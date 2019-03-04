@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import random
 import math
 import pandas as pd
-import pandas as pd
+
+
 def initalize_centroids(data, k):
     centroids = []
     while k>0:
@@ -20,27 +21,31 @@ def assign_centroids(new_centroids, data, k):
 
 def compute_new_centroids(data,k):
     new_centroids= []
+    no_change = False
+    last_cluster = data['cluster']
     data['cluster'] = 0
     data.loc[((data['dist1']<data['dist0']) &  (data['dist1']<data['dist2'])),'cluster'] = 1 
     data.loc[((data['dist2']<data['dist0']) & (data['dist2']<data['dist1'])),'cluster'] = 2
-    import pdb; pdb.set_trace()
-    while k>=0:
+    if(last_cluster.equals(data['cluster'])):
+       no_change = True
+    while k>0:
         data_centroid_x = data.loc[data['cluster']==k-1,'x']
         data_centroid_y = data.loc[data['cluster']==k-1,'y']
-        new_centroids.append([data_centroid_x.mean, data_centroid_y.mean])
+        new_centroids.append([data_centroid_x.mean(), data_centroid_y.mean()])
         k = k-1
-    return new_centroids
+    return new_centroids, no_change
 
 
 def run_k_means(new_centroids,data,k):
     centroids = []
     j = 0 
-    while (sorted(centroids) != sorted(new_centroids)):
+    no_change = False
+    while (no_change == False):
        j = j+1
        print("Run:",j," Centroids:" , new_centroids,centroids)
        assign_centroids(new_centroids,data,k)
        centroids = new_centroids
-       new_centroids = compute_new_centroids(data,k)
+       new_centroids, no_change = compute_new_centroids(data,k)
     return new_centroids 
                             
 data= pd.read_csv(r'places.txt', sep=",", names = ["x", "y","dist0","dist1","dist2","cluster"])
@@ -53,7 +58,10 @@ print(data.head())
 k=3
 init_centroids = initalize_centroids(data,k)
 results = run_k_means(init_centroids, data, k) 
-
+pd.options.display.max_rows = 400
+text_file = open(r'clusters.txt', "w")
+print(data['cluster'], file=text_file, end="",sep='')
+text_file.close()        
 
 
 
