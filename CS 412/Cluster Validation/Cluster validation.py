@@ -37,11 +37,7 @@ def intersection(cluster, truth, cluster_id, truth_id):
 
 def true_postives(cluster, truth, cluster_id, truth_id):
     nij = 0
-    i = 0
-    for entry in cluster:
-        if (entry == cluster_id and truth[i] == truth_id):
-           nij = nij + 1
-        i = i + 1
+    #TBD
     return nij
 
 
@@ -87,7 +83,7 @@ def calculate_Jaccard(truth,truth_count, cluster_list, cluster_count):
             nij = true_postives(cluster_list, truth, i,j)
             if(nij!=0):
                 tp_pairs = math.factorial(nij)/(2*math.factorial(nij-2) )
-            TP = TP + tp_pairs
+                TP = TP + tp_pairs
             if(first_time == True and partition!=0):
                fn_pairs = fn_pairs +  math.factorial(partition)/(2*math.factorial(partition-2) )
         first_time = False    
