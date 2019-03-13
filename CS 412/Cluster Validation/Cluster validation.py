@@ -70,10 +70,11 @@ result = []
 truth, truth_count, clusters, cluster_count = read_data()
 record = {'NMI':0, 'Jaccard':0}
 i = 0
+text_file = open('scores.txt', "w")
 for cluster_list in clusters:
     record['NMI'] = calculate_NMI(truth, truth_count, cluster_list, cluster_count[i] )
     record['Jaccard'] = calculate_Jaccard(truth,truth_count, cluster_list, cluster_count)
-    result.append(record) 
+    print(record['NMI'],' ',record['Jaccard'], file=text_file, sep='')
     i = i +1
-
-print(result)
+      
+text_file.close()        
