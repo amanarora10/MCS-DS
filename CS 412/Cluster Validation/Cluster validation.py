@@ -1,5 +1,6 @@
 import numpy
 import math
+from scipy.special import comb
 def read_file(file_name, data_count, data): 
     file = open(file_name,"r")
     i = 0
@@ -35,13 +36,6 @@ def intersection(cluster, truth, cluster_id, truth_id):
     n =  len(cluster)
     return (nij/n)
 
-def true_postives(cluster, truth, cluster_id, truth_id):
-    nij = 0
-    #TBD
-    return nij
-
-
-
 def calculate_NMI(truth,truth_count, cluster_list, cluster_count ):
     i = 0
     # Calcuate Ict
@@ -62,12 +56,22 @@ def calculate_NMI(truth,truth_count, cluster_list, cluster_count ):
                Ht = Ht + Ptj*math.log(Ptj,2.0)                 
             if(Pij !=0):
                 Ict = Ict + Pij* math.log(Pij/(Pci*Ptj), 2.0)
-                print('iteration:', i,j,'Pij:',Pij,Pij* math.log(Pij/(Pci*Ptj), 2.0) )
             j = j+1
         first_time = False   
         i = i+1
     NMI = Ict/(math.sqrt(Ht*Hc))
     return NMI
+
+def true_postives(cluster, truth, cluster_id, truth_id):
+    nij = 0
+    i = 0
+    for entry in cluster:
+        if (entry == cluster_id and truth[i] == truth_id):
+           nij = nij + 1
+        i = i + 1
+    return nij
+
+
 def calculate_Jaccard(truth,truth_count, cluster_list, cluster_count):
     i = 0
     TP = 0 
@@ -77,16 +81,20 @@ def calculate_Jaccard(truth,truth_count, cluster_list, cluster_count):
     for cluster in cluster_count:
         if(cluster == 0):
             break
-        cluster_pair = cluster_pair + math.factorial(cluster)/(2*math.factorial(cluster-2) ) 
+        cluster_pair = cluster_pair + comb(cluster,2) 
         j = 0
         for partition in truth_count:
+            #might be double counting
             nij = true_postives(cluster_list, truth, i,j)
             if(nij!=0):
-                tp_pairs = math.factorial(nij)/(2*math.factorial(nij-2) )
+                tp_pairs = comb(nij,2)
                 TP = TP + tp_pairs
+
             if(first_time == True and partition!=0):
-               fn_pairs = fn_pairs +  math.factorial(partition)/(2*math.factorial(partition-2) )
+               fn_pairs = fn_pairs + comb(partition,2)
+            j=j+1
         first_time = False    
+        i = i+1
     FP = cluster_pair - TP
     FN = fn_pairs - TP
     Jaccard = TP/(TP+FN+FP)
