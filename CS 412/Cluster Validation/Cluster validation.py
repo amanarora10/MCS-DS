@@ -35,6 +35,16 @@ def intersection(cluster, truth, cluster_id, truth_id):
     n =  len(cluster)
     return (nij/n)
 
+def true_postives(cluster, truth, cluster_id, truth_id):
+    nij = 0
+    i = 0
+    for entry in cluster:
+        if (entry == cluster_id and truth[i] == truth_id):
+           nij = nij + 1
+        i = i + 1
+    return nij
+
+
 
 def calculate_NMI(truth,truth_count, cluster_list, cluster_count ):
     i = 0
@@ -63,8 +73,28 @@ def calculate_NMI(truth,truth_count, cluster_list, cluster_count ):
     NMI = Ict/(math.sqrt(Ht*Hc))
     return NMI
 def calculate_Jaccard(truth,truth_count, cluster_list, cluster_count):
-
-    return 0
+    i = 0
+    TP = 0 
+    fn_pairs =0
+    cluster_pair = 0
+    first_time = True
+    for cluster in cluster_count:
+        if(cluster == 0):
+            break
+        cluster_pair = cluster_pair + math.factorial(cluster)/(2*math.factorial(cluster-2) ) 
+        j = 0
+        for partition in truth_count:
+            nij = true_postives(cluster_list, truth, i,j)
+            if(nij!=0):
+                tp_pairs = math.factorial(nij)/(2*math.factorial(nij-2) )
+            TP = TP + tp_pairs
+            if(first_time == True and partition!=0):
+               fn_pairs = fn_pairs +  math.factorial(partition)/(2*math.factorial(partition-2) )
+        first_time = False    
+    FP = cluster_pair - TP
+    FN = fn_pairs - TP
+    Jaccard = TP/(TP+FN+FP)
+    return Jaccard
 
 result = []
 truth, truth_count, clusters, cluster_count = read_data()
@@ -73,7 +103,7 @@ i = 0
 text_file = open('scores.txt', "w")
 for cluster_list in clusters:
     record['NMI'] = calculate_NMI(truth, truth_count, cluster_list, cluster_count[i] )
-    record['Jaccard'] = calculate_Jaccard(truth,truth_count, cluster_list, cluster_count)
+    record['Jaccard'] = calculate_Jaccard(truth,truth_count, cluster_list, cluster_count[i])
     print(record['NMI'],' ',record['Jaccard'], file=text_file, sep='')
     i = i +1
       
