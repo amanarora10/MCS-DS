@@ -2,8 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\CS 412",
-    "\\CS 412\\Assignment4"
+    "\\CS 412\\Agglomerative Clustering",
+    "\\CS 412\\CCmining",
+    "\\CS 412\\Cluster Validation",
+    "\\CS 412\\K- means"
   ],
-  "SelectedNode": "\\CS 412\\Assignment4",
+  "SelectedNode": "\\CS 412\\Cluster Validation",
   "PreviewInSolutionExplorer": false
 }
