@@ -29,7 +29,7 @@ def read_data():
         distance_matrix = [[0 for row in range(0,N)] for col in range(0,N)]
         first_line = False
       else:
-          loc = [{'x': float(fields[0]) ,'y': float(fields[1]), 'index': i, 'cluster_id':i }]
+          loc = [{'x': float(fields[0]) ,'y': float(fields[1]), 'index': i, 'cluster_id':i, 'd_min': sys.float_info.max}]
           result[i] = i
           loc_data[i] = (loc)
           i = i+1
@@ -94,21 +94,38 @@ def compare_cluster(loc_data, i,j, Measure,distance_matrix):
 
     return best
 
-def check_clusters(loc_data, Measure, total_clusters,distance_matrix):
-    best = {'cluster1':0,'cluster2':0, 'dist': sys.float_info.max}
-    for i in range(0, total_clusters -1 ):
-        for j in range (i+1, total_clusters):
-            current = compare_cluster(loc_data,i,j, Measure,distance_matrix)
-            if(current['dist'] < best['dist']):
-               best = current
+def check_clusters(loc_data, Measure, total_clusters,distance_matrix,first_time):
+
+    if(first_time):
+        for i in range(0,total_clusters-1):
+            best = {'cluster1':0,'cluster2':0, 'dist': sys.float_info.max}
+            for j in range (i+1, total_clusters):
+                current = compare_cluster(loc_data,i,j, Measure,distance_matrix)
+                if(current['dist'] < best['dist']):
+                   best = current  
+               # print("i and j", i, j)
+            if (loc_data[best['cluster1']][0]['d_min'] >  best['dist']):
+                loc_data[best['cluster1']][0]['d_min'] =  best['dist']
+            if (loc_data[best['cluster2']][0]['d_min'] >  best['dist']):
+                loc_data[best['cluster2']][0]['d_min'] =  best['dist']
+            first_time = False
+    #Find min
+    loc_data.sort(key=lambda x: x[0]['d_min'])
+    
+    for cluster in loc_data:
+        for point in cluster:
+
+
     merge_cluster(loc_data,best['cluster1'],best['cluster2'])
     return total_clusters -1
 
 def run_clustering():
     N,K,M,loc_data, distance_matrix = read_data()
     cluster_count = N
+    first_time = True
     while cluster_count > K:
-        cluster_count = check_clusters(loc_data, M, cluster_count,distance_matrix )
+        cluster_count = check_clusters(loc_data, M, cluster_count,distance_matrix,first_time)
+        first_time = False
     return loc_data, N
 
 loc_data, N = run_clustering()
@@ -117,3 +134,4 @@ for line in result:
     if line is None:
         break
     sys.stdout.write( str(line) + "\n")
+

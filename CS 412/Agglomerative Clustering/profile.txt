@@ -1,0 +1,81 @@
+Timer unit: 3.77581e-07 s
+
+Total time: 0.00268611 s
+File: <ipython-input-16-f7587e37cf1b>
+Function: merge_cluster at line 58
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    58                                           def merge_cluster(loc_data,i,j):
+    59      1210       1730.0      1.4     24.3      for loc in loc_data[j]:
+    60       970       2725.0      2.8     38.3          result[loc['index']] = loc_data[i][0]['cluster_id']
+    61       240       1505.0      6.3     21.2      loc_data[i] = loc_data[i] + loc_data[j]
+    62       240        871.0      3.6     12.2      del loc_data[j]
+    63       240        283.0      1.2      4.0      return
+
+Total time: 33.9379 s
+File: <ipython-input-16-f7587e37cf1b>
+Function: compare_cluster at line 65
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    65                                           def compare_cluster(loc_data, i,j, Measure,distance_matrix):
+    66                                           
+    67   2603960    4596392.0      1.8      5.1      cluster1 = loc_data[i]
+    68   2603960    4395535.0      1.7      4.9      cluster2 = loc_data[j]
+    69   2603960    5109163.0      2.0      5.7      best = {'cluster1':i,'cluster2':j, 'dist': 0}
+    70   2603960    4245427.0      1.6      4.7      if(Measure ==0):
+    71   2603960    5501444.0      2.1      6.1          best['dist'] = sys.float_info.max
+    72   7230706   12022149.0      1.7     13.4          for point1 in cluster1:
+    73  11071428   18024949.0      1.6     20.1              for point2 in cluster2:
+    74                                                           #current = eucildian_distance(point1, point2)
+    75   6444682   14034599.0      2.2     15.6                  current = distance_matrix[point1['index']][point2['index']]
+    76   6444682   10871074.0      1.7     12.1                  if(current < best['dist']):
+    77   3559147    7266301.0      2.0      8.1                      best = {'cluster1':i,'cluster2':j, 'dist': current}
+    78                                               elif(Measure ==1):
+    79                                                   for point1 in cluster1:
+    80                                                       for point2 in cluster2:
+    81                                                           #current = eucildian_distance(point1, point2)
+    82                                                           current = distance_matrix[point1['index']][point2['index']]
+    83                                                           if(current > best['dist']):
+    84                                                               best = {'cluster1':i,'cluster2':j, 'dist': current}
+    85                                               elif(Measure ==2):
+    86                                                   count = 0
+    87                                                   agg_dist = 0
+    88                                                   for point1 in cluster1:
+    89                                                       for point2 in cluster2:
+    90                                                           agg_dist = agg_dist + distance_matrix[point1['index']][point2['index']]
+    91                                                           count = count +1
+    92                                                  
+    93                                                   best = {'cluster1':i,'cluster2':j, 'dist': agg_dist/count}
+    94                                           
+    95   2603960    3815464.0      1.5      4.2      return best
+
+Total time: 69.5831 s
+File: <ipython-input-16-f7587e37cf1b>
+Function: check_clusters at line 97
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    97                                           def check_clusters(loc_data, Measure, total_clusters,distance_matrix):
+    98       240        678.0      2.8      0.0      best = {'cluster1':0,'cluster2':0, 'dist': sys.float_info.max}
+    99     31320      46034.0      1.5      0.0      for i in range(0, total_clusters -1 ):
+   100   2635040    3963962.0      1.5      2.2          for j in range (i+1, total_clusters):
+   101   2603960  175204681.0     67.3     95.1              current = compare_cluster(loc_data,i,j, Measure,distance_matrix)
+   102   2603960    5055805.0      1.9      2.7              if(current['dist'] < best['dist']):
+   103      1941       2886.0      1.5      0.0                 best = current
+   104       240      12035.0     50.1      0.0      merge_cluster(loc_data,best['cluster1'],best['cluster2'])
+   105       240        471.0      2.0      0.0      return total_clusters -1
+
+Total time: 74.0653 s
+File: <ipython-input-16-f7587e37cf1b>
+Function: run_clustering at line 107
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   107                                           def run_clustering():
+   108         1     353525.0 353525.0      0.2      N,K,M,loc_data, distance_matrix = read_data()
+   109         1          5.0      5.0      0.0      cluster_count = N
+   110       241        347.0      1.4      0.0      while cluster_count > K:
+   111       240  195803531.0 815848.0     99.8          cluster_count = check_clusters(loc_data, M, cluster_count,distance_matrix )
+   112         1          1.0      1.0      0.0      return loc_data, N
