@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\CS 412",
-    "\\CS 412\\Cluster Validation",
-    "\\CS 412\\Decision Tree"
+    "\\CS 412\\Naive Bayes Classifier"
   ],
-  "SelectedNode": "\\CS 412\\Decision Tree",
+  "SelectedNode": "\\CS 412\\Naive Bayes Classifier\\Bayes Classifier.py",
   "PreviewInSolutionExplorer": false
 }
