@@ -3,8 +3,6 @@ import time
 #for line in sys.stdin:
     #print(line)
 result = [None]*2600
-
-
 def eucildian_distance(point1,point2):
     dist = (point1[0]['x'] - point2[0]['x'])**2 + (point1[0]['y'] - point2[0]['y'])**2
     return dist

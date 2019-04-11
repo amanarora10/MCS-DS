@@ -52,6 +52,7 @@ def read_data():
 
 X_train, y_train, X_test = read_data()
 
+
 P_c =  Counter(y_train)
 for element in P_c.keys():
      P_c[element] = (P_c[element] + 0.1)/(len(y_train)+ 0.1*len(set(y_train)))
@@ -62,7 +63,8 @@ for test_row in X_test:
     max = -1
     for c in set(y_train):
         P_x_c = ComputeLikeyhood(X_train,y_train,test_row,c)
-        current = P_c[c-1]*P_x_c
+        current = P_c[c]*P_x_c
+        print("class ",c,":",current)
         if(max<current):
            result[i] = c  
            max = current
