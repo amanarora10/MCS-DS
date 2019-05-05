@@ -26,15 +26,15 @@ X, Y = read_file(r"C:\Users\amana\Source\Repos\amanarora10\MCS-DS\CS 412\Decisio
 #X_train, X_val, Y_train, Y_val = train_test_split(X, Y, random_state=1)
 X_test, Y_test= read_file(r"C:\Users\amana\Source\Repos\amanarora10\MCS-DS\CS 412\Decision Tree\testing.txt", True)
 
-model = tree.DecisionTreeClassifier(max_depth = 841)
+model = tree.DecisionTreeClassifier(max_depth = 841,min_samples_leaf =8)
 model = model.fit(X,Y)
 Y_test = model.predict(X_test)
 text_file = open(r'C:\Users\amana\Source\Repos\amanarora10\MCS-DS\CS 412\Decision Tree\result.txt', "w")
 for label in Y_test:
     print(label,file=text_file)
-#maximum = 0.0
-#for i in range(1,1001):
-#    model = tree.DecisionTreeClassifier(max_depth = i)
+maximum = 0.0
+#for i in range(1,10):
+#    model = tree.DecisionTreeClassifier(max_depth = 841, min_samples_leaf = i)
 #    #model = MLPClassifier(solver = 'lbfgs')
 #    model = model.fit(X_train,Y_train)
 #    y_predict = model.predict(X_val)
