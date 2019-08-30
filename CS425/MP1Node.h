@@ -20,10 +20,21 @@
  */
 #define TREMOVE 20
 #define TFAIL 5
+#define TGOSSIP 1
 
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
+
+/* */
+
+typedef struct Record_t {
+	int  id;
+	short port;
+	int state; /*invalid, Alive, Failed*/
+	long heartbeat;
+	long timestamp;
+}Record_t;
 
 /**
  * Message Types
@@ -31,9 +42,18 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
+	GOSSIP,
     DUMMYLASTMSGTYPE
 };
 
+/**
+ * Message Types
+ */
+typedef enum {
+	INVALID = 0,
+	VALID,
+	FAILED
+}Statetype;
 /**
  * STRUCT NAME: MessageHdr
  *
@@ -42,6 +62,29 @@ enum MsgTypes{
 typedef struct MessageHdr {
 	enum MsgTypes msgType;
 }MessageHdr;
+
+/**
+ * STRUCT NAME: JOINREP message
+ *
+ * DESCRIPTION: Header and content of Gossip message
+ */
+typedef struct Joinrep_t {
+	MessageHdr header;
+	Record_t* memberList;
+}Joinrep_t;
+
+
+/**
+ * STRUCT NAME: GOSSIP message
+ *
+ * DESCRIPTION: Header and content of Gossip message
+ */
+
+typedef struct Gossip_t {
+	MessageHdr header;
+	vector<MemberListEntry> memberList;
+}Gossip_t;
+
 
 /**
  * CLASS NAME: MP1Node
@@ -55,7 +98,7 @@ private:
 	Params *par;
 	Member *memberNode;
 	char NULLADDR[6];
-
+	Record_t* table;
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
 	Member * getMemberNode() {
@@ -74,6 +117,10 @@ public:
 	int isNullAddress(Address *addr);
 	Address getJoinAddress();
 	void initMemberListTable(Member *memberNode);
+	void initMembertable(Record_t** table);
+	void update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging);
+	void send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* memberList);
+	void merge_tables(Record_t* rx_table, Record_t* current_table);
 	void printAddress(Address *addr);
 	virtual ~MP1Node();
 };

@@ -38,6 +38,7 @@ else
 	./Application testcases/singlefailure.conf
 fi
 joincount=`grep joined dbg.log | cut -d" " -f2,4-7 | sort -u | wc -l`
+echo $joincount
 if [ $joincount -eq 100 ]; then
 	grade=`expr $grade + 10`
 	echo "Checking Join..................10/10"

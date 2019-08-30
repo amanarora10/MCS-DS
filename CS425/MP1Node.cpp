@@ -108,7 +108,7 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	memberNode->pingCounter = TFAIL;
 	memberNode->timeOutCounter = -1;
     initMemberListTable(memberNode);
-
+	initMembertable(&table);
     return 0;
 }
 
@@ -163,6 +163,7 @@ int MP1Node::finishUpThisNode(){
    /*
     * Your code goes here
     */
+	return 1;
 }
 
 /**
@@ -208,6 +209,109 @@ void MP1Node::checkMessages() {
     }
     return;
 }
+void MP1Node::update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging)
+{
+	short port = 0;
+	Address remote_addr;
+
+	memcpy(&(remote_addr.addr[0]), &id, sizeof(int));
+	memcpy(&(remote_addr.addr[4]), &port, sizeof(short));
+
+	//char* addr = address->addr;
+	//memcpy(&id, &addr[0], sizeof(int));
+	//memcpy(&port, &addr[4], sizeof(short));
+	if ((table[id].state != INVALID && 
+		table[id].heartbeat < heartbeat)||
+		table[id].state == INVALID
+		)
+	{
+		if (table[id].state == INVALID)
+		{
+			table[id].state = VALID;
+			if(logging == true)
+				log->logNodeAdd(&(this->memberNode->addr), &remote_addr);
+		}
+		table[id].heartbeat = heartbeat;
+		table[id].timestamp = current_time;
+		assert(table[id].port == port);
+
+	}
+
+}
+
+/*void MP1Node::update_list(int current_time, vector<MemberListEntry> *list, Address* address, long heartbeat)
+{
+	long id=0;
+	short port = 0;
+	char* addr = address->addr;
+	memcpy(&id, &addr[0], sizeof(int));
+	memcpy(&port, &addr[4], sizeof(short));
+
+	for (int j = 0;j < list->size();j++)
+	{
+		if (list->at(j).getid() == id)
+		{
+			if (list->at(j).getheartbeat() < heartbeat)
+			{
+				list->at(j).setheartbeat(heartbeat);
+				list->at(j).settimestamp(current_time);
+			}
+			else
+			{
+				return;
+			}
+
+		}
+
+	}
+	MemberListEntry* entry = new MemberListEntry(id,port,heartbeat,current_time);
+	list->push_back(*entry);
+	
+}*/
+
+
+void MP1Node::send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* table)
+{
+	char* joinrep;
+	MessageHdr header;
+	int id = 0;
+	//Update the table with self hearbeat
+	char* addr = src->addr;
+	memcpy(&id, &addr[0], sizeof(int));
+	update_list(table, par->getcurrtime(), id, this->memberNode->heartbeat, false);
+	
+	header.msgType = JOINREP;
+	int size = sizeof(MessageHdr) + sizeof(Record_t)*(par->EN_GPSZ+1);
+	joinrep = (char*)calloc(1,size);
+	assert(joinrep != NULL);
+	memcpy(joinrep, &header, sizeof(MessageHdr));
+	memcpy(joinrep+sizeof(MessageHdr), (char*)table, sizeof(Record_t) * (par->EN_GPSZ+1));
+	
+	//	for (int i = 0; i < memberList.size(); i++)		
+//		joinrep->memberList.push_back(memberList[i]);
+	ent->ENsend(src, dest, joinrep, size );
+
+}
+
+/**
+ * FUNCTION NAME: recvCallBack
+ *
+ * DESCRIPTION: Message handler for different message types
+ */
+void MP1Node::merge_tables(Record_t* rx_table, Record_t* current_table)
+
+{
+	for (int i = 1;i <= par->EN_GPSZ;i++)
+	{
+		if (rx_table[i].state != INVALID)
+		{
+			update_list(this->table,par->getcurrtime(),rx_table[i].id, rx_table[i].heartbeat,true);
+		}
+
+	}
+
+
+}
 
 /**
  * FUNCTION NAME: recvCallBack
@@ -215,9 +319,46 @@ void MP1Node::checkMessages() {
  * DESCRIPTION: Message handler for different message types
  */
 bool MP1Node::recvCallBack(void *env, char *data, int size ) {
-	/*
-	 * Your code goes here
-	 */
+
+	enum MsgTypes msgid;
+	int id = 0;
+	Record_t* rx_table = NULL;
+	Address* address = new Address();
+	long heartbeat = 0;
+	msgid = *((MsgTypes *)data);
+	Member* memberNode = (Member*)env;
+	switch (msgid)
+	{
+	case JOINREQ:
+		memcpy(address->addr, (char*)((MessageHdr*)data + 1), sizeof(memberNode->addr.addr));
+		memcpy(&heartbeat, (char*)((MessageHdr*)data + 1) + 1 + sizeof(memberNode->addr.addr), sizeof(long));
+#ifdef DEBUGLOG
+		log->logNodeAdd(&(memberNode->addr), address);
+#endif
+		//update_list(par->getcurrtime(), &(memberNode->memberList), address, heartbeat);
+
+		memcpy(&id, &(address->addr[0]), sizeof(int));
+		update_list(this->table, par->getcurrtime(), id, heartbeat,false);
+		send_joinrep(emulNet, address, &memberNode->addr, this->table);
+		break;
+
+	case JOINREP:
+		memberNode->inGroup = true;
+		rx_table = (Record_t*) ((char*)data + sizeof(MsgTypes)) ;
+		merge_tables(rx_table, this->table);
+		break;
+	case GOSSIP:
+
+		break;
+     
+	default:
+		assert(0);
+
+	}
+
+
+
+	return 1;
 }
 
 /**
@@ -229,9 +370,7 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
  */
 void MP1Node::nodeLoopOps() {
 
-	/*
-	 * Your code goes here
-	 */
+	this->memberNode->heartbeat++;
 
     return;
 }
@@ -267,7 +406,19 @@ Address MP1Node::getJoinAddress() {
  */
 void MP1Node::initMemberListTable(Member *memberNode) {
 	memberNode->memberList.clear();
+	memberNode->memberList.reserve(par->EN_GPSZ);
+	}
+/**
+ * FUNCTION NAME: initMemberTable
+ *
+ * DESCRIPTION: Initialize the membership list
+ */
+void MP1Node::initMembertable(Record_t** table) {
+	int size = par->EN_GPSZ + 1;
+	*table = (Record_t*)calloc(size, sizeof(Record_t));
+
 }
+
 
 /**
  * FUNCTION NAME: printAddress
