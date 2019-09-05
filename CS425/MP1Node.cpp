@@ -210,6 +210,8 @@ void MP1Node::checkMessages() {
     }
     return;
 }
+
+
 void MP1Node::update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging, int state)
 {
 	short port = 0;
@@ -221,11 +223,13 @@ void MP1Node::update_list(Record_t* table, int current_time, int id, long heartb
 	//char* addr = address->addr;
 	//memcpy(&id, &addr[0], sizeof(int));
 	//memcpy(&port, &addr[4], sizeof(short));
-	if ((table[id].state != INVALID && 
-		table[id].heartbeat < heartbeat)||
+
+	//To do: State needs to be fixed
+	if ((table[id].state != INVALID &&
+		table[id].heartbeat < heartbeat) ||
 		table[id].state == INVALID
 		)
-	{
+	  {
 		if (table[id].state == INVALID)
 		{
 			table[id].state = VALID;
@@ -243,7 +247,11 @@ void MP1Node::update_list(Record_t* table, int current_time, int id, long heartb
 			table[id].heartbeat = heartbeat;
 			table[id].timestamp = current_time;
 		}
-		if (state == REMOVED)
+	  }
+
+
+
+	if (state == REMOVED)
 		{
 			table[id].state = REMOVED;
 			log->logNodeRemove(&(this->memberNode->addr), &remote_addr);
@@ -254,7 +262,6 @@ void MP1Node::update_list(Record_t* table, int current_time, int id, long heartb
 		}
 		assert(table[id].port == port);
 
-	}
 
 }
 
@@ -355,15 +362,22 @@ void MP1Node::check_heartbeat(Record_t* table)
 				printf("Node %d: delay:%d at time: %d for node:%d- marked failed\n",
 					*(int*)(&memberNode->addr.addr), delta,
 					par->getcurrtime(), i);
+				//log->LOG(&memberNode->addr, "Node failed at time. node: %d delay:%d",i,delta);
+
 
 			}
 			if ((delta > TFAIL + TREMOVE) && (table[i].state == FAILED))
 			{
+				Address removed_node;
+				short port = 0;
 				table[i].state = REMOVED;
 				printf("Node %d: delay:%d at time: %d for node:%d- removed\n",
 					*(int*)(&memberNode->addr.addr), delta,
 					par->getcurrtime(), i);
+				memcpy(&removed_node.addr[0], &i, sizeof(int));
+				memcpy(&removed_node.addr[4], &port, sizeof(short));
 
+				log->logNodeRemove(&(this->memberNode->addr),&removed_node);
 
 			}
 		}
@@ -384,7 +398,9 @@ void MP1Node::merge_tables(Record_t* rx_table, Record_t* current_table)
 {
 	for (int i = 0;i <= par->EN_GPSZ;i++)
 	{
-		if (rx_table[i].state != INVALID)
+		if (rx_table[i].state != INVALID && 
+			rx_table[i].state != FAILED &&
+			rx_table[i].state != REMOVED)
 		{
 			update_list(this->table,par->getcurrtime(),i, rx_table[i].heartbeat,true, rx_table[i].state);
 			check_heartbeat(this->table);
