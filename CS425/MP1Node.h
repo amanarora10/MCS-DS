@@ -22,6 +22,10 @@
 #define TFAIL 5
 #define TGOSSIP 1
 
+#define P_NGR_SELECT 100 //Proability of picking a neighor (max 100) 
+
+//Max. neighbors to send gossip
+#define MAX_NEIGHBORS 5
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
@@ -52,7 +56,8 @@ enum MsgTypes{
 typedef enum {
 	INVALID = 0,
 	VALID,
-	FAILED
+	FAILED,
+	REMOVED
 }Statetype;
 /**
  * STRUCT NAME: MessageHdr
@@ -99,6 +104,7 @@ private:
 	Member *memberNode;
 	char NULLADDR[6];
 	Record_t* table;
+	int last_gossip_time;
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
 	Member * getMemberNode() {
@@ -118,10 +124,13 @@ public:
 	Address getJoinAddress();
 	void initMemberListTable(Member *memberNode);
 	void initMembertable(Record_t** table);
-	void update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging);
+	void update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging, int state);
 	void send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* memberList);
+	void send_gossip(EmulNet* ent, Address* dest, Address* src, Record_t* table);
 	void merge_tables(Record_t* rx_table, Record_t* current_table);
 	void printAddress(Address *addr);
+	int select_neighbor(int*, Address* addr);
+	void check_heartbeat(Record_t* table);
 	virtual ~MP1Node();
 };
 

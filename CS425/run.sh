@@ -25,5 +25,5 @@ cp dbg.log ../../dbg.1.log
 ./Application testcases/msgdropsinglefailure.conf > /dev/null
 cp dbg.log ../../dbg.2.log
 cd ../..
-rm -rf grade-dir
+#rm -rf grade-dir
 

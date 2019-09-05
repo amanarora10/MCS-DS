@@ -109,6 +109,7 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	memberNode->timeOutCounter = -1;
     initMemberListTable(memberNode);
 	initMembertable(&table);
+	this->last_gossip_time = par->getcurrtime();
     return 0;
 }
 
@@ -209,7 +210,7 @@ void MP1Node::checkMessages() {
     }
     return;
 }
-void MP1Node::update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging)
+void MP1Node::update_list(Record_t* table, int current_time, int id, long heartbeat, bool logging, int state)
 {
 	short port = 0;
 	Address remote_addr;
@@ -228,11 +229,29 @@ void MP1Node::update_list(Record_t* table, int current_time, int id, long heartb
 		if (table[id].state == INVALID)
 		{
 			table[id].state = VALID;
-			if(logging == true)
+			if (logging == true)
+			{
 				log->logNodeAdd(&(this->memberNode->addr), &remote_addr);
+				printf("Node %d, adding new node :%d at time: %d\n",
+					*((int*)(&memberNode->addr.addr)),
+					remote_addr.addr[0],
+					par->getcurrtime());
+			}
 		}
-		table[id].heartbeat = heartbeat;
-		table[id].timestamp = current_time;
+		if (table[id].state == VALID)
+		{
+			table[id].heartbeat = heartbeat;
+			table[id].timestamp = current_time;
+		}
+		if (state == REMOVED)
+		{
+			table[id].state = REMOVED;
+			log->logNodeRemove(&(this->memberNode->addr), &remote_addr);
+			printf("Node %d, removing node :%d at time: %d\n",
+				*((int*)(&memberNode->addr.addr)),
+				remote_addr.addr[0],
+				par->getcurrtime());
+		}
 		assert(table[id].port == port);
 
 	}
@@ -278,7 +297,7 @@ void MP1Node::send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* 
 	//Update the table with self hearbeat
 	char* addr = src->addr;
 	memcpy(&id, &addr[0], sizeof(int));
-	update_list(table, par->getcurrtime(), id, this->memberNode->heartbeat, false);
+	update_list(table, par->getcurrtime(), id, this->memberNode->heartbeat, true, VALID);
 	
 	header.msgType = JOINREP;
 	int size = sizeof(MessageHdr) + sizeof(Record_t)*(par->EN_GPSZ+1);
@@ -293,6 +312,68 @@ void MP1Node::send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* 
 
 }
 
+void MP1Node::send_gossip(EmulNet* ent, Address* dest, Address* src, Record_t* table)
+{
+	char* gossip;
+	MessageHdr header;
+	int id = 0;
+	//Update the table with self hearbeat
+	char* addr = src->addr;
+	memcpy(&id, &addr[0], sizeof(int));
+	update_list(table, par->getcurrtime(), id, this->memberNode->heartbeat, false, VALID);
+
+	header.msgType = GOSSIP;
+	int size = sizeof(MessageHdr) + sizeof(Record_t) * (par->EN_GPSZ + 1);
+	gossip = (char*)calloc(1, size);
+	assert(gossip != NULL);
+	memcpy(gossip, &header, sizeof(MessageHdr));
+	memcpy(gossip + sizeof(MessageHdr), (char*)table, sizeof(Record_t) * (par->EN_GPSZ + 1));
+
+//	for (int i = 0; i < memberList.size(); i++)		
+//	joinrep->memberList.push_back(memberList[i]);
+
+	ent->ENsend(src, dest, gossip, size);
+
+}
+
+void MP1Node::check_heartbeat(Record_t* table)
+{
+	int max = 0, node =-1;
+	for (int i = 0;i <= par->EN_GPSZ;i++)
+	{
+		if (table[i].state != INVALID)
+		{
+			int delta = par->getcurrtime() - table[i].timestamp;
+			if (delta > max)
+			{
+				max = delta;
+				node = i;
+			}
+			if (delta > TFAIL && table[i].state == VALID)
+			{
+				table[i].state = FAILED;
+				printf("Node %d: delay:%d at time: %d for node:%d- marked failed\n",
+					*(int*)(&memberNode->addr.addr), delta,
+					par->getcurrtime(), i);
+
+			}
+			if ((delta > TFAIL + TREMOVE) && (table[i].state == FAILED))
+			{
+				table[i].state = REMOVED;
+				printf("Node %d: delay:%d at time: %d for node:%d- removed\n",
+					*(int*)(&memberNode->addr.addr), delta,
+					par->getcurrtime(), i);
+
+
+			}
+		}
+	}
+	printf("Node %d, max delay:%d at time: %d for node:%d \n",
+		*(int*)(&memberNode->addr.addr), max,
+			par->getcurrtime(),node);
+	
+}
+
 /**
  * FUNCTION NAME: recvCallBack
  *
@@ -301,18 +382,44 @@ void MP1Node::send_joinrep(EmulNet* ent, Address* dest, Address* src, Record_t* 
 void MP1Node::merge_tables(Record_t* rx_table, Record_t* current_table)
 
 {
-	for (int i = 1;i <= par->EN_GPSZ;i++)
+	for (int i = 0;i <= par->EN_GPSZ;i++)
 	{
 		if (rx_table[i].state != INVALID)
 		{
-			update_list(this->table,par->getcurrtime(),rx_table[i].id, rx_table[i].heartbeat,true);
+			update_list(this->table,par->getcurrtime(),i, rx_table[i].heartbeat,true, rx_table[i].state);
+			check_heartbeat(this->table);
 		}
+
 
 	}
 
 
 }
 
+int MP1Node::select_neighbor(int* neighbors, Address* addr)
+{
+	Record_t* record = this->table;
+	srand(time(NULL));
+	int n = 0;
+	for (int i = 0;i <= par->EN_GPSZ;i++)
+	{
+		if (record[i].state == VALID && // Check if the entry is valid
+			i!= int(addr->addr[0]) && // Do not send to yourself
+			((rand() % 100) < P_NGR_SELECT) // Pick a neighor with probabilty
+			)
+		{
+			//memcpy(&neighbors[n].addr[0],&record[i].id,sizeof(int));
+			//memcpy(&neighbors[n].addr[4],&record[i].port, sizeof(short));
+					
+			neighbors[n] = i;
+			n = n + 1;
+		}
+		
+	}
+
+	return n;
+	
+}
 /**
  * FUNCTION NAME: recvCallBack
  *
@@ -334,11 +441,15 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 		memcpy(&heartbeat, (char*)((MessageHdr*)data + 1) + 1 + sizeof(memberNode->addr.addr), sizeof(long));
 #ifdef DEBUGLOG
 		log->logNodeAdd(&(memberNode->addr), address);
+		printf("Node %d, adding new node :%d at time: %d\n",
+			*((int*)(&memberNode->addr.addr)),
+			address->addr[0],
+			par->getcurrtime());
 #endif
 		//update_list(par->getcurrtime(), &(memberNode->memberList), address, heartbeat);
 
 		memcpy(&id, &(address->addr[0]), sizeof(int));
-		update_list(this->table, par->getcurrtime(), id, heartbeat,false);
+		update_list(this->table, par->getcurrtime(), id, heartbeat,false, VALID);
 		send_joinrep(emulNet, address, &memberNode->addr, this->table);
 		break;
 
@@ -348,7 +459,8 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 		merge_tables(rx_table, this->table);
 		break;
 	case GOSSIP:
-
+		rx_table = (Record_t*)((char*)data + sizeof(MsgTypes));
+		merge_tables(rx_table, this->table);
 		break;
      
 	default:
@@ -369,6 +481,29 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
  * 				Propagate your membership list
  */
 void MP1Node::nodeLoopOps() {
+   
+	/*Check if its time to Gossip*/
+	if (par->getcurrtime() > this->last_gossip_time + TGOSSIP)
+	{
+		int* neighbors = (int*)calloc(par->EN_GPSZ+1,sizeof(int));
+		this->last_gossip_time = par->getcurrtime();
+		int n = 0;short port = 0;
+		Address dest;
+		//Select random neighbors to send gossip
+		n = select_neighbor(neighbors, &memberNode->addr);
+		for (int i = 0;i < n;i++)
+		{   
+			//Address dest;
+			memcpy(&dest.addr[0], &neighbors[i], sizeof(int));
+			memcpy(&dest.addr[4], &port, sizeof(short));
+			printf("Node %d, Sending gossip to:%d at time: %d\n",
+				  *((int*)(&memberNode->addr.addr)),
+				  neighbors[i],
+				  par->getcurrtime());
+			send_gossip(emulNet, &dest, &memberNode->addr, table);
+		}
+		free(neighbors);
+	}
 
 	this->memberNode->heartbeat++;
 
@@ -406,7 +541,7 @@ Address MP1Node::getJoinAddress() {
  */
 void MP1Node::initMemberListTable(Member *memberNode) {
 	memberNode->memberList.clear();
-	memberNode->memberList.reserve(par->EN_GPSZ);
+	memberNode->memberList.reserve(par->EN_GPSZ+1);
 	}
 /**
  * FUNCTION NAME: initMemberTable
