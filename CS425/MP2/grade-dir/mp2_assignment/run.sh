@@ -34,4 +34,4 @@ echo "UPDATE test"
 cp dbg.log ../../dbg.3.log
 
 cd ../..
-#rm -rf grade-dir
+rm -rf grade-dir
