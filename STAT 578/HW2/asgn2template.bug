@@ -1,0 +1,11 @@
+model {
+  for (j in 1:) {
+    psihat[j] ~ 
+    psi[j] ~ 
+  }
+
+  psi0 ~ 
+  sigma0 ~ 
+
+  sigmasq0 <- 
+}

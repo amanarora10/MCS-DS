@@ -1,0 +1,289 @@
+---
+title: "HW6"
+author: "Aman Arora"
+date: "4/26/2020"
+output:
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Answer 1
+
+```{r cars}
+df = read.csv("C://Users//amana//Downloads//illinimensbb.csv",header=TRUE)
+plot(Ht~Pos, data = df)
+```
+
+There does seems to a correlation between height and position based on the box plots. With tallest players at center,  shorter players at guard and most middle height player in the front.
+
+## Answer 2 (a)
+
+$\underline{JAGS- Model}$
+
+model {
+for (i in 1:length(FGM)) {
+FGM[i] ~ dbin(prob[i], FGA[i])
+logit(prob[i]) <- betapos[Pos[i]] + betaht*htscaled[i]
+FGMrep[i] ~ dbin(prob[i], FGA[i])
+}
+for (j in 1:max(Pos)) {
+betapos[j] ~ dt(0, 0.01, 1)
+}
+betaht ~ dt(0, 0.16, 1)
+}
+
+
+```{r}
+d1 <- list(FGM = df$FGM,FGA = df$FGA, Pos = unclass(df$Pos),htscaled = as.vector(scale(df$Ht, scale=2*sd(df$Ht))))
+
+inits1 <- 
+list(list(betapos=c(10,10,10),betaht=10,.RNG.name="base::Wichmann-Hill",.RNG.seed=7),
+list(betapos=c(10,10,-10), betaht=-10,.RNG.name="base::Wichmann-Hill",.RNG.seed=8),
+list(betapos=c(10,-10,10), betaht=-10,.RNG.name="base::Wichmann-Hill",.RNG.seed=9),
+list(betapos=c(10,-10,-10), betaht=10,.RNG.name="base::Wichmann-Hill",.RNG.seed=10))
+```
+
+```{r}
+library(rjags)
+m1 <- jags.model("C://Users//amana//Downloads//FGM.bug", d1, inits1, n.chains=4, n.adapt=2000)
+update(m1, 1000) # burn-in
+x1 <- coda.samples(m1, c("betapos","betaht"),n.iter=10000)
+gelman.diag(x1, autoburnin=FALSE)
+
+```
+As we can see  the gelam-Rubin statistic is converging to 1 indicating no
+convergence problemeffectiveSize(x1[,1:4])
+
+
+
+```{r}
+effectiveSize(x1[,1:4])
+
+```
+## Answer 2 (b)
+
+```{r}
+
+summary(x1[,1:4])
+
+
+```
+
+## Answer 2 (c)
+```{r}
+x2 = as.matrix(x1)
+
+plot(x2[,'betaht'],x2[,'betapos[1]'])
+
+plot(x2[,'betaht'],x2[,'betapos[2]'])
+
+plot(x2[,'betaht'],x2[,'betapos[3]'])
+
+```
+There seems to be negative  correlation  between beta[1] (center)/beta[2] (forward) and beta height. Also there is positive correlation between beta[3] (guard) and beta height. 
+
+## Answer 2 (d)
+
+Posterior density of FGM probability of Ayo Dosunmu (at index 4)
+
+```{r}
+x3 <- coda.samples(m1, c("betapos","betaht","prob","FGMrep"),n.iter=10000)
+
+```
+```{r}
+x4 <- as.matrix(x3)
+densplot(x3[,c("prob[4]")])
+
+```
+
+## Answer 2 (e)
+
+Posterior probability of forward having a higher probability of making a goal vs guards. 
+
+```{r}
+cat("Posterior probability:", mean(x4[,'betapos[2]']>x4[,'betapos[3]']),"\n")
+
+bayes_factor <- mean(x4[,'betapos[2]']>x4[,'betapos[3]'])/mean(x4[,'betapos[2]']< x4[,'betapos[3]'])
+cat("Bayes factor:", bayes_factor)
+
+```
+Bayes factor indicates strong evidence in favor FGM for forward vs guards.
+
+## Answer 2 (f)
+
+```{r}
+probs <- as.matrix(x3)[, paste("prob[",1:nrow(df),"]", sep="")]
+FGMrep <- as.matrix(x3)[, paste("FGMrep[",1:nrow(df),"]", sep="")]
+Tchi <- numeric(nrow(df))
+Tchirep <- numeric(nrow(df))
+for(s in 1:nrow(FGMrep)){
+ 
+ Tchi[s] <- sum((df$FGM - df$FGA*probs[s,])^2 /
+ (df$FGA*probs[s,]*(1-probs[s,])))
+ 
+ Tchirep[s] <- sum((FGMrep[s,] - df$FGA*probs[s,])^2 /
+ (df$FGA*probs[s,]*(1-probs[s,])))
+ }
+mean(Tchirep >= Tchi)
+
+```
+THe p value is close to 0, the discrepency measure of replicated data has very low probability to be above discrepency measure of data  indicating evidence overdispersion.
+
+##Answer 2 (g)(i)
+
+$\underline{JAGS- Model}$
+model {
+for (i in 1:length(FGM)) {
+FGM[i] ~ dbin(prob[i], FGA[i])
+logit(prob[i]) <- betapos[Pos[i]] + betaht*htscaled[i] + epsilon[i]
+epsilon[i] ~ dnorm(0,1/sigmaepsilon^2)
+FGMrep[i] ~ dbin(prob[i], FGA[i])
+}
+for (j in 1:max(Pos)) {
+betapos[j] ~ dt(0, 0.01, 1)
+}
+betaht ~ dt(0, 0.16, 1)
+sigmaepsilon ~ dunif(0,10)
+}
+
+
+```{r}
+library(rjags)
+
+inits2 <- 
+list(list(betapos=c(10,10,10),betaht=10,sigmaepsilon=0.01,.RNG.name="base::Wichmann-Hill",.RNG.seed=7),
+list(betapos=c(10,10,-10), betaht=-10,sigmaepsilon=9,.RNG.name="base::Wichmann-Hill",.RNG.seed=8),
+list(betapos=c(10,-10,10), betaht=-10,sigmaepsilon=.01,.RNG.name="base::Wichmann-Hill",.RNG.seed=9),
+list(betapos=c(10,-10,-10), betaht=10,sigmaepsilon=9,.RNG.name="base::Wichmann-Hill",.RNG.seed=10))
+
+m1 <- jags.model("C://Users//amana//Downloads//FGM_dis.bug", d1, inits2, n.chains=4, n.adapt=2000)
+update(m1, 1000) # burn-in
+x5 <- coda.samples(m1, c("betapos","betaht","sigmaepsilon","prob","FGMrep"),n.iter=10000)
+
+
+gelman.diag(x5, autoburnin=FALSE)
+
+```
+##Answer 2 (g)(ii)
+
+```{r}
+densplot(x5[,c("sigmaepsilon")])
+```
+```{r}
+x6 = as.matrix(x5)
+
+cat("Posterior probability:", mean(x6[,'betapos[2]']>x6[,'betapos[3]']),"\n")
+
+bayes_factor <- mean(x6[,'betapos[2]']>x6[,'betapos[3]'])/mean(x6[,'betapos[2]']< x6[,'betapos[3]'])
+cat("Bayes factor:", bayes_factor)
+
+```
+The conclusions for new model based on p value and bayes value is different. The evidence is now less strong vs previous model  that forward players probability of making a field goal is higher than guard position player.  The bayes factor also indicates a positive evidence not strong like previous model.   
+
+## Answer 3(a)
+
+model {
+for (i in 1:length(blocks)) 
+{
+  blocks[i] ~ dpois(lambda[i])
+  log(lambda[i]) <- logmin[i] + beta.pos[pos[i]] + beta.height*htscaled[i]
+  blocksrep[i] ~ dpois(lambda[i])
+}
+
+beta.height ~ dnorm(0, 0.0001)
+
+for (i in 1:max(pos)) {
+beta.pos[i] ~ dnorm(0, 0.0001)
+}
+
+}
+
+
+```{r}
+d2 <- list(blocks = df$BLK, logmin = log(df$MIN), htscaled = as.vector(scale(df$Ht)), pos = unclass(df$Pos))
+
+inits2 <- 
+list(list(beta.pos=c(100,100,100),beta.height=10,.RNG.name="base::Wichmann-Hill",.RNG.seed=1981),
+list(beta.pos=c(100,100,-100), beta.height=-10,.RNG.name="base::Wichmann-Hill",.RNG.seed=1982),
+list(beta.pos=c(100,-100,100), beta.height=-10,.RNG.name="base::Wichmann-Hill",.RNG.seed=1983),
+list(beta.pos=c(100,-100,-100), beta.height=10,.RNG.name="base::Wichmann-Hill",.RNG.seed=1984))
+library(rjags)
+
+m2 <- jags.model("C://Users//amana//Downloads//Shots_blocked.bug", d2, inits2, n.chains=4, n.adapt=1000)
+
+update(m2, 1000) # burn-in
+x6 <- coda.samples(m2, c("beta.pos","beta.height","blocksrep","lambda"),n.iter=50000)
+gelman.diag(x6[,1:19], autoburnin=FALSE)
+
+```
+
+```{r}
+effectiveSize(x6[,1:4])
+
+```
+
+## Answer 3(b)
+
+
+```{r}
+summary(x6[,1:4])
+
+
+```
+## Answer 3(c)
+
+```{r}
+x7 <- as.matrix(x6)
+
+post.samp <- x7[,"beta.height"]
+post.samp.change = exp(post.samp)
+quantile(post.samp.change,c(0.025,0.975))
+
+```
+
+Since the lower end of  95 central inerval is greater than 1 (~1.6) this indicates greater height is associated with higher  blocking rate.
+
+## Answer 3(d)
+
+```{r}
+lambdas <- as.matrix(x6)[, paste("lambda[",1:nrow(df),"]", sep="")]
+blocksrep <- as.matrix(x6)[, paste("blocksrep[",1:nrow(df),"]", sep="")]
+Tchi <- numeric(nrow(blocksrep))
+Tchirep <- numeric(nrow(blocksrep))
+
+for(s in 1:nrow(blocksrep)){
+ Tchi[s] <- sum((df$BLK - lambdas[s,])^2 / lambdas[s,])
+ Tchirep[s] <- sum((blocksrep[s,] - lambdas[s,])^2 / lambdas[s,])
+}
+ mean(Tchirep >= Tchi)
+
+
+```
+
+The low p values indicates evidence of a problem.
+
+
+## Answer 3 (e)(i)
+
+```{r}
+
+for (i in 1:nrow(df))
+{
+  df$p_value[i] <-  mean(blocksrep[,i] > df$BLK[i])
+}  
+
+df[,c("Player","p_value")]
+```
+
+## Answer 3 (e)(ii)
+
+One of the player with p values less than .05 is Kane, Samba
+
+## Answer 3 (e)(iii)
+
+Some of the players have probability close to 1 - "De La Rosa, Adonis" and "Jones, Tevian" since they blocked less shots than the play time and height would suggests. Hence the replicated values are greater  than actual values in majority of replicates samples. 
+
+

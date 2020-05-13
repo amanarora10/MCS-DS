@@ -1,0 +1,201 @@
+---
+title: "STAT578-HW5"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## a)(i)
+```{r echo=FALSE}
+library(randomcoloR)
+df <- read.csv("C:\\temp\\usparkvisits.csv",header = TRUE)
+num_parks <- nrow(df)
+num_years <- ncol(df)
+```
+
+
+```{r}
+palette <- distinctColorPalette(num_parks)
+year <- 2006:2018
+plot(year,(df[1,2:num_years]),ylim = c(0, 11000000),col = palette[0],ylab = "Visits",lty =2)
+for (i in 1:num_parks)
+    lines(year,(df[i,2:num_years]),ylim = c(0, 11000000),col = palette[i],lty =2)
+
+```
+
+##a)(ii)
+
+
+```{r pressure}
+plot(year,log(df[1,2:num_years]),ylim = c(0, log(11000000)),col = palette[0], ylab = "log(Visits)",lty=2)
+for (i in 1:num_parks)
+    lines(year,log(df[i,2:num_years]),ylim = c(0, log(11000000)),col = palette[i],lty =2)
+```
+## b)(i)
+```{r}
+df1 <- read.csv("C:\\temp\\usparks.csv",header = TRUE)
+park_names = colnames(df1)[3:ncol(df1)]
+
+# Center the year.
+df1$Year <- df1$Year - mean(df1$Year)
+```
+
+```{r}
+beta1 <- c() 
+beta2 <- c()
+beta_all <-matrix(NA, ncol(df1), 2)
+for (i in 1:num_parks)
+{
+  mod = lm(
+    as.formula(paste("log(", park_names[i],")", "~","Year",sep = "" )),
+    data=df1)
+  beta <- mod$coefficients
+  beta_all[i,] <- beta
+  beta1 <-  c(beta1,beta[1])
+  beta2 <-  c(beta2,beta[2])
+}
+
+```
+
+
+```{r}
+plot(beta1,beta2)
+```
+
+##b)(ii)
+```{r}
+mean(beta1)
+mean(beta2)
+```
+## b)(iii)
+
+
+```{r}
+var(beta1)
+var(beta2)
+
+```
+## b)(iv)
+```{r}
+cor(beta1,beta2)
+```
+
+##c(i)
+
+
+
+![JAGS MODEL](model1.jpg)
+
+```{r}
+d1 <- list(visits = log(df[,-1]),year = c(2006:2018),mubeta0 = c(0, 0),
+Sigmamubetainv = rbind(c(0.000001, 0),c(0, 0.000001)),
+Sigma0 = rbind(c(10, 0),c(0, 0.01)))
+
+inits1 <- list(
+list(sigmasqyinv = 10, mubeta = c(50, 50),Sigmabetainv = rbind(c(10000, 0), c(0, 10000)),.RNG.name="base::Wichmann-Hill",.RNG.seed=77),    
+list(sigmasqyinv = 0.001, mubeta = c(-50, 50), Sigmabetainv = rbind(c(10000, 0), c(0, 10000)),.RNG.name="base::Wichmann-Hill",.RNG.seed=78), 
+list(sigmasqyinv = 10, mubeta = c(50, -50), Sigmabetainv = rbind(c(0.001, 0),c(0, 0.001)),.RNG.name="base::Wichmann-Hill",.RNG.seed=79),
+list(sigmasqyinv = 0.001, mubeta = c(-50, -50),Sigmabetainv = rbind(c(0.001, 0), c(0, 0.001)),.RNG.name="base::Wichmann-Hill",.RNG.seed=80))
+
+```
+
+
+```{r}
+library(rjags)
+m1 <- jags.model("C:\\temp\\parkvisit1.bug", d1, inits1, n.chains=4, n.adapt=1000)
+update(m1, 2000) # burn-in
+x1 <- coda.samples(m1, c("mubeta","Sigmabeta","sigmasqy","rho"), n.iter=50000)
+gelman.diag(x1, autoburnin=FALSE, multivariate=FALSE)
+
+```
+```{r}
+effectiveSize(x1[,c("mubeta[1]","mubeta[2]","Sigmabeta[1,1]","Sigmabeta[1,2]","Sigmabeta[2,2]","sigmasqy","rho")])
+
+```
+## c(ii)
+```{r}
+summary(x1[,c("mubeta[1]","mubeta[2]","Sigmabeta[1,1]","Sigmabeta[1,2]","Sigmabeta[2,2]","sigmasqy","rho")])
+```
+## c(iii)
+
+95% posterior for $\rho$ is (-0.66250, -0.032544) 
+```{r}
+densplot(x1[,c("rho")])
+```
+
+##c(iv)
+
+Posterior probability of $\rho$<0
+
+```{r}
+post.samp <- as.matrix(x1)
+post_rho_neg<- mean(post.samp[,"rho"] < 0)
+post_rho_pos<- mean(post.samp[,"rho"] > 0)
+bayes_factor <-post_rho_neg/post_rho_pos
+post_rho_neg
+bayes_factor
+
+```
+Since bayes factor is ~57 this indicates strong evidence in favor of $rho$ <0 
+
+##c(v)
+
+```{r}
+post.samp.change = exp(12*post.samp[,"mubeta[2]"])
+quantile(post.samp.change,c(0.025,0.975))
+
+```
+95% central interval for $e^{12\mu_{\beta_{2}}$ is (1.130208 1.845914) 
+
+##c(vi)
+```{r}
+dic.samples(m1,100000)
+
+```
+
+##d(i)
+
+JAGS MODEL
+
+![JAGS MODEL](model2.jpg)
+
+```{r}
+d1 <- list(visits = log(df[,-1]),year = c(2006:2018),mubeta0 = c(0, 0),
+Sigmamubetainv = rbind(c(0.000001, 0),c(0, 0.000001)))
+
+
+library(rjags)
+m1 <- jags.model("C:\\temp\\parkvisit2.bug", d1, inits1, n.chains=4, n.adapt=1000)
+update(m1, 2000) # burn-in
+x1 <- coda.samples(m1, c("mubeta","sigmasqy","Sigmabeta1_sq","Sigmabeta2_sq"), n.iter=50000)
+gelman.diag(x1, autoburnin=FALSE, multivariate=FALSE)
+effectiveSize(x1[,c("mubeta[1]","mubeta[2]","Sigmabeta1_sq","Sigmabeta2_sq","sigmasqy")])
+
+```
+
+
+```{r}
+summary(x1[,c("mubeta[1]","mubeta[2]","Sigmabeta1_sq","Sigmabeta2_sq","sigmasqy")])
+
+```
+##d(iv)
+
+```{r}
+post.samp <- as.matrix(x1)
+post.samp.change = exp(12*post.samp[,"mubeta[2]"])
+quantile(post.samp.change,c(0.025,0.975))
+```
+##d(v)
+```{r}
+dic.samples(m1,100000)
+
+```
+
+
+##d (vi)
+
+The DIC value of the bivariate prior model (52.26 )  is lower than univariate model (53.17), the bivariate model is a prefered model based on DIC. 
+
+

@@ -1,0 +1,189 @@
+---
+title: "Data Analysis"
+author: "Aman Arora"
+date: "4/30/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1
+
+## Section: 2
+
+```{r data}
+
+library(randomcoloR)
+
+df = read.csv("C://Users//amana//Downloads//EUCOVIDdeaths.csv",header=TRUE)
+
+num_days <- ncol(df)
+num_countries <- nrow(df)
+palette <- distinctColorPalette(num_countries)
+days <- 16:31
+
+plot(days,(df[1,3:num_days]),ylim = c(0, 1000),col = palette[0],ylab = "Deaths",lty =2)
+
+axis(1,at=c(16:31))
+for (i in 2:num_countries)
+    lines(days,(df[i,3:num_days]),ylim = c(0, 1000),col = palette[i],lty =2)
+
+
+plot(days,(df[1,3:num_days])/df[1,2],ylim = c(0, 20),col = palette[0],ylab = "Deaths/Millon inhabitant",lty =2)
+title(main = "Death per Captia  vs Day")
+axis(1,at=c(16:31))
+for (i in 2:num_countries)
+    lines(days,(df[i,3:num_days])/df[i,2],ylim = c(0, 20),col = palette[i],lty =2)
+
+```
+```{r pressure, echo=FALSE}
+death_sum <- rowSums(df[3:num_days])
+max_index <- which.max(death_sum)
+df[max_index,1]  
+
+```
+Italy has the highest deaths 
+
+
+```{r}
+rate_sum <- vector(,num_countries)
+
+for (i in 1:num_countries)
+  rate_sum[i] <- death_sum[i]/df[i,2]
+
+max_index <- which.max(rate_sum)
+df[max_index,1]  
+
+```
+
+
+```{r}
+df[which(death_sum==0),1]
+
+```
+## Section 3
+
+
+```{r section3 }
+
+d3 <- list(deaths = df[,-1:-2],logpopulation  = log(df$PopulationM), daycent = days - mean(days))
+
+inits2 <- 
+list(list(slope = 50,mu.intercept = 200,sigma.intercept = 100, .RNG.name="base::Wichmann-Hill",.RNG.seed=81),
+list(slope = 50,mu.intercept = -200,sigma.intercept = 100,.RNG.name="base::Wichmann-Hill",.RNG.seed=82),
+list(slope = -50,mu.intercept = 200,sigma.intercept = 10^-3,.RNG.name="base::Wichmann-Hill",.RNG.seed=83),
+list(slope = -50,mu.intercept = -200,sigma.intercept = 10^-3,.RNG.name="base::Wichmann-Hill",.RNG.seed=84))
+
+#inits3 <- 
+#list(list(.RNG.name="base::Wichmann-Hill",.RNG.seed=81),
+#list(.RNG.name="base::Wichmann-Hill",.RNG.seed=82),
+#list(.RNG.name="base::Wichmann-Hill",.RNG.seed=83),
+#list(.RNG.name="base::Wichmann-Hill",.RNG.seed=84))
+
+
+
+library(rjags)
+m1 <- jags.model("C://Users//amana//Downloads//firstmodel.bug", d3, inits2, n.chains=4, n.adapt=1000)
+update(m1, 1000) # burn-in
+x1 <- coda.samples(m1, c("mu.intercept","sigma.intercept","slope","intercept"),n.iter=10000)
+gelman.diag(x1, autoburnin=FALSE)
+
+gelman.plot(x1)
+
+```
+
+
+```{r}
+
+effectiveSize(x1)
+write.csv(effectiveSize(x1), "C://Users//amana//Downloads//filename.csv")
+```
+
+
+
+
+```{r}
+x2<- summary(x1)
+
+x3 <- x2$quantiles[,3]
+
+#write.csv(as.matrix(x2$statistics), "C://Users//amana//Downloads//post_summary_3.csv")
+write.csv(as.matrix(x2$quantiles), "C://Users//amana//Downloads//post_summary_3_1.csv")
+```
+
+
+```{r}
+max_index <- which.max(x3)
+df[max_index,1]  
+
+min_index <- which.min(x3)
+df[min_index,1]  
+
+dic.samples(m1,10000)
+```
+
+##Section 4
+
+```{r}
+
+inits2 <- 
+list(list(mu.slope = 50,mu.intercept = 200, sigma.slope = 100, sigma.intercept = 100, .RNG.name="base::Wichmann-Hill",.RNG.seed=81),
+list(mu.slope = 50,mu.intercept = -200,sigma.slope = 10^-3,sigma.intercept = 100,.RNG.name="base::Wichmann-Hill",.RNG.seed=82),
+list(mu.slope = -50,mu.intercept = 200,sigma.slope = 100,sigma.intercept = 10^-3,.RNG.name="base::Wichmann-Hill",.RNG.seed=83),
+list(mu.slope = -50,mu.intercept = -200,sigma.slope = 10^-3,sigma.intercept = 10^-3,.RNG.name="base::Wichmann-Hill",.RNG.seed=84))
+
+m1 <- jags.model("C://Users//amana//Downloads//secondmodel.bug", d3, inits2, n.chains=4, n.adapt=1000)
+update(m1, 1000) # burn-in
+x1 <- coda.samples(m1, c("mu.intercept","sigma.intercept","slope","intercept","sigma.slope"),n.iter=10000)
+gelman.diag(x1, autoburnin=FALSE)
+
+
+```
+```{r}
+
+effectiveSize(x1)
+write.csv(effectiveSize(x1), "C://Users//amana//Downloads//4_eff_samples.csv")
+```
+
+#Section 4 (c)
+```{r}
+x3 <-as.matrix(x1)
+densplot(x1[,c("sigma.slope")], xlab = "sigma.slope", ylab ="PDF")
+
+```
+
+#Section 4 (d)
+
+```{r}
+post_intercepts_samples <- x3[, paste("intercept[",1:nrow(df),"]", sep="")]
+expected_intercept <- apply(post_intercepts_samples,2,mean)
+
+post_slope_samples <- x3[, paste("slope[",1:nrow(df),"]", sep="")]
+expected_slope <- apply(post_slope_samples,2,mean)
+
+
+plot(1:3, c(1,3,2), type = "n")
+text(1:3,c(1,2,3),c("one","two","three"),cex =0.8)
+
+plot(expected_intercept,expected_slope, type ="n")
+text(expected_intercept,expected_slope,df[,1],cex =.6)
+
+
+```
+
+```{r}
+df$Country
+```
+
+
+#Section 4 (e)
+```{r}
+dic.samples(m1,10000)
+
+```
+
+Second model is better due to lower mean devicance  resulting in better overall DIC value.
