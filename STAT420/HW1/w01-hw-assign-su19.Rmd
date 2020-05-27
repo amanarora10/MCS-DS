@@ -269,12 +269,15 @@ list_extreme_values <- function(x, k = 2)
   small = x[x < low_threshold]
   large = x[x > high_threshold]
   
-  c(small,large)
-  
+  out = list(small,large)
+  names(out) = c("small","large") 
+  return(out)
 }
 
 
-list_extreme_values(x = x, k = 1)
+a= list_extreme_values(x = x, k = 1)
+View(a)
+
 list_extreme_values(x = y, k = 3)
 list_extreme_values(x = y, k = 2)
 list_extreme_values(x = z, k = 1.5)
@@ -287,130 +290,10 @@ list_extreme_values(x = z, k = 1.5)
 
 
 ```{r}
-library(MASS)
-melanoma = MASS::Melanoma
-densplot(melanoma$age)
-```
+z = list_extreme_values(x = y, k = 1.5)
 
-```{r}
-#1
-library(MASS)
-melanoma = MASS::Melanoma
-sum(melanoma$status == 1)
-
-#2
-mean(melanoma[melanoma$status == 2,]$age)
-
-#3
-mammals = MASS::mammals
-max_i = which.max(mammals$brain/mammals$body)
-mammals[max_i,]
-
-#4
-boxplot(iris)
-
-apply(iris,2,sd)
+z$large
 
 
-
-#5
-#min(z[[1]])+max(z[[2]])+mean(z[[3]])
-
-#6 New york
-```
-
-
-```{r}
-#7
-print("mean air quality")
-View(airquality)
-mean(airquality[airquality$Month==5,]$Wind )
-```
-
-
-
-```{r}
-#8
-
-mean(airquality$Ozone, na.rm = TRUE)
-
-#9
-
-plot(airquality$Wind,airquality$Temp)
-abline(lm(Temp ~ Wind,airquality))
-
-```
-
-
-```{r}
-#10
-
-set.seed(1337)
-x = rnorm(10000)
-sum(x>2|x< -2)/
-
-```
-
-
-```{r}
-#11
-
-f<- function(input = 42) 
-{
-  input[input<0] = 0
-  return(input)
-}
-
-set.seed(42)
-x = rnorm(100, mean = 0, sd = 10)
-
-mean(f(input = x)) - f()
-```
-
-
-```{r}
-#12
-
-x0 = rep(1,30)
-x1 = (1:30)^2
-
-set.seed(42)
-y  = 5 * x0 + x1 + rnorm(n = 30, mean = 0 , sd = 1)
-mean(y)
-
-#13
-x0 = rep(1,30)
-x1 = (1:30)^2
-
-X = cbind(x0,x1)
-
-sum(X[17,]+X[19,])
-
-
-
-```
-
-```{r}
-#14
-set.seed(42)
-x0 = rep(1,30)
-x1 = (1:30)^2
-X = cbind(x0,x1)
-y  = 5 * x0 + x1 + rnorm(n = 30, mean = 0 , sd = 1)
-beta = ginv(t(X)%*% X)%*%t(X)%*%y
-
-sum(beta)
-
-```
-```{r}
-#15
-y_hat = X%*%beta 
-sum((y-y_hat)^2)
-
-
-
-```
-```{r}
-apply(iris[,-5],2,sd)
 ```
 
