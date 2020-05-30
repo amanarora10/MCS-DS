@@ -1,6 +1,6 @@
 ---
-title: "Week 1 - Homework"
-author: "STAT 420, Summer 2019, D. Unger"
+title: "Week 1 - Homework (Aman Arora - amana4@illinois.edu)"
+author: "STAT 420, Summer 2020, D. Unger"
 date: ''
 output:
   html_document: 
@@ -29,7 +29,6 @@ this dataset? How many variables? What are the observations in this dataset?
 ```{r}
 msleep = ggplot2::msleep
 dim(msleep)
-?msleep
 ```
 The data set has 11 variables and 83 observations of various animals their sleep characteristics and body/brain weights.
 
@@ -88,6 +87,7 @@ The birthwt data frame has 189 observations  and 10 variables. The observations 
 plot(bwt~lwt,data= birthwt,ylab ="Birth weight(grams)", xlab = "Mother's weight (lb)", col ="blue",main = "Birth weight vs Mother's weight before Pregnancy")
 abline(lm(bwt ~ lwt, birthwt))
 ```
+
 There does seems to be a positive relation ship between mother's and baby's weight. Indicated by a positive slope of the regresion line.
 
 
@@ -157,6 +157,8 @@ hist(df$Calories, col = "blue", xlab = "Calories (kcal)", main = "Histogram of C
 plot(Calories~Protein, data = df, col ="red",main = "Calories vs Protein" )
 abline(lm(Calories ~ Protein, df))
 ```
+
+
 Does not seem like these is a positive relation between protein and calories as the regression line has a positive slope but by visual inspection the fit seems be quite poor i.e. protein by itself may not be the only predictor variable. 
 
 
@@ -169,6 +171,7 @@ df$Total = 4*df$Protein + 4*df$Carbs + 9*df$Fat
 plot(Total~Calories, df, col = "dark green", main = "Expected Calories vs Actual Calories", ylab ="Expected Calories (Kcal)", xlab = "Actual Calories (Kcal)")
 
 ```
+
 The plot is not a straight line, it seems the calorie formula does not fully capture the relationship -  there are still unknown variables that are not accounted in the formula. 
 
 
@@ -213,6 +216,10 @@ sum_of_squares(x = c(c, d))
 where the $x$ vector is `d`.
 
 ```{r}
+sum_of_squares <- function(x)
+{
+  sum(x^2)
+}
 
 sqrt(mean(sum_of_squares(d)))
 
@@ -279,8 +286,7 @@ list_extreme_values <- function(x, k = 2)
 }
 
 
-a= list_extreme_values(x = x, k = 1)
-
+list_extreme_values(x = x, k = 1)
 list_extreme_values(x = y, k = 3)
 list_extreme_values(x = y, k = 2)
 list_extreme_values(x = z, k = 1.5)
@@ -293,9 +299,25 @@ list_extreme_values(x = z, k = 1.5)
 
 
 ```{r}
+list_extreme_values <- function(x, k = 2)
+{
+  dev = sd(x)
+  avg = mean(x)
+  
+  low_threshold = avg - k*dev
+  high_threshold = avg + k*dev
+  
+  small = x[x < low_threshold]
+  large = x[x > high_threshold]
+  
+  out = list(small,large)
+  names(out) = c("small","large") 
+  return(out)
+}
+
 z = list_extreme_values(x = y, k = 1.5)
 
-z$large
+mean(z$large)
 
 
 ```
