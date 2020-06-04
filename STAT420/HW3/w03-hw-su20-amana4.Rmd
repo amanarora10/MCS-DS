@@ -1,6 +1,6 @@
 ---
 title: "Week 3 - Homework"
-author: "STAT 420, Summer 2020, D. Unger"
+author: "Aman Arora - amana4@illinois.edu"
 date: ''
 output:
   html_document: 
@@ -9,16 +9,6 @@ output:
   pdf_document: default
 urlcolor: cyan
 ---
-
-
-# Directions
-
-Students are encouraged to work together on homework. However, sharing, copying or providing any part of a homework solution or code is an infraction of the University's rules on Academic Integrity. Any violation will be punished as severely as possible.
-
-- Be sure to remove this section if you use this `.Rmd` file as a template.
-- You may leave the questions in your final document.
-
-***
 
 ## Exercise 1 (Using `lm` for Inference)
 
@@ -40,15 +30,74 @@ Store the results in a variable called `cat_model`. Use a $t$ test to test the s
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
 
+**Solution**:
+```{r}
+library("MASS")
+cat_model = lm(Hwt~Bwt, data = cats)
+result = summary(cat_model)
+```
+
+* The null hypothesis is $H_0:\beta1 = 0$ i.e there is no relationship  between cat's heart weight and body weight. Alternative hypothesis is  $H1:\beta1 \ne 0$ i.e there is a relationship  between cat's heart weight and body weight
+
+* The t statistic is: `r result$coefficients[2,3]` 
+
+* The p value is 2.2e-16
+
+* At $\alpha = 0.05$  we can reject the NULL hypothesis. 
+
+* Rejection of NULL hypothesis indicates there is significant evidence for a relationship between between cat's heart weight and body weight
+
+
 **(b)** Calculate a 95% confidence interval for $\beta_1$. Give an interpretation of the interval in the context of the problem.
+
+```{r}
+intervals = confint(cat_model, level = .95)
+
+```
+95% confidence interval for $\beta_1$ is: (`r intervals[2,1]`, `r intervals[2,2]`)
+
 
 **(c)** Calculate a 90% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
 
+```{r}
+intervals = confint(cat_model, level = .9)
+```
+
+90% confidence interval for $\beta_0$ is: (`r intervals[1,1]`, `r intervals[1,2]`)
+
+
 **(d)** Use a 90% confidence interval to estimate the mean heart weight for body weights of 2.1 and 2.8 kilograms. Which of the two intervals is wider? Why?
+
+```{r}
+new_bwt = data.frame(Bwt = c(2.1,2.8))
+result = predict(cat_model, newdata = new_bwt, interval = c("confidence"), level =0.9)
+result
+```
+
+The interval is wider for body weight 2.1 since its father from mean of body weight hence has greater error.
+
+
 
 **(e)** Use a 90% prediction interval to predict the heart weight for body weights of 2.8 and 4.2 kilograms.
 
+```{r}
+
+new_bwt = data.frame(Bwt = c(2.8,4.2))
+result = predict(cat_model, newdata = new_bwt, interval = c("prediction"), level =0.9)
+result
+
+```
+
+
 **(f)** Create a scatterplot of the data. Add the regression line, 95% confidence bands, and 95% prediction bands.
+
+
+```{r}
+
+plot(Hwt~Bwt, data = cats)
+
+```
+
 
 **(g)** Use a $t$ test to test:
 
