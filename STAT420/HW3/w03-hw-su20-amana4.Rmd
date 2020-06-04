@@ -94,7 +94,21 @@ result
 
 ```{r}
 
-plot(Hwt~Bwt, data = cats)
+Bwt_grid = seq(min(cats$Bwt), max(cats$Bwt), by = 0.01)
+
+hwt_ci_band = predict(cat_model, newdata = data.frame(Bwt =Bwt_grid ), interval = "confidence",level = .95)
+
+hwt_pi_band = predict(cat_model, newdata = data.frame(Bwt =Bwt_grid ), interval = "prediction",level = .95)
+
+plot(Hwt~Bwt, data = cats, ylim = c(min(hwt_pi_band),max(hwt_pi_band)), main = "Heart Weight vs Body Weight of cats", xlab= "Body Weight(kg)", ylab ="Heart Weight(grams)")
+
+abline(cat_model, col = "red")
+
+lines(Bwt_grid,hwt_ci_band[,"lwr"],col ="blue",lwd = 3, lty = 2)
+lines(Bwt_grid,hwt_ci_band[,"upr"],col ="blue",lwd = 3, lty = 2)
+
+lines(Bwt_grid,hwt_pi_band[,"lwr"],col ="blue",lwd = 3, lty = 3)
+lines(Bwt_grid,hwt_pi_band[,"upr"],col ="blue",lwd = 3, lty = 3)
 
 ```
 
@@ -111,6 +125,33 @@ Report the following:
 - A statistical decision at $\alpha = 0.05$
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
+
+```{r}
+result  = summary(cat_model)$coefficients
+
+beta_hat_1 = result[2,1]
+se = result[2,2]
+
+#Hypothesized Beta1
+beta_hyp = 4
+
+t = (beta_hat_1- beta_hyp)/se
+
+p = 2*pt(abs(t), df = nrow(cats) -2,lower.tail = FALSE)
+
+```
+* The Value of test statistic is: `r t`
+* the p value is:`r p` 
+* At $\alpha = 0.05$ we fail to reject $H_0$
+
+
+```{r}
+
+summary(cat_model)$coefficients
+```
+
+
+
 
 ***
 
