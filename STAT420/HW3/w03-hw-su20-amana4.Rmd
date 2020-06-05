@@ -184,6 +184,23 @@ Store the results in a variable called `ozone_wind_model`. Use a $t$ test to tes
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
 
+```{r}
+
+wind_model = lm(ozone~wind, data = Ozone)
+result = summary(wind_model)
+
+```
+
+* The null hypothesis is $H_0:\beta1 = 0$ i.e there is no relationship  between Ozone and Wind. Alternative hypothesis is  $H1:\beta1 \ne 0$ i.e there is a relationship  between between Ozone reading and Wind
+
+* The t statistic is: `r result$coefficients[2,3]` 
+
+* The p value is 0.8268
+
+* At $\alpha = 0.05$  we fail to reject the NULL hypothesis. 
+
+* There is not enough evidence in data to reject the possibility of no relationship between Ozone readings and wind. 
+
 **(b)** Fit the following simple linear regression model in `R`. Use the ozone measurement as the response and temperature as the predictor. 
 
 \[
@@ -199,6 +216,23 @@ Store the results in a variable called `ozone_temp_model`. Use a $t$ test to tes
 - A conclusion in the context of the problem
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
+
+```{r}
+temp_model = lm(ozone~temp, data = Ozone)
+result = summary(temp_model)
+result
+```
+
+* The null hypothesis is $H_0:\beta1 = 0$ i.e there is no relationship  between Ozone and temperature. Alternative hypothesis is  $H1:\beta1 \ne 0$ i.e there is a relationship  between between Ozone reading and temperature
+
+* The t statistic is: `r result$coefficients[2,3]` 
+
+* The p value is 2.2e-16
+
+* At $\alpha = 0.01$  we can reject the NULL hypothesis. 
+
+* There is enough evidence in data to reject the possibility of no relationship between Ozone readings and temperature 
+
 
 ***
 
@@ -221,10 +255,36 @@ We will use samples of size $n = 50$.
 **(a)** Simulate this model $2000$ times. Each time use `lm()` to fit a simple linear regression model, then store the value of $\hat{\beta}_0$ and $\hat{\beta}_1$. Set a seed using **your** birthday before performing the simulation. Note, we are simulating the $x$ values once, and then they remain fixed for the remainder of the exercise.
 
 ```{r}
-birthday = 18760613
+birthday = 12121977
 set.seed(birthday)
 n = 50
 x = seq(0, 10, length = n)
+
+#Function to Simulate SLR
+sim_slr = function(x, beta_0 , beta_1, sigma) {
+  n = length(x)
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  y = beta_0 + beta_1 * x + epsilon
+  data.frame(predictor = x, response = y)
+}
+
+#No of simulations
+m = 2000
+
+#Initialize vector to store results
+beta_hat_0 = rep(0,m)
+beta_hat_1 = rep(0,m)
+
+#Generate and store SLR coefficients 
+for(i in 1:m)
+{
+  std_dev = 4
+  df = sim_slr(x, beta_0 = -5, beta_1 = 3.25, sigma = std_dev)
+  fitted_model = lm(response ~ predictor, df)
+  beta_hat_0[i] = fitted_model$coefficients[1]
+  beta_hat_1[i] = fitted_model$coefficients[2]
+}  
+
 ```
 
 **(b)** Create a table that summarizes the results of the simulations. The table should have two columns, one for $\hat{\beta}_0$ and one for $\hat{\beta}_1$. The table should have four rows:
@@ -234,10 +294,59 @@ x = seq(0, 10, length = n)
 - A row for the true standard deviation given the known values of $x$
 - A row for the standard deviation of the simulated values
 
+```{r}
+library(knitr)
+
+true_exp = c(-5,3.25)
+sim_mean = c(mean(beta_hat_0),mean(beta_hat_1))
+
+true_sd = c(4,4)
+
+sim_sd = c(sd(beta_hat_0),sd(beta_hat_1))
+
+table.comp  <- data.frame(rbind(true_exp, sim_mean, true_sd,sim_sd))
+
+colnames(table.comp) = c("$\beta0$ ","$\beta1$")
+
+
+```
+
+`r kable(table.comp,"markdown",caption ="Simulation Summary")`  
+
+
 **(c)** Plot two histograms side-by-side:
 
 - A histogram of your simulated values for $\hat{\beta}_0$. Add the normal curve for the true sampling distribution of $\hat{\beta}_0$.
 - A histogram of your simulated values for $\hat{\beta}_1$. Add the normal curve for the true sampling distribution of $\hat{\beta}_1$.
+
+```{r}
+#Calculate true variance of estimated beta0 and beta1
+Sxx = sum((x- mean(x))^2)
+true_var = 16
+n= length(x)
+
+true_sd_beta0 = sqrt(true_var*(1/n + (mean(x)^2)/Sxx))
+true_sd_beta1 = sqrt(true_var/Sxx)
+
+#Plot beta 0 estimate and true value
+beta0_val = seq(from = min(beta_hat_0), to = max(beta_hat_0), by = 0.01)
+beta0_density = dnorm(beta0_val, mean=-5, sd=true_sd_beta0)
+
+par(mfrow=c(1,2))
+hist(beta_hat_0,freq = FALSE,main = "Histogram of $\\beta_0$" )
+lines(beta0_val,beta0_density, col = "red", lwd = 2)
+
+#Plot beta 1 estimate and true value
+beta1_val = seq(from = min(beta_hat_1), to = max(beta_hat_1), by = 0.01)
+beta1_density = dnorm(beta1_val, mean=3.25, sd=true_sd_beta1)
+hist(beta_hat_1,freq = FALSE, ylim=c(0,max(beta1_density)))
+
+lines(beta1_val,beta1_density, col = "red", lwd = 2)
+
+
+```
+
+
 
 ***
 
@@ -262,11 +371,38 @@ Our goal here is to use simulation to verify that the confidence intervals reall
 **(a)** Simulate this model $2500$ times. Each time use `lm()` to fit a simple linear regression model, then store the value of $\hat{\beta}_1$ and $s_e$. Set a seed using **your** birthday before performing the simulation. Note, we are simulating the $x$ values once, and then they remain fixed for the remainder of the exercise.
 
 ```{r}
-birthday = 18760613
+birthday = 12121977
 set.seed(birthday)
 n = 25
 x = seq(0, 2.5, length = n)
+
+#Function to Simulate SLR
+sim_slr = function(x, beta_0 , beta_1, sigma) {
+  n = length(x)
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  y = beta_0 + beta_1 * x + epsilon
+  data.frame(predictor = x, response = y)
+}
+
+#No of simulations
+m = 2500
+
+#Initialize vector to store results
+se = rep(0,m)
+beta_hat_1 = rep(0,m)
+intervals = rep(0,m)
+#Generate and store SLR coefficients 
+for(i in 1:m)
+{
+  std_dev = 3
+  df = sim_slr(x, beta_0 = 5, beta_1 = 2, sigma = std_dev)
+  fitted_model = lm(response ~ predictor, df)
+  se[i] = summary(fitted_model)$coefficients[2,2] 
+  beta_hat_1[i] = fitted_model$coefficients[2]
+}  
+
 ```
+
 
 **(b)** For each of the $\hat{\beta}_1$ that you simulated, calculate a 95% confidence interval. Store the lower limits in a vector `lower_95` and the upper limits in a vector `upper_95`. Some hints:
 
@@ -274,13 +410,51 @@ x = seq(0, 2.5, length = n)
 - Remember that `x` is fixed, so $S_{xx}$ will be the same for each interval.
 - You could, but do not need to write a `for` loop. Remember vectorized operations.
 
+
+```{r}
+critcal_val = qt(.025,df = n, lower.tail = FALSE)
+
+lower_95 = beta_hat_1 - critcal_val*se
+upper_95 = beta_hat_1 + critcal_val*se
+
+```
 **(c)** What proportion of these intervals contains the true value of $\beta_1$?
+
+```{r}
+result = mean(lower_95 <2 & upper_95>2)
+
+```
+The proportion of interval with true value is `r result`
+
 
 **(d)** Based on these intervals, what proportion of the simulations would reject the test $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ at $\alpha = 0.05$?
 
+
+```{r}
+
+```
+
+
 **(e)** For each of the $\hat{\beta}_1$ that you simulated, calculate a 99% confidence interval. Store the lower limits in a vector `lower_99` and the upper limits in a vector `upper_99`.
 
+```{r}
+
+critcal_val = qt(.005,df = n, lower.tail = FALSE)
+
+lower_99 = beta_hat_1 - critcal_val*se
+upper_99 = beta_hat_1 + critcal_val*se
+
+
+```
+
 **(f)** What proportion of these intervals contains the true value of $\beta_1$?
+
+```{r}
+result = mean(lower_99 <2 & upper_99>2)
+result
+```
+The proportion of interval with true value is `r result`
+
 
 **(g)** Based on these intervals, what proportion of the simulations would reject the test $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ at $\alpha = 0.01$?
 
