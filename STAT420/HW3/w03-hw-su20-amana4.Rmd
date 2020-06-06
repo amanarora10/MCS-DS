@@ -412,7 +412,7 @@ for(i in 1:m)
 
 
 ```{r}
-critcal_val = qt(.025,df = n, lower.tail = FALSE)
+critcal_val = qt(.025,df = n-2, lower.tail = FALSE)
 
 lower_95 = beta_hat_1 - critcal_val*se
 upper_95 = beta_hat_1 + critcal_val*se
@@ -431,15 +431,17 @@ The proportion of interval with true value is `r result`
 
 
 ```{r}
-
+result = mean(abs(beta_hat_1) > critcal_val*se  )
+result
 ```
 
+The proportion of simulations that would reject the test is:  `r result `
 
 **(e)** For each of the $\hat{\beta}_1$ that you simulated, calculate a 99% confidence interval. Store the lower limits in a vector `lower_99` and the upper limits in a vector `upper_99`.
 
 ```{r}
 
-critcal_val = qt(.005,df = n, lower.tail = FALSE)
+critcal_val = qt(.005,df = n-2, lower.tail = FALSE)
 
 lower_99 = beta_hat_1 - critcal_val*se
 upper_99 = beta_hat_1 + critcal_val*se
@@ -451,12 +453,20 @@ upper_99 = beta_hat_1 + critcal_val*se
 
 ```{r}
 result = mean(lower_99 <2 & upper_99>2)
-result
+
 ```
 The proportion of interval with true value is `r result`
 
 
 **(g)** Based on these intervals, what proportion of the simulations would reject the test $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ at $\alpha = 0.01$?
+
+```{r}
+
+result = mean(abs(beta_hat_1) > critcal_val*se  )
+result
+```
+
+The proportion of simulations that would reject the test is:  `r result `
 
 ***
 
@@ -489,11 +499,71 @@ The function should return a named vector with three elements:
 - `lower`, the lower bound of the interval
 - `upper`, the upper bound of the interval
 
+
+```{r}
+calc_pred_int <- function(fitted_model,newdata1, level =.95)
+{
+ # result_test = predict(fitted_model, newdata = newdata1, interval = "prediction")
+  
+  y_hat = predict(fitted_model, newdata = newdata1, interval = c("prediction"))
+  p_value = (1-level)/2
+  cat("pvalue", p_value, "\n")
+  
+  n= length(fitted_model$residuals)
+  cat("n", n,"\n")
+  
+  se = summary(fitted_model)$se
+  cat("se", se,"\n")
+  
+  critcal_val = qt(p_value, df = n-2, lower.tail = FALSE)
+  
+  cat("critcal_val", critcal_val,"\n")
+  
+  x= fitted_model$model[names(newdata1)][,1]
+  x_mean = mean(x)
+  
+  cat("x_mean", x_mean,"\n")
+  
+  Sxx = sum((x- mean(x))^2)
+  
+  cat("Sxx", Sxx,"\n")
+  
+  cat("new data", newdata1[,1],"\n")
+  
+  range = critcal_val*se*sqrt(1+1/n + (newdata1[,1] -x_mean)^2/Sxx )
+  
+  cat("range", range,"\n")
+   
+  upper = y_hat + range
+  lower = y_hat - range
+  result = c(y_hat, lower,upper )
+  
+  names(result) = c("estimate","lower","upper")
+  return (result)
+ 
+}
+  
+  
+
+
+```
+
+
+```{r}
+newcat_1 = data.frame(Bwt = 4.0)
+calc_pred_int(cat_model, newcat_1)
+summary(cat_model)
+```
+
 **(b)** After writing the function, run this code:
 
 ```{r, eval = FALSE}
 newcat_1 = data.frame(Bwt = 4.0)
 calc_pred_int(cat_model, newcat_1)
+
+#x= as.numeric(x[1,])
+#sum((4- mean(x))^2)
+
 ```
 
 **(c)** After writing the function, run this code:
