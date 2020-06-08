@@ -1,6 +1,6 @@
 ---
 title: "Week 4 - Homework"
-author: "STAT 420, Summer 2020, D. Unger"
+author: "Aman Arora (amana4)"
 date: ''
 output:
   html_document: 
@@ -10,15 +10,6 @@ output:
 urlcolor: cyan
 ---
 
-
-# Directions
-
-Students are encouraged to work together on homework. However, sharing, copying or providing any part of a homework solution or code is an infraction of the University's rules on Academic Integrity. Any violation will be punished as severely as possible.
-
-- Be sure to remove this section if you use this `.Rmd` file as a template.
-- You may leave the questions in your final document.
-
-***
 
 ## Exercise 1 (Using `lm`)
 
@@ -65,21 +56,97 @@ Use an $F$-test to test the significance of the regression. Report the following
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
 
+
+```{r}
+
+df = read.csv("nutrition-2018.csv")
+calorie_model = lm(Calories~Fat + Sugar + Sodium, data = df)
+summary_cal = summary(calorie_model)
+summary_cal
+
+```
+* The null hypothesis is $H_0:\beta1 = 0 and  \beta2 =0 and \beta3 = 0 $ i.e there is no relationship  between calories and Fat sugar and sodium . Alternative hypothesis is  $H_0:\beta1 \ne 0, \beta2 \ne 0 , \beta3 \ne 0 $ i.e there is  relationship  between calories and Fat sugar and sodium.
+
+*The value of the test statistic is 'r summary_cal$fstatistic["value"]'
+
+* The p value is 2.2e-16
+
+* With $\alpha = 0.01$ we fail to reject $H_0$
+
+
+
+
 **(b)** Output only the estimated regression coefficients. Interpret all $\hat{\beta}_j$ coefficients in the context of the problem.
+
+```{r}
+summary_cal$coefficients[,1]
+
+```
+
+
 
 **(c)** Use your model to predict the number of `Calories` in a Big Mac. According to [McDonald's publicized nutrition facts](https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html), the Big Mac contains 30g of fat, 9g of sugar, and 1010mg of sodium.
 
+```{r}
+big_mac = data.frame(Fat = c(30), Sugar = c(9), Sodium = c(1010))
+predict(calorie_model, newdata = big_mac)
+
+```
+
+
 **(d)** Calculate the standard deviation, $s_y$, for the observed values in the Calories variable. Report the value of $s_e$ from your multiple regression model. Interpret both estimates in the context of this problem.
+
+```{r}
+sd(df$Calories)
+```
+
+
 
 **(e)** Report the value of $R^2$ for the model. Interpret its meaning in the context of the problem.
 
+```{r}
+summary_cal$r.squared
+
+```
+
+
 **(f)** Calculate a 90% confidence interval for $\beta_2$. Give an interpretation of the interval in the context of the problem.
+
+```{r}
+confint(calorie_model,level = 0.9, "Sugar")
+```
+
+
 
 **(g)** Calculate a 95% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
 
+```{r}
+
+confint(calorie_model,level = 0.95,"(Intercept)")
+
+```
+
+
+
 **(h)** Use a 99% confidence interval to estimate the mean Calorie content of a food with 23g of fat, 0g of sugar, and 400mg of sodium, which is true of a large order of McDonald's french fries. Interpret the interval in context.
+
+```{r}
+
+fries  = data.frame(Fat = c(23), Sugar = c(0), Sodium = c(400))
+predict(calorie_model, newdata = fries, interval = c("confidence"), level =0.99)
+
+```
+
  
 **(i)** Use a 99% prediction interval to predict the Calorie content of a Crunchwrap Supreme, which has 21g of fat, 6g of sugar, and 1200mg of sodium according to [Taco Bell's publicized nutrition information](https://www.tacobell.com/nutrition/info). Interpret the interval in context.
+
+```{r}
+Crunchwrap = data.frame(Fat = c(21), Sugar = c(6), Sodium = c(1200))
+predict(calorie_model, newdata = Crunchwrap, interval = c("prediction"), level =0.99)
+
+```
+
+
 
 ***
 
@@ -110,6 +177,14 @@ For this exercise we will consider three models, each with Wins as the response.
 - The p-value of the test
 - A statistical decision at $\alpha = 0.05$
 - The model you prefer
+
+```{r}
+df = read.csv("goalies.csv")
+model1 = lm()
+
+```
+
+
 
 **(b)** Use an $F$-test to compare Model 3 to your preferred model from part **(a)**. Report the following:
 
