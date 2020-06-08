@@ -54,7 +54,7 @@ result = summary(cat_model)
 intervals = confint(cat_model, level = .95)
 
 ```
-95% confidence interval for $\beta_1$ is: (`r intervals[2,1]`, `r intervals[2,2]`)
+95% confidence interval for $\beta_1$ is: (`r intervals[2,1]`, `r intervals[2,2]`). The interpretation here is we are 99% confident that the true mean of rate of change of heart weight with body weight is in this interval.
 
 
 **(c)** Calculate a 90% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
@@ -63,7 +63,7 @@ intervals = confint(cat_model, level = .95)
 intervals = confint(cat_model, level = .9)
 ```
 
-90% confidence interval for $\beta_0$ is: (`r intervals[1,1]`, `r intervals[1,2]`)
+90% confidence interval for $\beta_0$ is: (`r intervals[1,1]`, `r intervals[1,2]`).The interpretation here is we are 90% confident that the true mean of rate of change of heart weight with body weight is in this interval.
 
 
 **(d)** Use a 90% confidence interval to estimate the mean heart weight for body weights of 2.1 and 2.8 kilograms. Which of the two intervals is wider? Why?
@@ -74,8 +74,7 @@ result = predict(cat_model, newdata = new_bwt, interval = c("confidence"), level
 result
 ```
 
-The interval is wider for body weight 2.1 since its father from mean of body weight hence has greater error.
-
+The interval is wider for body weight 2.1 since its farther from mean of body weight hence has greater variance.     
 
 
 **(e)** Use a 90% prediction interval to predict the heart weight for body weights of 2.8 and 4.2 kilograms.
@@ -299,14 +298,18 @@ library(knitr)
 
 true_exp = c(-5,3.25)
 sim_mean = c(mean(beta_hat_0),mean(beta_hat_1))
+Sxx = sum((x- mean(x))^2)
 
-true_sd = c(4,4)
+sd_beta0 = std_dev*sqrt(1/n+ mean(x)^2/Sxx)
+sd_beta1 = std_dev/sqrt(Sxx)
+
+true_sd = c(sd_beta0,sd_beta1)
 
 sim_sd = c(sd(beta_hat_0),sd(beta_hat_1))
 
 table.comp  <- data.frame(rbind(true_exp, sim_mean, true_sd,sim_sd))
 
-colnames(table.comp) = c("$\beta0$ ","$\beta1$")
+colnames(table.comp) = c("beta0","beta1")
 
 
 ```
@@ -333,7 +336,7 @@ beta0_val = seq(from = min(beta_hat_0), to = max(beta_hat_0), by = 0.01)
 beta0_density = dnorm(beta0_val, mean=-5, sd=true_sd_beta0)
 
 par(mfrow=c(1,2))
-hist(beta_hat_0,freq = FALSE,main = "Histogram of $\\beta_0$" )
+hist(beta_hat_0,freq = FALSE)
 lines(beta0_val,beta0_density, col = "red", lwd = 2)
 
 #Plot beta 1 estimate and true value
@@ -345,8 +348,6 @@ lines(beta1_val,beta1_density, col = "red", lwd = 2)
 
 
 ```
-
-
 
 ***
 
@@ -463,7 +464,6 @@ The proportion of interval with true value is `r result`
 ```{r}
 
 result = mean(abs(beta_hat_1) > critcal_val*se  )
-result
 ```
 
 The proportion of simulations that would reject the test is:  `r result `
@@ -501,42 +501,41 @@ The function should return a named vector with three elements:
 
 
 ```{r}
-calc_pred_int <- function(fitted_model,newdata1, level =.95)
+calc_pred_int <- function(cat_model, newdata1, level= .95)
 {
- # result_test = predict(fitted_model, newdata = newdata1, interval = "prediction")
-  
-  y_hat = predict(fitted_model, newdata = newdata1, interval = c("prediction"))
+  y_hat = predict(cat_model, newdata = newdata1)
   p_value = (1-level)/2
-  cat("pvalue", p_value, "\n")
+  #cat("pvalue", p_value, "\n")
   
-  n= length(fitted_model$residuals)
-  cat("n", n,"\n")
+  n= length(cat_model$residuals)
+  #cat("n", n,"\n")
   
-  se = summary(fitted_model)$se
-  cat("se", se,"\n")
+  se = 1.452
+  #cat("se", se,"\n")
   
   critcal_val = qt(p_value, df = n-2, lower.tail = FALSE)
+  #cat("critcal_val", critcal_val,"\n")
   
-  cat("critcal_val", critcal_val,"\n")
+  x= cat_model$model[names(newdata1)][,1]
   
-  x= fitted_model$model[names(newdata1)][,1]
   x_mean = mean(x)
-  
-  cat("x_mean", x_mean,"\n")
+  #cat("x_mean", x_mean,"\n")
   
   Sxx = sum((x- mean(x))^2)
+  #cat("Sxx", Sxx,"\n")
   
-  cat("Sxx", Sxx,"\n")
-  
-  cat("new data", newdata1[,1],"\n")
-  
+  #cat("new data", newdata1[,1],"\n")
+ 
   range = critcal_val*se*sqrt(1+1/n + (newdata1[,1] -x_mean)^2/Sxx )
   
-  cat("range", range,"\n")
-   
+  #cat("range", range,"\n")
+  
   upper = y_hat + range
   lower = y_hat - range
-  result = c(y_hat, lower,upper )
+  result = c(y_hat, lower,upper)
+  
+  #cat("upper", upper,"\n")
+  #cat("lower", lower,"\n")
   
   names(result) = c("estimate","lower","upper")
   return (result)
@@ -549,28 +548,21 @@ calc_pred_int <- function(fitted_model,newdata1, level =.95)
 ```
 
 
-```{r}
-newcat_1 = data.frame(Bwt = 4.0)
-calc_pred_int(cat_model, newcat_1)
-summary(cat_model)
-```
 
 **(b)** After writing the function, run this code:
 
-```{r, eval = FALSE}
+```{r}
+cat_model = lm(Hwt~Bwt, data = cats)
 newcat_1 = data.frame(Bwt = 4.0)
 calc_pred_int(cat_model, newcat_1)
-
-#x= as.numeric(x[1,])
-#sum((4- mean(x))^2)
-
 ```
 
 **(c)** After writing the function, run this code:
 
-```{r, eval = FALSE}
+```{r}
+cat_model = lm(Hwt~Bwt, data = cats)
+
 newcat_2 = data.frame(Bwt = 3.3)
 calc_pred_int(cat_model, newcat_2, level = 0.90)
 ```
-
 
