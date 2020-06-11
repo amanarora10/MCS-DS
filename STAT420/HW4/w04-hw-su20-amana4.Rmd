@@ -65,16 +65,15 @@ summary_cal = summary(calorie_model)
 summary_cal
 
 ```
-* The null hypothesis is $H_0:\beta1 = 0 and  \beta2 =0 and \beta3 = 0 $ i.e there is no relationship  between calories and Fat sugar and sodium . Alternative hypothesis is  $H_0:\beta1 \ne 0, \beta2 \ne 0 , \beta3 \ne 0 $ i.e there is  relationship  between calories and Fat sugar and sodium.
+* The null hypothesis is $H_0:\beta1 = 0 and  \beta2 =0 and \beta3 = 0 $ i.e there is no linear relationship  of calories  with Fat, sugar and sodium. Alternative hypothesis is  $H1:at least one of $\beta1$  $\beta2$ $\beta3$ is non zero. There is a linear relationship of calries  with at least one of the predictors -  Fat, sugar and sodium.
 
-*The value of the test statistic is 'r summary_cal$fstatistic["value"]'
+* The value of the test statistic is 'r summary_cal$fstatistic["value"]'
 
 * The p value is 2.2e-16
 
 * With $\alpha = 0.01$ we fail to reject $H_0$
 
-
-
+* The conclusion is there sufficient  evidence to support  the hypothesis that there is  linear relationship of calories  with at least one of the predictors -  Fat, sugar and sodium.
 
 **(b)** Output only the estimated regression coefficients. Interpret all $\hat{\beta}_j$ coefficients in the context of the problem.
 
@@ -82,6 +81,14 @@ summary_cal
 summary_cal$coefficients[,1]
 
 ```
+
+* $\hat{\beta}_0$ indicates the mean of estimated calories when Fat, sugar and sodium are all 0.
+
+* $\hat{\beta}_1$ indicates the rate of change of calories with each unit increase in  fat  with constant sugar and sodium.
+
+* $\hat{\beta}_2$ indicates the rate of change of calories with each unit increase in  sugar  with constant fat  and sodium.
+
+* $\hat{\beta}_3$ indicates the rate of change of calories with each unit increase in  sodium  with constant sugar and fat
 
 
 
@@ -98,8 +105,12 @@ predict(calorie_model, newdata = big_mac)
 
 ```{r}
 sd(df$Calories)
+summary_cal$sigma
 ```
+* $s_y$ = `r sd(df$Calories)`
+* $s_e$ = `r summary_cal$sigma`
 
+TBD
 
 
 **(e)** Report the value of $R^2$ for the model. Interpret its meaning in the context of the problem.
@@ -109,13 +120,16 @@ summary_cal$r.squared
 
 ```
 
+* $R^2$ indicates the proportion of variation in calories that is explained by the linear model with fat, sugar and sodium as predictors.  
+
+
 
 **(f)** Calculate a 90% confidence interval for $\beta_2$. Give an interpretation of the interval in the context of the problem.
 
 ```{r}
 confint(calorie_model,level = 0.9, "Sugar")
 ```
-
+The interpretation here is we are 90% certain that the true mean of rate of change of calories with sugar is in this interval.
 
 
 **(g)** Calculate a 95% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
@@ -125,7 +139,7 @@ confint(calorie_model,level = 0.9, "Sugar")
 confint(calorie_model,level = 0.95,"(Intercept)")
 
 ```
-
+The interpretation here is we are 95% certain that the true estimate of "mean calories" when sugar, fat and sodium are 0 is in this interval.
 
 
 **(h)** Use a 99% confidence interval to estimate the mean Calorie content of a food with 23g of fat, 0g of sugar, and 400mg of sodium, which is true of a large order of McDonald's french fries. Interpret the interval in context.
@@ -136,7 +150,7 @@ fries  = data.frame(Fat = c(23), Sugar = c(0), Sodium = c(400))
 predict(calorie_model, newdata = fries, interval = c("confidence"), level =0.99)
 
 ```
-
+The interpretation here is we are 99% certain that the true mean of calories in a large order  McDonald's french fries is in this interval. 
  
 **(i)** Use a 99% prediction interval to predict the Calorie content of a Crunchwrap Supreme, which has 21g of fat, 6g of sugar, and 1200mg of sodium according to [Taco Bell's publicized nutrition information](https://www.tacobell.com/nutrition/info). Interpret the interval in context.
 
@@ -145,7 +159,7 @@ Crunchwrap = data.frame(Fat = c(21), Sugar = c(6), Sodium = c(1200))
 predict(calorie_model, newdata = Crunchwrap, interval = c("prediction"), level =0.99)
 
 ```
-
+The interpretation here is we are 99% certain that the estimated calories in Crunchwrap Supreme is in this interval. 
 
 
 ***
@@ -172,7 +186,7 @@ For this exercise we will consider three models, each with Wins as the response.
 
 **(a)** Use an $F$-test to compares Models 1 and 2. Report the following:
 
-- The null hypothesis
+- The null hypothesis 
 - The value of the test statistic
 - The p-value of the test
 - A statistical decision at $\alpha = 0.05$
@@ -180,10 +194,21 @@ For this exercise we will consider three models, each with Wins as the response.
 
 ```{r}
 df = read.csv("goalies.csv")
-model1 = lm()
 
+model1 = lm(W~GA+SV,data = df)
+
+model2 = lm(W~GA+SV+SA+MIN+SO,data = df)
+
+model3 = lm(W~.,data = df)
+
+result = anova(model1,model2)
+result
 ```
-
+* The NULL hypothesis is additional coeff. of predictors in model 2 $\beta3$, $\beta4$,$\beta5$ are 0
+* The value of test statistic is:  `r result[2,"F"]`
+* The p-value of the test is : `r result[2,"Pr(>F)"]`
+* We can reject NULL hypothesis at $\alpha = 0.05$  
+* We prefer the 2nd model over 1st model since there is a statisicially significant improved accuracy. 
 
 
 **(b)** Use an $F$-test to compare Model 3 to your preferred model from part **(a)**. Report the following:
@@ -194,11 +219,33 @@ model1 = lm()
 - A statistical decision at $\alpha = 0.05$
 - The model you prefer
 
+```{r}
+result = anova(model2,model3)
+result
+```
+* The NULL hypothesis is additional coeff. of predictors in model 3 vs model 2 are 0
+* The value of test statistic is:  `r result[2,"F"]`
+* The p-value of the test is : `r result[2,"Pr(>F)"]`
+* We can reject NULL hypothesis at $\alpha = 0.05$  
+* We prefer the 3rd model over 2nd model since there is a statistically significant improved accuracy. 
+
 **(c)** Use a $t$-test to test $H_0: \beta_{\texttt{SV}} = 0 \ \text{vs} \ H_1: \beta_{\texttt{SV}} \neq 0$ for the model you preferred in part **(b)**. Report the following:
 
 - The value of the test statistic
 - The p-value of the test
 - A statistical decision at $\alpha = 0.05$
+
+```{r}
+#null_model = lm(W ~ GA + SA + SV_PCT + GAA + SO + MIN + PIM, data = df)
+#anova(null_model, model3)
+
+t_value = summary(model3)$coefficients["SV","t value"]
+p_value = summary(model3)$coefficients["SV","Pr(>|t|)"]
+
+```
+* The value of the test statistic is `r t_value`
+* The p-value of the test is `r p_value `
+
 
 ***
 
@@ -215,13 +262,65 @@ Ozone = Ozone[complete.cases(Ozone), ]
 
 **(a)** Obtain the estimated regression coefficients **without** the use of `lm()` or any other built-in functions for regression. That is, you should use only matrix operations. Store the results in a vector `beta_hat_no_lm`. To ensure this is a vector, you may need to use `as.vector()`. Return this vector as well as the results of `sum(beta_hat_no_lm ^ 2)`.
 
+
+```{r}
+n = nrow(Ozone)
+p= ncol(Ozone) -1 
+y = Ozone$ozone
+X = cbind(rep(1,n),Ozone$wind, Ozone$humidity, Ozone$temp )
+
+beta_hat_no_lm = as.vector(solve(t(X) %*% X) %*% t(X) %*% y)
+beta_hat_no_lm
+sum_no_lm = sum(beta_hat_no_lm ^ 2)
+sum_no_lm
+```
+
 **(b)** Obtain the estimated regression coefficients **with** the use of `lm()`. Store the results in a vector `beta_hat_lm`. To ensure this is a vector, you may need to use `as.vector()`. Return this vector as well as the results of `sum(beta_hat_lm ^ 2)`.
+
+```{r}
+ozone_model = lm(ozone ~. , data = Ozone )
+beta_hat_lm = as.vector(ozone_model$coefficients)
+sum_lm = sum(beta_hat_lm ^ 2)
+beta_hat_lm
+sum_lm
+```
 
 **(c)** Use the `all.equal()` function to verify that the results are the same. You may need to remove the names of one of the vectors. The `as.vector()` function will do this as a side effect, or you can directly use `unname()`.
 
+```{r}
+all.equal(beta_hat_no_lm,beta_hat_lm )
+```
+
 **(d)** Calculate $s_e$ without the use of `lm()`. That is, continue with your results from **(a)** and perform additional matrix operations to obtain the result. Output this result. Also, verify that this result is the same as the result obtained from `lm()`.
 
+
+```{r}
+
+y_hat = X %*% beta_hat_no_lm
+e= y-y_hat
+se_no_lm  = as.vector(sqrt((t(e)%*%e)/(n-p)))
+se_no_lm
+
+se_lm =  as.vector(summary(ozone_model)$sigma)
+
+se_lm
+```
+The $s_e$ from matrix operation closely matches with the one obtained from the lm function
+
 **(e)** Calculate $R^2$ without the use of `lm()`. That is, continue with your results from **(a)** and **(d)**, and perform additional operations to obtain the result. Output this result. Also, verify that this result is the same as the result obtained from `lm()`.
+
+```{r}
+total_var = sum((y - mean(y))^2)
+r_sq_no_lm = 1 - sum(e^2)/total_var
+r_sq_no_lm
+
+
+r_sq  = summary(ozone_model)$r.squared
+r_sq
+
+```
+
+The $R^2$ calculated  without lm matches $R^2$ from lm
 
 ***
 
@@ -258,6 +357,8 @@ Set a seed of `11`, and then split the `Auto` data into two datasets, one called
 ```{r, eval = FALSE}
 set.seed(11)
 auto_trn_idx = sample(1:nrow(Auto), 292)
+auto_tst_idx <- setdiff(1:nrow(Auto), auto_trn_idx)
+
 ```
 
 Fit a total of five models using the training data.
@@ -267,6 +368,36 @@ Fit a total of five models using the training data.
 - The remaining three you can pick to be anything you like. One of these should be the *best* of the five for predicting the response.
 
 For each model report the **train** and **test** RMSE. Arrange your results in a well-formatted markdown table. Argue that one of your models is the best for predicting the response.
+
+```{r}
+evaluate_model <-function(fitted_model)
+{
+
+  rmse_train = 
+
+  rmse_test = 
+
+  
+}
+
+
+
+auto_trn = Auto[auto_trn_idx,]
+auto_tst = Auto[auto_tst_idx,]
+
+model_all = lm(mpg~., data = auto_trn)
+model_disp = lm(mpg~displacement, data = auto_trn)
+model_year_wt = lm(mpg~year+weight, data = auto_trn)
+model_hp = lm(mpg~horsepower, data = auto_trn)
+model_cylinders = lm(mpg~cylinders, data = auto_trn)
+
+evaluate_model(model_all)
+
+```
+
+
+
+
 
 ***
 
