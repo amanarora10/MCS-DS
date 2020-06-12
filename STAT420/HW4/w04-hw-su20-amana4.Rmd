@@ -369,35 +369,60 @@ Fit a total of five models using the training data.
 
 For each model report the **train** and **test** RMSE. Arrange your results in a well-formatted markdown table. Argue that one of your models is the best for predicting the response.
 
+## Solution
+
 ```{r}
-evaluate_model <-function(fitted_model)
+library(knitr)
+set.seed(11)
+auto_trn_idx = sample(1:nrow(Auto), 292)
+auto_tst_idx <- setdiff(1:nrow(Auto), auto_trn_idx)
+
+#Function to calculate and return training RMSE and test RMSE for a model
+evaluate_model <-function(fitted_model,train_data, test_data)
 {
 
-  rmse_train = 
-
-  rmse_test = 
-
+ rmse_train = sqrt(mean(fitted_model$residuals^2))
   
+ new_data1 = test_data[,names(fitted_model$model)][-1]
+ 
+ y_test_pred = predict(fitted_model, newdata = new_data1) 
+
+ residual_test =   as.vector(y_test_pred - as.vector(test_data["mpg"]))[,1]
+
+ rmse_test  = sqrt(mean(residual_test^2))
+  
+ result = c(rmse_train, rmse_test)
+
+ result
 }
-
-
 
 auto_trn = Auto[auto_trn_idx,]
 auto_tst = Auto[auto_tst_idx,]
 
-model_all = lm(mpg~., data = auto_trn)
+#Create 5 models
+model_all  = lm(mpg~., data = auto_trn)
 model_disp = lm(mpg~displacement, data = auto_trn)
 model_year_wt = lm(mpg~year+weight, data = auto_trn)
 model_hp = lm(mpg~horsepower, data = auto_trn)
 model_cylinders = lm(mpg~cylinders, data = auto_trn)
 
-evaluate_model(model_all)
+#Store the results
+result_all = evaluate_model(model_all,auto_trn,auto_tst)
+result_disp = evaluate_model(model_disp,auto_trn,auto_tst)
+result_year_wt = evaluate_model(model_year_wt,auto_trn,auto_tst)
+result_hp = evaluate_model(model_hp,auto_trn,auto_tst)
+result_cyl = evaluate_model(model_cylinders,auto_trn,auto_tst)
+
+#Format for markdown table
+table.comp = data.frame(rbind(result_all, result_disp, result_year_wt,result_hp,result_cyl))
+row.names(table.comp) = c("All", "Displacement"," Year+Weight","Horse Power","Cylinders" )
+colnames(table.comp) = c("Train RMSE", "Test RMSE")
 
 ```
 
+`r kable(table.comp,"markdown",caption ="Model Comparison")`  
 
-
-
+* Test RMSE is the most appropriate metric since it measure the performance of model on unseen data. Thus based on the comparison on test data the model with lowest test RMSE is the model with all parameters, the model with weight and year come very close to it as well in terms of minimizing test RMSE 
 
 ***
 
@@ -441,9 +466,35 @@ Report the sum of the diagonal of `C` as well as the 5th row of `sim_data`. For 
 ```{r}
 set.seed(420)
 sample_size = 42
+n= sample_size
+
+x0 = rep(1,n)
+x1 = rnorm(n,0,2)
+x2 = runif(n,0,4)
+x3 = rnorm(n,0,1)
+x4 = runif(n,-2,2)
+x5 = rnorm(n,0,2)
+
+X = cbind(x0,x1,x2,x3,x4,x5)
+y = rep(0,n)
+
+C = solve(t(X) %*% X)
+sim_data = data.frame( y,x0,x1,x2,x3,x4,x5)
+
+sim_data[5,]
+sum(diag(C))
+
 ```
 
 **(b)** Create three vectors of length `2500` that will store results from the simulation in part **(c)**. Call them `beta_hat_1`, `beta_3_pval`, and `beta_5_pval`.
+
+```{r}
+beta_hat_1 = rep(0,2500)
+beta_3_pval = rep(0,2500)
+beta_5_pval = rep(0,2500)
+```
+
+
 
 **(c)** Simulate 2500 samples of size `n = 42` from the model above. Each time update the `y` value of `sim_data`. Then use `lm()` to fit a multiple regression model. Each time store:
 
@@ -451,11 +502,78 @@ sample_size = 42
 - The p-value for the two-sided test of $\beta_3 = 0$ in `beta_3_pval`
 - The p-value for the two-sided test of $\beta_5 = 0$ in `beta_5_pval`
 
+```{r}
+
+beta_0 = 2
+beta_1 = -0.75
+beta_2 = 1.5
+beta_3 = 0
+beta_4 = 0
+beta_5 = 2
+
+
+for (i in 1:2500) {
+  
+x0 = rep(1,n)
+x1 = rnorm(n,0,2)
+x2 = runif(n,0,4)
+x3 = rnorm(n,0,1)
+x4 = runif(n,-2,2)
+x5 = rnorm(n,0,2)
+y = rep(0,n)
+
+sim_data = data.frame(y,x0,x1,x2,x3,x4,x5)
+
+X = cbind(x0,x1,x2,x3,x4,x5)
+
+error = rnorm(n,0,sd = 5)
+
+beta = rbind(2, -0.75, 1.5, 0, 0, 2)
+
+sim_data["y"]  = X %*% beta + error
+
+fitted_model = lm(y~ x1+x2+x3+x4+x5,data = sim_data)
+
+beta_hat_1[i] = fitted_model$coefficients["x1"]
+
+beta_3_pval[i] = summary(fitted_model)$coefficients["x3","Pr(>|t|)"]
+beta_5_pval[i] = summary(fitted_model)$coefficients["x5","Pr(>|t|)"]
+
+}
+
+
+```
+
+
 **(d)** Based on the known values of $X$, what is the true distribution of $\hat{\beta}_1$?
+
+The true distribution of  $\hat{\beta}_1$ is Normal with mean -0.75 and variance of          `r C["x1","x1"]*25 `
+
 
 **(e)** Calculate the mean and variance of `beta_hat_1`. Are they close to what we would expect? Plot a histogram of `beta_hat_1`. Add a curve for the true distribution of $\hat{\beta}_1$. Does the curve seem to match the histogram?
 
+```{r}
+mean(beta_hat_1)
+var(beta_hat_1)
+hist(beta_hat_1)
+
+```
+
+* Yes the mean and variance of $\hat{\beta}_1 matches the expected values.
+
+
 **(f)** What proportion of the p-values stored in `beta_3_pval` is less than 0.10? Is this what you would expect?
 
+
+```{r}
+mean(beta_3_pval<0.1)
+```
+Yes its expected to have small  proportion of beta_3_pval less than 0.1 since from simulation function we can see $\beta_3$ is zero . i.e. it can not explain the variation in the predictor and NULL hypothesis is thus likely. 
+
 **(g)** What proportion of the p-values stored in `beta_5_pval` is less than 0.01? Is this what you would expect?
+
+```{r}
+mean(beta_5_pval<0.1)
+```
+Yes its expected to have large proportion of beta_5_pval less than .1 since from simulation function we can see $\beta_5$ is non zero significant value. i.e. it can explain the variation in the predictor and NULL hypothesis is unlikely. 
 
