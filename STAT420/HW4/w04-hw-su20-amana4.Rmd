@@ -555,7 +555,12 @@ The true distribution of  $\hat{\beta}_1$ is Normal with mean -0.75 and variance
 ```{r}
 mean(beta_hat_1)
 var(beta_hat_1)
-hist(beta_hat_1)
+
+beta1_val = seq(from = min(beta_hat_1), to = max(beta_hat_1), by = 0.01)
+beta1_density = dnorm(beta1_val, mean=-0.75, sd=sqrt(C["x1","x1"]*25))
+hist(beta_hat_1,freq = FALSE, ylim=c(0,max(beta1_density)))
+
+lines(beta1_val,beta1_density, col = "red", lwd = 2)
 
 ```
 
@@ -575,5 +580,5 @@ Yes its expected to have small  proportion of beta_3_pval less than 0.1 since fr
 ```{r}
 mean(beta_5_pval<0.1)
 ```
-Yes its expected to have large proportion of beta_5_pval less than .1 since from simulation function we can see $\beta_5$ is non zero significant value. i.e. it can explain the variation in the predictor and NULL hypothesis is unlikely. 
+Yes its expected to have large proportion of beta_5_pval less than 0.1 since from simulation function we can see $\beta_5$ is non zero significant value. i.e. it can explain the variation in the predictor and NULL hypothesis is unlikely. 
 
