@@ -1,0 +1,656 @@
+---
+title: 'Week 6 - Simulation Project'
+author: "Aman Arora"
+date: ''
+output:
+    bookdown::html_document2:
+    toc: true
+    fig_caption: true
+    template: flatly
+
+urlcolor: cyan
+---
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+library(knitr)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+```
+
+# Simulation Study 1
+
+## Introduction 
+
+In this simulation we intend to study the impact of variance on the F statistic, p values and $R^2$ calculated from significant and non significant multiple regression values. Additionally we will compare and contrast the true distribution with empirical distrubitons from these 2 models.    
+
+## Methods
+
+In this simulation study we will investigate the significance of regression. We will simulate from two different models significant and non significant models. For both, we will consider a sample size of $25$ and three possible levels of noise. That is, three values of $\sigma$.
+
+- $n = 25$
+- $\sigma \in (1, 5, 10)$ 
+
+The first model will be defined as follows:
+
+1. The **"significant"** model (model 1)
+
+\[
+Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2)$ and
+
+- $\beta_0 = 3$,
+- $\beta_1 = 1$,
+- $\beta_2 = 1$,
+- $\beta_3 = 1$.
+
+
+
+
+```{r}
+
+#set the  seed
+birthday = 19771212
+set.seed(birthday)
+
+#Read in the data
+df1 = read.csv("study_1.csv")
+
+#No of simulations
+m = 2000
+
+# No of observations
+n = nrow(df1)
+
+#No of parameters of the significant model
+p = 4
+
+#Function to Simulate MLR
+sim_mlr = function(df, betas, sigma) {
+  n = nrow(df)
+  X = cbind(x0 = rep(1, n), as.matrix(df[-1]))
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  Y = X %*% betas + epsilon
+  df["y"] = Y
+  return(df)
+}
+
+#Sigmas to be simulated
+sigmas = c(1, 5, 10)
+
+#Model 1 - significant model betas
+betas1 = c(3, 1, 1, 1)
+
+#Initialize matrices to store results for model 1
+f_stat_1 = matrix(0, m, length(sigmas))
+p_val_1 =  matrix(0, m, length(sigmas))
+r_squared_1 = matrix(0, m, length(sigmas))
+
+
+#Simulate MLR 2000 times for each sigma and store results in a matrix.
+for (j in 1:length(sigmas))
+{
+  for (i in 1:m)
+  {
+    #Simulate MLR
+    df1 = sim_mlr(df1, betas1, sigmas[j])
+    
+    # Fit the model and store its summary
+    model_fitted_sum = summary(lm(y ~ x1 + x2 + x3, data = df1))
+    
+    #Store f statistic, r squared and p value for this simulation
+    f_stat_1[i, j] = model_fitted_sum$fstatistic["value"]
+    r_squared_1[i, j] = model_fitted_sum$r.squared
+    p_val_1[i, j] = pf(f_stat_1[i, j], p - 1, n - p, lower.tail = FALSE)
+  }
+}  
+
+```
+
+Now we will simulate the second  model, it will be non-significant model with betas for all predictors set to 0, It will defined as follows:
+
+2. The **"non-significant"** model (model 2)
+
+\[
+Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2)$ and
+
+- $\beta_0 = 3$,
+- $\beta_1 = 0$,
+- $\beta_2 = 0$,
+- $\beta_3 = 0$.
+
+
+```{r}
+#Model 2
+
+#Read in the data
+df1 = read.csv("study_1.csv")
+
+#No of simulations
+m = 2000
+
+# No of observations
+n = nrow(df1)
+
+#No of parameters of the significant model
+p = 4
+
+#Sigmas to be simulated
+sigmas = c(1, 5, 10)
+
+#betas
+betas = c(3,0,0,0)
+
+#Initialize matrices to store results for model 2
+f_stat_2 = matrix(0, m, length(sigmas))
+p_val_2 =  matrix(0, m, length(sigmas))
+r_squared_2 = matrix(0, m, length(sigmas))
+
+#Simulate MLR for each sigma and store results
+for(j in 1:length(sigmas))
+{  
+  for (i in 1:m)
+  {
+    df1 = sim_mlr(df1,betas,sigmas[j])
+    model_fitted_sum = summary(lm(y ~ x1+x2+x3, data = df1) )
+    f_stat_2[i,j] = model_fitted_sum$fstatistic["value"]
+    r_squared_2[i,j]= model_fitted_sum$r.squared
+    p_val_2[i,j] = pf(f_stat_2[i,j],p-1,n-p,lower.tail = FALSE)
+  }
+}  
+
+
+```
+
+## Results
+
+### Comparison of means 
+
+```{r, echo = FALSE}
+library(knitr)
+
+# Store the value in data frame for model 1
+model1.table = rbind( colMeans(p_val_1), colMeans(f_stat_1), colMeans(r_squared_1))
+colnames(model1.table) = c("sigma = 1","sigma = 5", "sigma = 10")
+rownames(model1.table) = c("P value mean ","F-statistic mean", "R squared mean")
+
+# Store the value in data frame for model 2
+model2.table = rbind( colMeans(p_val_2), colMeans(f_stat_2), colMeans(r_squared_2))
+colnames(model2.table) = c("sigma = 1","sigma = 5", "sigma = 10")
+rownames(model2.table) = c("P value mean ","F-statistic mean", "R squared mean")
+
+
+
+```
+#### Significant Model
+
+`r kable(model1.table,"markdown",caption ="Simulation Summary")`
+
+#### Non Significant Model
+
+`r kable(model2.table,"markdown",caption ="Simulation Summary")`  
+  
+  
+### Mean of p values with sigma for Significant and non-signifcant model
+
+```{r, echo = FALSE}
+par(mfrow=c(1,2))
+
+plot( y = colMeans(p_val_1), x = sigmas,  xlab = "sigma", ylab ="Mean P value", cex =3,pch ="+", main ="Significant model" ,lty = 1, col ="red",xaxt='n' )
+axis(1,at=sigmas)
+grid()
+
+plot( y = colMeans(p_val_2), x = sigmas,  xlab = "sigma", ylab ="Mean P value", cex =3,pch ="+", main ="Non Significant model" ,lty = 1, col ="red",xaxt='n' )
+axis(1,at=sigmas)
+grid()
+```
+  
+    
+#### Histograms of R squared for different Variances  for Significant (Model 1) & non insignificant models (Model 2)  
+
+```{r, echo =  FALSE}
+par(mfrow=c(2,3))
+
+for (i in 1:3)
+{
+  hist(r_squared_1[,i],freq = FALSE, main = "Model 1: Histogram for r-squared",col ="light blue", xlab = "r-squared")
+}
+
+for (i in 1:3)
+{
+  hist(r_squared_2[,i],freq = FALSE, main = "Model 2: Histogram for r-squared",col ="coral", xlab = "r-squared")
+}
+```
+
+
+#### Histograms of p values for different Variances  for Significant (Model 1) non insignificant models (Model 2)  
+
+```{r, echo = FALSE}
+par(mfrow=c(2,3))
+
+for (i in 1:3)
+{
+  title = paste("Model 1: p-value, sigma:",  sigmas[i])
+
+  hist(p_val_1[,i],freq = FALSE, main = title, col ="light blue",xlab = "p value")
+}
+
+for (i in 1:3)
+{
+  title = paste("Model 2: p-value, sigma:",  sigmas[i])
+
+  hist(p_val_2[,i],freq = FALSE, main = title,xlab = "p value", col = "coral")
+}
+
+```
+  
+#### Histograms of f statistic for different Variances for Significant (Model 1) non insignificant models (Model 2). 
+
+ True distribution for F-statistic added for Model 2 (red line)
+
+```{r, echo = FALSE}
+
+par(mfrow=c(2,3))
+
+for (i in 1:3)
+{
+  title = paste("Model 1: F statistic, sigma:",  sigmas[i])
+  hist(f_stat_1[,i],freq = FALSE, col = "light blue", main = title, xlab = "F-statistic" )
+}
+
+for (i in 1:3)
+{
+  title = paste("Model 2: F statistic, sigma:",  sigmas[i])
+  hist(f_stat_2[,i],freq = FALSE, main = title,col = "coral", xlab = "F-statistic")
+  lines(pf(0:10,df1 = p-1, df2 = n-p,lower.tail = FALSE), col = "red")
+  legend("topright", 
+       c("True distribution"), 
+       lty=c(1), 
+       col=c("red"), 
+       bty = "n")
+}
+
+
+
+```
+
+## Discussion 
+
+* As we can see from table  with increase in variance of the true distribution the p value of significance of  regression decreases for significant model (model 1). This is expected as with increased variance the uncertainty of significance of the linear regression increases as noise portion overcomes the signal portion of the model. The F statistic follows the p value.  
+
+* This is not true though for the non significant model (model 2), the p-value indicates (as expected) the NULL hypothesis is true for all three sigma values. 
+
+* Under NULL hypothesis the  F statistic  is expected to follow a F distribution, we can see that in F statistic plots for non significant models.
+
+* The $r^2$ for significant model decrease with increase in variance as the ratio of SSE increases with variance. However for non significant model the   $r^2$ remains lows and does not change with increase variance.  
+
+
+# Simulation Study 2: Using RMSE for Selection?
+
+In homework we saw how Test RMSE can be used to select the “best” model. In this simulation study we will investigate how well this procedure works. Since splitting the data is random, we don’t expect it to work correctly each time. We could get unlucky. But averaged over many attempts, we should expect it to select the appropriate model.
+
+We will simulate from the model
+
+\[
+Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \beta_4 x_{i4} + \beta_5 x_{i5} + \beta_6 x_{i6} + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2)$ and
+
+- $\beta_0 = 0$,
+- $\beta_1 = 3$,
+- $\beta_2 = -4$,
+- $\beta_3 = 1.6$,
+- $\beta_4 = -1.1$,
+- $\beta_5 = 0.7$,
+- $\beta_6 = 0.5$.
+
+We will consider a sample size of $500$ and three possible levels of noise. That is, three values of $\sigma$.
+
+- $n = 500$
+- $\sigma \in (1, 2, 4)$
+
+Use the data found in [`study_2.csv`](study_2.csv) for the values of the predictors. These should be kept constant for the entirety of this study. The `y` values in this data are a blank placeholder.
+
+Each time you simulate the data, randomly split the data into train and test sets of equal sizes (250 observations for training, 250 observations for testing).
+
+For each, fit **nine** models, with forms:
+
+- `y ~ x1`
+- `y ~ x1 + x2`
+- `y ~ x1 + x2 + x3`
+- `y ~ x1 + x2 + x3 + x4`
+- `y ~ x1 + x2 + x3 + x4 + x5`
+- `y ~ x1 + x2 + x3 + x4 + x5 + x6`, the correct form of the model as noted above
+- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7`
+- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8`
+- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9`
+
+For each model, calculate Train and Test RMSE.
+
+\[
+\text{RMSE}(\text{model, data}) = \sqrt{\frac{1}{n} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2}
+\]
+
+Repeat this process with $1000$ simulations for each of the $3$ values of $\sigma$. For each value of $\sigma$, create a plot that shows how average Train RMSE and average Test RMSE changes as a function of model size. Also show the number of times the model of each size was chosen for each value of $\sigma$.
+
+Done correctly, you will have simulated the $y$ vector $3×1000=3000$ times. You will have fit $9×3×1000=27000$ models. A minimal result would use $3$ plots. Additional plots may also be useful.
+
+Potential discussions:
+
+- Does the method **always** select the correct model? On average, does is select the correct model?
+- How does the level of noise affect the results?
+
+
+# Simulation Study 2
+
+## Introduction 
+
+In this simulation we intend to study the effect of model size/variance  on test and train RMSE for a linear model. We will also quantify how frequently the actual model is selected by using test RMSE as the criteria. 
+
+## Methods
+
+
+```{r}
+df1 = read.csv("study_2.csv")
+#No of simulations
+m = 500
+library(knitr)
+set.seed(19771212)
+```
+
+
+```{r}
+#Function to Simulate MLR
+sim_mlr = function(df, betas, sigma) {
+  n = nrow(df)
+  X = cbind(x0= rep(1,n), as.matrix(df[2:7]))
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  Y = X %*% betas + epsilon
+  df["y"] = Y
+  return(df)
+}
+
+```
+
+
+```{r}
+#Function to calculate and return training RMSE and test RMSE for a model
+evaluate_model <-function(fitted_model,train_data, test_data)
+{
+
+ rmse_train = sqrt(mean(fitted_model$residuals^2))
+  
+ new_data1 = test_data[,names(fitted_model$model)][-1]
+ 
+ y_test_pred = predict(fitted_model, newdata = new_data1) 
+
+ residual_test =   as.vector(y_test_pred - as.vector(test_data["y"]))[,1]
+
+ rmse_test  = sqrt(mean(residual_test^2))
+  
+ result = c(rmse_train, rmse_test)
+
+}
+```
+
+
+```{r}
+#Function to simulate a run for a given sigma and beta
+simulate_run <-function(df, betas, sigma, num_sim = 1000 )
+{
+
+ min_count = rep(0,9)
+ 
+ result_train = matrix(0, 9, num_sim)
+ result_test = matrix(0, 9, num_sim)
+
+ #Create the model
+ response = "y"
+ predictors = c("x1","x2","x3","x4","x5","x6","x7","x8","x9") 
+ 
+ #Run 1000 simulations
+ for(q in 1:num_sim)
+ {
+  #Simulate MLR
+  df = sim_mlr(df,betas,sigma)
+  
+  #Split training and test data
+  trn_idx = sample(1:nrow(df), 250)
+  tst_idx = setdiff(1:nrow(df), trn_idx)
+  trn_data = df[trn_idx,]
+  tst_data  = df[tst_idx,]
+  
+  #initialize test RMSE to a large value
+  min_model = 10^6
+
+  #Run linear regression on 9 models, evaluate and store RMSE  for test and training data
+  for(model_num  in 1:9)
+  {
+    f = as.formula(paste (response, paste(predictors[1:model_num],collapse = "+"),sep = "~")) 
+    #print(f)
+    
+    #Fit the model and find test and train RMSE
+    model_true = lm(f ,data = df)
+    result = evaluate_model(model_true,trn_data,tst_data)
+    result_train[model_num,q] = result[1]
+    result_test[model_num,q] = result[2]
+    
+    #Compare test RMSE with best so far
+    min_model = min(min_model, result[2])
+    
+    #update the best model based on test RMSE
+    if (min_model == result[2])
+    {
+      best_model_idx = model_num
+      
+    }
+  } 
+  
+  #update the count of best model
+  min_count[best_model_idx] = min_count[best_model_idx] + 1
+ }
+ 
+ result = list(rowMeans(result_train), rowMeans(result_test), min_count) 
+ 
+ names(result) = c("train_rmse", "test_rmse", "counts")
+ return (result )
+
+}  
+
+```
+
+
+```{r}
+#sigmas to be simulated
+sigmas = c(1,2,4)
+
+#Model betas
+betas1 = c(0,3,-4,1.6,-1.1,0.7,0.5)
+
+
+#Run simualtion for 3 different sigmas
+result_sigma1 =  simulate_run(df = df1, betas = betas1, sigma = sigmas[1], num_sim = 1000 )
+    
+result_sigma2 =  simulate_run(df = df1, betas = betas1, sigma = sigmas[2], num_sim = 1000 )
+
+result_sigma4 =  simulate_run(df = df1, betas = betas1, sigma = sigmas[3], num_sim = 1000 )
+
+
+```
+
+## Results
+
+### Model no. wins vs model number for sigma = 1, 2 and 4
+
+
+```{r}
+
+
+plot(result_sigma1$counts, ylab = "No of times the model is best",xlab = "model number",main = "Best Count vs model number (sigma = 1)",pch = 15, col = "red")
+grid(nx = 8) 
+axis(side = 1, at = 1:9)
+
+plot(result_sigma2$counts, ylab = "No of times the model is best",xlab = "model number",main = "Best Count vs model number (sigma = 2)",pch = 15, col = "red")
+grid(nx = 8) 
+
+axis(side = 1, at = 1:9)
+plot(result_sigma4$counts, ylab = "No of times the model is best",xlab = "model number",main = "Best Count vs model number (sigma = 4)",pch = 15, col = "red")
+axis(side = 1, at = 1:9)
+grid(nx = 8) 
+
+```
+
+
+### Mean Train/Test RMSE change with sigma for 9 models
+
+```{r}
+#par(mfrow=c(1,3))
+
+plot(result_sigma1$train_rmse,pch = 15, col = "red",main = "Mean RMSE vs model number , sigma = 1", xlab = "model number", ylab = " RMSE")
+points(result_sigma1$test_rmse, col = "blue", pch = 4)
+legend("topright", 
+       c("Train RMSE", "Test RMSE"), 
+       pch =c(15,4), 
+       col=c("red", "blue"), 
+       bty = "n")
+
+grid(nx = 8) 
+axis(side = 1, at = 1:9)
+
+plot(result_sigma2$train_rmse,pch = 15, col = "red",main = "Mean RMSE vs model number, sigma = 2", xlab = "model number", ylab = " RMSE")
+
+points(result_sigma2$test_rmse, col = "blue", pch = 4)
+legend("topright", 
+       c("Train RMSE", "Test RMSE"), 
+       pch =c(15,4), 
+       col=c("red", "blue"), 
+       bty = "n")
+
+grid(nx = 8) 
+axis(side = 1, at = 1:9)
+
+plot(result_sigma4$train_rmse,pch = 15, col = "red",main = " Mean RMSE vs model number, sigma = 4",xlab = "model number", ylab = " RMSE")
+points(result_sigma4$test_rmse, col = "blue", pch = 4)
+legend("topright", 
+       c("Train RMSE", "Test RMSE"), 
+       pch =c(15,4), 
+       col=c("red", "blue"), 
+       bty = "n")
+grid(nx = 8) 
+axis(side = 1, at = 1:9)
+
+
+```
+
+
+
+## Discussion 
+
+* From the plots above we can see mean test RMSE falls as the model complexity increase till model 6 (true model), after model 6 the decrease in test RMSE is minimal indicating  the true model may have only 6 predictors. Any test RMSE decrease in adding more parameters is negligible. 
+
+
+* As we can see from plot the method does not always select the correct model (model 6). In fact its skewed towards choosing models with higher number of parameters over 6. The method does do well in rejecting the models with less parameters than true model but does tend to select a model with higher parameters than true model since they tend to do better in terms of RMSE. 
+
+* The variance also tends to increase the test/train RMSE. Moreover we tend to select incorrect model with increased variance. As an example with variance of 1 and 2 the method does not pick any model with less than 6 predictors but at variance of 4  the method starts to select  models with 4 and 5 predictors as best model as well. 
+
+# Simulation Study 3: Power
+
+In this simulation study we will investigate the **power** of the significance of regression test for simple linear regression. 
+
+\[
+H_0: \beta_{1} = 0 \ \text{vs} \ H_1: \beta_{1} \neq 0
+\]
+
+Recall, we had defined the *significance* level, $\alpha$, to be the probability of a Type I error.
+
+\[
+\alpha = P[\text{Reject } H_0 \mid H_0 \text{ True}] = P[\text{Type I Error}]
+\]
+
+Similarly, the probability of a Type II error is often denoted using $\beta$; however, this should not be confused with a regression parameter.
+
+\[
+\beta = P[\text{Fail to Reject } H_0 \mid H_1 \text{ True}] = P[\text{Type II Error}]
+\]
+
+*Power* is the probability of rejecting the null hypothesis when the null is not true, that is, the alternative is true and $\beta_{1}$ is non-zero.
+
+\[
+\text{Power} = 1 - \beta = P[\text{Reject } H_0 \mid H_1 \text{ True}]
+\]
+
+Essentially, power is the probability that a signal of a particular strength will be detected. Many things affect the power of a test. In this case, some of those are:
+
+- Sample Size, $n$
+- Signal Strength, $\beta_1$
+- Noise Level, $\sigma$
+- Significance Level, $\alpha$
+
+We'll investigate the first three.
+
+To do so we will simulate from the model
+
+\[
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2)$.
+
+For simplicity, we will let $\beta_0 = 0$, thus $\beta_1$ is essentially controlling the amount of "signal." We will then consider different signals, noises, and sample sizes:
+
+- $\beta_1 \in (-2, -1.9, -1.8, \ldots, -0.1, 0, 0.1, 0.2, 0.3, \ldots 1.9, 2)$
+- $\sigma \in (1, 2, 4)$
+- $n \in (10, 20, 30)$
+
+We will hold the significance level constant at $\alpha = 0.05$.
+
+Use the following code to generate the predictor values, `x`: values for different sample sizes.
+
+```{r eval=FALSE}
+x_values = seq(0, 5, length = n)
+```
+
+For each possible $\beta_1$ and $\sigma$ combination, simulate from the true model at least $1000$ times. Each time, perform the significance of the regression test. To estimate the power with these simulations, and some $\alpha$, use
+
+\[
+\hat{\text{Power}} = \hat{P}[\text{Reject } H_0 \mid H_1 \text{ True}] = \frac{\text{# Tests Rejected}}{\text{# Simulations}}
+\]
+
+It is *possible* to derive an expression for power mathematically, but often this is difficult, so instead, we rely on simulation.
+
+Create three plots, one for each value of $\sigma$. Within each of these plots, add a “power curve” for each value of $n$ that shows how power is affected by signal strength, $\beta_1$.
+
+Potential discussions:
+
+- How do $n$, $\beta_1$, and $\sigma$ affect power? Consider additional plots to demonstrate these effects.
+- Are $1000$ simulations sufficient?
+
+```{r}
+#Function to Simulate SLR
+sim_slr = function(x, beta_0 , beta_1, sigma) {
+  n = length(x)
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  y = beta_0 + beta_1 * x + epsilon
+  data.frame(predictor = x, response = y)
+}
+
+x_values = seq(0, 5, length = 40)
+
+beta1 = seq(from = -2, to = 2, by = .1)
+
+sigma = c(1,2,4)
+
+n = c(10,20,40)
+
+#sim_slr(n,0,beta1,sigma[1])
+
+```
+
+
