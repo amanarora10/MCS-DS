@@ -385,7 +385,6 @@ summary {
 <li><a href="#exercise-2-more-lm-for-multiple-regression">Exercise 2 (More <code>lm</code> for Multiple Regression)</a></li>
 <li><a href="#exercise-3-regression-without-lm">Exercise 3 (Regression without <code>lm</code>)</a></li>
 <li><a href="#exercise-4-regression-for-prediction">Exercise 4 (Regression for Prediction)</a></li>
-<li><a href="#solution">Solution</a></li>
 <li><a href="#exercise-5-simulating-multiple-regression">Exercise 5 (Simulating Multiple Regression)</a></li>
 </ul>
 </div>
@@ -432,7 +431,7 @@ Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i.
 </ul>
 <p>When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of <code>R</code> output.</p>
 <pre class="r"><code>df = read.csv(&quot;nutrition-2018.csv&quot;)
-calorie_model = lm(Calories~Fat + Sugar + Sodium, data = df)
+calorie_model = lm(Calories ~ Fat + Sugar + Sodium, data = df)
 summary_cal = summary(calorie_model)
 summary_cal</code></pre>
 <pre><code>## 
@@ -456,8 +455,8 @@ summary_cal</code></pre>
 ## Multiple R-squared:  0.7686, Adjusted R-squared:  0.7685 
 ## F-statistic:  6591 on 3 and 5952 DF,  p-value: &lt; 2.2e-16</code></pre>
 <ul>
-<li><p>The null hypothesis is $H_0:1 = 0 and 2 =0 and 3 = 0 $ i.e there is no linear relationship of calories with Fat, sugar and sodium. Alternative hypothesis is $H1:at least one of <span class="math inline">\(\beta1\)</span> <span class="math inline">\(\beta2\)</span> <span class="math inline">\(\beta3\)</span> is non zero. There is a linear relationship of calries with at least one of the predictors - Fat, sugar and sodium.</p></li>
-<li><p>The value of the test statistic is ‘r summary_cal$fstatistic[“value”]’</p></li>
+<li><p>The null hypothesis is <span class="math inline">\(H_0:\beta1 = 0\)</span> and <span class="math inline">\(\beta2 =0\)</span> and <span class="math inline">\(\beta3 = 0\)</span> i.e there is no linear relationship of calories with Fat, sugar and sodium. Alternative hypothesis is H1 :at least one of <span class="math inline">\(\beta1\)</span>, <span class="math inline">\(\beta2\)</span>, <span class="math inline">\(\beta3\)</span> is non zero. There is a linear relationship of calories with at least one of the predictors - Fat, sugar and sodium.</p></li>
+<li><p>The value of the test statistic is 6590.9402239</p></li>
 <li><p>The p value is 2.2e-16</p></li>
 <li><p>With <span class="math inline">\(\alpha = 0.01\)</span> we fail to reject <span class="math inline">\(H_0\)</span></p></li>
 <li><p>The conclusion is there sufficient evidence to support the hypothesis that there is linear relationship of calories with at least one of the predictors - Fat, sugar and sodium.</p></li>
@@ -468,9 +467,9 @@ summary_cal</code></pre>
 ## 1.004561e+02 8.483289e+00 3.900517e+00 6.165246e-03</code></pre>
 <ul>
 <li><p><span class="math inline">\(\hat{\beta}_0\)</span> indicates the mean of estimated calories when Fat, sugar and sodium are all 0.</p></li>
-<li><p><span class="math inline">\(\hat{\beta}_1\)</span> indicates the rate of change of calories with each unit increase in fat with constant sugar and sodium.</p></li>
-<li><p><span class="math inline">\(\hat{\beta}_2\)</span> indicates the rate of change of calories with each unit increase in sugar with constant fat and sodium.</p></li>
-<li><p><span class="math inline">\(\hat{\beta}_3\)</span> indicates the rate of change of calories with each unit increase in sodium with constant sugar and fat</p></li>
+<li><p><span class="math inline">\(\hat{\beta}_1\)</span> indicates the rate of change of calories with each unit increase in fat with given sugar and sodium.</p></li>
+<li><p><span class="math inline">\(\hat{\beta}_2\)</span> indicates the rate of change of calories with each unit increase in sugar content with given fat and sodium.</p></li>
+<li><p><span class="math inline">\(\hat{\beta}_3\)</span> indicates the rate of change of calories with each unit increase in sodium with given sugar and fat</p></li>
 </ul>
 <p><strong>(c)</strong> Use your model to predict the number of <code>Calories</code> in a Big Mac. According to <a href="https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html">McDonald’s publicized nutrition facts</a>, the Big Mac contains 30g of fat, 9g of sugar, and 1010mg of sodium.</p>
 <pre class="r"><code>big_mac = data.frame(Fat = c(30), Sugar = c(9), Sodium = c(1010))
@@ -483,10 +482,9 @@ predict(calorie_model, newdata = big_mac)</code></pre>
 <pre class="r"><code>summary_cal$sigma</code></pre>
 <pre><code>## [1] 80.8543</code></pre>
 <ul>
-<li><span class="math inline">\(s_y\)</span> = 168.0499661</li>
-<li><span class="math inline">\(s_e\)</span> = 80.8543023</li>
+<li><p><span class="math inline">\(s_y\)</span> = 168.0499661, this is the total amount of variation in observed calories of the food.</p></li>
+<li><p><span class="math inline">\(s_e\)</span> = 80.8543023: The <span class="math inline">\(s_e\)</span> is a measure of delta between predicted values of calories from the model from the actual value of calories</p></li>
 </ul>
-<p>TBD</p>
 <p><strong>(e)</strong> Report the value of <span class="math inline">\(R^2\)</span> for the model. Interpret its meaning in the context of the problem.</p>
 <pre class="r"><code>summary_cal$r.squared</code></pre>
 <pre><code>## [1] 0.7686281</code></pre>
@@ -570,7 +568,7 @@ result</code></pre>
 <li>The p-value of the test is : 6.808247210^{-138}</li>
 <li>We can reject NULL hypothesis at <span class="math inline">\(\alpha = 0.05\)</span><br />
 </li>
-<li>We prefer the 2nd model over 1st model since there is a statisicially significant improved accuracy.</li>
+<li>We prefer the 2nd model over 1st model since there is a statistically significant improved accuracy.</li>
 </ul>
 <p><strong>(b)</strong> Use an <span class="math inline">\(F\)</span>-test to compare Model 3 to your preferred model from part <strong>(a)</strong>. Report the following:</p>
 <ul>
@@ -700,9 +698,7 @@ auto_tst_idx &lt;- setdiff(1:nrow(Auto), auto_trn_idx)</code></pre>
 <li>The remaining three you can pick to be anything you like. One of these should be the <em>best</em> of the five for predicting the response.</li>
 </ul>
 <p>For each model report the <strong>train</strong> and <strong>test</strong> RMSE. Arrange your results in a well-formatted markdown table. Argue that one of your models is the best for predicting the response.</p>
-</div>
-<div id="solution" class="section level2">
-<h2>Solution</h2>
+<p>*Solution</p>
 <pre class="r"><code>library(knitr)
 set.seed(11)
 auto_trn_idx = sample(1:nrow(Auto), 292)
