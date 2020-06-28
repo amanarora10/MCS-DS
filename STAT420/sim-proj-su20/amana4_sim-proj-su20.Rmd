@@ -437,7 +437,7 @@ simulate_run <-function(df, betas, sigma, num_sim = 1000 )
     #print(f)
     
     #Fit the model and find test and train RMSE
-    model_true = lm(f ,data = df)
+    model_true = lm(f ,data = trn_data)
     result = evaluate_model(model_true,trn_data,tst_data)
     result_train[model_num,q] = result[1]
     result_test[model_num,q] = result[2]
@@ -553,12 +553,12 @@ axis(side = 1, at = 1:9)
 
 ## Discussion 
 
-* From the plots above we can see mean test RMSE falls as the model complexity increase till model 6 (true model), after model 6 the decrease in test RMSE is minimal indicating  the true model may have only 6 predictors. Any test RMSE decrease in adding more parameters is negligible. 
+* From the plots above we can see mean train  RMSE falls as the model complexity increases (more predictors). However for the testRMSE the model6 performs the better with least RMSE. As model complexity increases beyond 6, the test RMSE starts increasing indicating the model 7 and beyond ovefit the trainind data resutling in poor fit on unseen test data.  
 
 
-* As we can see from plot the method does not always select the correct model (model 6). In fact its skewed towards choosing models with higher number of parameters over 6. The method does do well in rejecting the models with less parameters than true model but does tend to select a model with higher parameters than true model since they tend to do better in terms of RMSE. 
+* As we can see from plot the method does select the correct model (model 6) on an average. The method do well in rejecting the models with less or more parameters than true model on an average. 
 
-* The variance also tends to increase the test/train RMSE. Moreover we tend to select incorrect model with increased variance. As an example with variance of 1 and 2 the method does not pick any model with less than 6 predictors but at variance of 4  the method starts to select  models with 4 and 5 predictors as best model as well. 
+* The variance also tends to increase the test/train RMSE. Moreover we tend to select incorrect model with increased variance. As an example with variance of 1 and 2 the method does not pick any model with less than 2 predictors but at variance of 4  the method starts to select  models with 1 predictor as best model as well. The noise has a detrimental affect on test RMSE as a metric of model selection. 
 
 # Simulation Study 3: Power
 
@@ -621,11 +621,11 @@ for(beta1_idx in 1:length(beta1_list))
 
 ##Results
 ```{r}
-# beta, sigma, n
+#Plot the power vs signal curve 
 for(sigma_idx in 1:length(sigmas))
 {
   title = paste("Power curve with sigma =",sigmas[sigma_idx]) 
-  plot(results[,sigma_idx,1], x=beta1_list, type = "l", col = "green", main = title, ylab = "Power", xlab = "beta1")
+  plot(results[,sigma_idx,1], x=beta1_list, type = "l", col = "green", main = title, ylab = "Power", xlab = "beta1 (Signal)")
   lines(results[,sigma_idx,2], type = "l", x = beta1_list, col = "red")
   lines(results[,sigma_idx,3], type = "l", x= beta1_list, col = "blue")
   grid() 
@@ -637,6 +637,11 @@ for(sigma_idx in 1:length(sigmas))
 }  
 
 ```
+```{r}
+
+```
+
+
 ##Discussion
 
 ```{r}
