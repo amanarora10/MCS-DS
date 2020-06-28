@@ -562,76 +562,11 @@ axis(side = 1, at = 1:9)
 
 # Simulation Study 3: Power
 
-In this simulation study we will investigate the **power** of the significance of regression test for simple linear regression. 
+##Introduction 
 
-\[
-H_0: \beta_{1} = 0 \ \text{vs} \ H_1: \beta_{1} \neq 0
-\]
+In this simulation study we will investigate the power of the significance of regression test for simple linear regression.
 
-Recall, we had defined the *significance* level, $\alpha$, to be the probability of a Type I error.
-
-\[
-\alpha = P[\text{Reject } H_0 \mid H_0 \text{ True}] = P[\text{Type I Error}]
-\]
-
-Similarly, the probability of a Type II error is often denoted using $\beta$; however, this should not be confused with a regression parameter.
-
-\[
-\beta = P[\text{Fail to Reject } H_0 \mid H_1 \text{ True}] = P[\text{Type II Error}]
-\]
-
-*Power* is the probability of rejecting the null hypothesis when the null is not true, that is, the alternative is true and $\beta_{1}$ is non-zero.
-
-\[
-\text{Power} = 1 - \beta = P[\text{Reject } H_0 \mid H_1 \text{ True}]
-\]
-
-Essentially, power is the probability that a signal of a particular strength will be detected. Many things affect the power of a test. In this case, some of those are:
-
-- Sample Size, $n$
-- Signal Strength, $\beta_1$
-- Noise Level, $\sigma$
-- Significance Level, $\alpha$
-
-We'll investigate the first three.
-
-To do so we will simulate from the model
-
-\[
-Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
-\]
-
-where $\epsilon_i \sim N(0, \sigma^2)$.
-
-For simplicity, we will let $\beta_0 = 0$, thus $\beta_1$ is essentially controlling the amount of "signal." We will then consider different signals, noises, and sample sizes:
-
-- $\beta_1 \in (-2, -1.9, -1.8, \ldots, -0.1, 0, 0.1, 0.2, 0.3, \ldots 1.9, 2)$
-- $\sigma \in (1, 2, 4)$
-- $n \in (10, 20, 30)$
-
-We will hold the significance level constant at $\alpha = 0.05$.
-
-Use the following code to generate the predictor values, `x`: values for different sample sizes.
-
-```{r eval=FALSE}
-x_values = seq(0, 5, length = n)
-```
-
-For each possible $\beta_1$ and $\sigma$ combination, simulate from the true model at least $1000$ times. Each time, perform the significance of the regression test. To estimate the power with these simulations, and some $\alpha$, use
-
-\[
-\hat{\text{Power}} = \hat{P}[\text{Reject } H_0 \mid H_1 \text{ True}] = \frac{\text{# Tests Rejected}}{\text{# Simulations}}
-\]
-
-It is *possible* to derive an expression for power mathematically, but often this is difficult, so instead, we rely on simulation.
-
-Create three plots, one for each value of $\sigma$. Within each of these plots, add a “power curve” for each value of $n$ that shows how power is affected by signal strength, $\beta_1$.
-
-Potential discussions:
-
-- How do $n$, $\beta_1$, and $\sigma$ affect power? Consider additional plots to demonstrate these effects.
-- Are $1000$ simulations sufficient?
-
+##Methods 
 ```{r}
 #Function to Simulate SLR
 sim_slr = function(x, beta_0 , beta_1, sigma) {
@@ -641,16 +576,77 @@ sim_slr = function(x, beta_0 , beta_1, sigma) {
   data.frame(predictor = x, response = y)
 }
 
-x_values = seq(0, 5, length = 40)
 
-beta1 = seq(from = -2, to = 2, by = .1)
+beta1_list = seq(from = -2, to = 2, by = .1)
 
-sigma = c(1,2,4)
+sigmas = c(1,2,4)
+alpha = 0.05
+sample_list  = c(10,20,40)
+num_sim = 1000
 
-n = c(10,20,40)
-
-#sim_slr(n,0,beta1,sigma[1])
+results <- array(rep(0, length(sample_list)*length(sigmas)*length(beta1_list)), dim=c(length(beta1_list), length(sigmas), length(sample_list)))
 
 ```
+
+
+```{r}
+for(beta1_idx in 1:length(beta1_list))
+{
+  #cat("beta1_idx:", beta1_idx, "beta1_list",beta1_list[beta1_idx], "\n")
+  for(sigma_idx in 1:length(sigmas))
+  {
+    for(n_idx in 1:length(sample_list))
+    {
+      x_values = seq(0, 5, length = sample_list[n_idx])
+      null_rej_count  = 0 
+      for(i in 1:num_sim)
+      {
+        df1 = sim_slr(x_values,0,beta1_list[beta1_idx],sigmas[sigma_idx])
+        model_sum = summary(lm(predictor~response, data = df1))
+        p_val = model_sum$coefficients["response","Pr(>|t|)"]
+        #print(p_val)
+        if(p_val < alpha)
+        {
+          null_rej_count =  null_rej_count +1
+          #cat("null reject_count", null_rej_count,"\n")
+        }
+      }    
+      results[beta1_idx,sigma_idx,n_idx] = null_rej_count/num_sim
+    }
+  }
+}  
+
+
+```
+
+##Results
+```{r}
+# beta, sigma, n
+for(sigma_idx in 1:length(sigmas))
+{
+  title = paste("Power curve with sigma =",sigmas[sigma_idx]) 
+  plot(results[,sigma_idx,1], x=beta1_list, type = "l", col = "green", main = title, ylab = "Power", xlab = "beta1")
+  lines(results[,sigma_idx,2], type = "l", x = beta1_list, col = "red")
+  lines(results[,sigma_idx,3], type = "l", x= beta1_list, col = "blue")
+  grid() 
+  legend("bottomright", 
+       c("n = 10", "n = 20","n = 40"), 
+       lty=c(1),  
+       col=c("green", "red", "blue")
+       )
+}  
+
+```
+##Discussion
+
+```{r}
+beta1_list[c(TRUE, FALSE)]
+beta1_list
+```
+
+```{r}
+results[,1,1]
+```
+
 
 
