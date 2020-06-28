@@ -1,13 +1,9 @@
 ---
-title: 'Week 6 - Simulation Project'
+title: "Week 6 - Simulation Project"
 author: "Aman Arora"
 date: ''
 output:
-    bookdown::html_document2:
-    toc: true
-    fig_caption: true
-    template: flatly
-
+  bookdown::html_document2: null
 urlcolor: cyan
 ---
 
@@ -197,7 +193,7 @@ rownames(model2.table) = c("P value mean ","F-statistic mean", "R squared mean")
 `r kable(model2.table,"markdown",caption ="Simulation Summary")`  
   
   
-### Mean of p values with sigma for Significant and non-signifcant model
+### Mean of p values with sigma
 
 ```{r, echo = FALSE}
 par(mfrow=c(1,2))
@@ -212,7 +208,7 @@ grid()
 ```
   
     
-#### Histograms of R squared for different Variances  for Significant (Model 1) & non insignificant models (Model 2)  
+#### Histograms of R squared for different Variances  for Significant (Model 1) & non insignificant models (Model 2)  {#R2_histogram}
 
 ```{r, echo =  FALSE}
 par(mfrow=c(2,3))
@@ -229,7 +225,7 @@ for (i in 1:3)
 ```
 
 
-#### Histograms of p values for different Variances  for Significant (Model 1) non insignificant models (Model 2)  
+#### Histograms of p values for different Variances  for Significant (Model 1) non insignificant models (Model 2) {#p_val} 
 
 ```{r, echo = FALSE}
 par(mfrow=c(2,3))
@@ -250,7 +246,7 @@ for (i in 1:3)
 
 ```
   
-#### Histograms of f statistic for different Variances for Significant (Model 1) non insignificant models (Model 2). 
+#### Histograms of f statistic for different Variances for Significant (Model 1) non insignificant models (Model 2). {#F_stat}
 
  True distribution for F-statistic added for Model 2 (red line)
 
@@ -282,71 +278,13 @@ for (i in 1:3)
 
 ## Discussion 
 
-* As we can see from table  with increase in variance of the true distribution the p value of significance of  regression decreases for significant model (model 1). This is expected as with increased variance the uncertainty of significance of the linear regression increases as noise portion overcomes the signal portion of the model. The F statistic follows the p value.  
+* As we can see from table [Comparison of means]  with increase in variance of the true distribution the p value of significance of  regression decreases for significant model (model 1). This is expected as with increased variance the uncertainty of significance of the linear regression increases as noise portion overcomes the signal portion of the model. The F statistic follows the p value.  
 
-* This is not true though for the non significant model (model 2), the p-value indicates (as expected) the NULL hypothesis is true for all three sigma values. 
+* This is not true though for the non significant model (model 2), the p-value indicates (as expected) the NULL hypothesis is true for all three sigma values. [Mean of p values with sigma]
 
-* Under NULL hypothesis the  F statistic  is expected to follow a F distribution, we can see that in F statistic plots for non significant models.
+* Under NULL hypothesis the  F statistic  is expected to follow a F distribution, we can see that in F statistic plots for non significant models. See [F statsitic histogram](#F_stat)
 
-* The $r^2$ for significant model decrease with increase in variance as the ratio of SSE increases with variance. However for non significant model the   $r^2$ remains lows and does not change with increase variance.  
-
-
-# Simulation Study 2: Using RMSE for Selection?
-
-In homework we saw how Test RMSE can be used to select the “best” model. In this simulation study we will investigate how well this procedure works. Since splitting the data is random, we don’t expect it to work correctly each time. We could get unlucky. But averaged over many attempts, we should expect it to select the appropriate model.
-
-We will simulate from the model
-
-\[
-Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \beta_4 x_{i4} + \beta_5 x_{i5} + \beta_6 x_{i6} + \epsilon_i
-\]
-
-where $\epsilon_i \sim N(0, \sigma^2)$ and
-
-- $\beta_0 = 0$,
-- $\beta_1 = 3$,
-- $\beta_2 = -4$,
-- $\beta_3 = 1.6$,
-- $\beta_4 = -1.1$,
-- $\beta_5 = 0.7$,
-- $\beta_6 = 0.5$.
-
-We will consider a sample size of $500$ and three possible levels of noise. That is, three values of $\sigma$.
-
-- $n = 500$
-- $\sigma \in (1, 2, 4)$
-
-Use the data found in [`study_2.csv`](study_2.csv) for the values of the predictors. These should be kept constant for the entirety of this study. The `y` values in this data are a blank placeholder.
-
-Each time you simulate the data, randomly split the data into train and test sets of equal sizes (250 observations for training, 250 observations for testing).
-
-For each, fit **nine** models, with forms:
-
-- `y ~ x1`
-- `y ~ x1 + x2`
-- `y ~ x1 + x2 + x3`
-- `y ~ x1 + x2 + x3 + x4`
-- `y ~ x1 + x2 + x3 + x4 + x5`
-- `y ~ x1 + x2 + x3 + x4 + x5 + x6`, the correct form of the model as noted above
-- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7`
-- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8`
-- `y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9`
-
-For each model, calculate Train and Test RMSE.
-
-\[
-\text{RMSE}(\text{model, data}) = \sqrt{\frac{1}{n} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2}
-\]
-
-Repeat this process with $1000$ simulations for each of the $3$ values of $\sigma$. For each value of $\sigma$, create a plot that shows how average Train RMSE and average Test RMSE changes as a function of model size. Also show the number of times the model of each size was chosen for each value of $\sigma$.
-
-Done correctly, you will have simulated the $y$ vector $3×1000=3000$ times. You will have fit $9×3×1000=27000$ models. A minimal result would use $3$ plots. Additional plots may also be useful.
-
-Potential discussions:
-
-- Does the method **always** select the correct model? On average, does is select the correct model?
-- How does the level of noise affect the results?
-
+* The $r^2$ for significant model decrease with increase in variance as the ratio of SSE increases with variance. However for non significant model the   $r^2$ remains lows and does not change with increase variance. See [R squared histogram](#R2_histogram) 
 
 # Simulation Study 2
 
@@ -468,6 +406,8 @@ simulate_run <-function(df, betas, sigma, num_sim = 1000 )
 
 
 ```{r}
+
+
 #sigmas to be simulated
 sigmas = c(1,2,4)
 
@@ -487,10 +427,10 @@ result_sigma4 =  simulate_run(df = df1, betas = betas1, sigma = sigmas[3], num_s
 
 ## Results
 
-### Model no. wins vs model number for sigma = 1, 2 and 4
+### Model no. wins vs model number 
 
 
-```{r}
+```{r, echo = FALSE}
 
 
 plot(result_sigma1$counts, ylab = "No of times the model is best",xlab = "model number",main = "Best Count vs model number (sigma = 1)",pch = 15, col = "red")
@@ -508,11 +448,10 @@ grid(nx = 8)
 ```
 
 
-### Mean Train/Test RMSE change with sigma for 9 models
+### Mean Train/Test RMSE 
 
-```{r}
+```{r , echo = FALSE}
 #par(mfrow=c(1,3))
-
 plot(result_sigma1$train_rmse,pch = 15, col = "red",main = "Mean RMSE vs model number , sigma = 1", xlab = "model number", ylab = " RMSE")
 points(result_sigma1$test_rmse, col = "blue", pch = 4)
 legend("topright", 
@@ -553,20 +492,19 @@ axis(side = 1, at = 1:9)
 
 ## Discussion 
 
-* From the plots above we can see mean train  RMSE falls as the model complexity increases (more predictors). However for the testRMSE the model6 performs the better with least RMSE. As model complexity increases beyond 6, the test RMSE starts increasing indicating the model 7 and beyond ovefit the trainind data resutling in poor fit on unseen test data.  
+* From the plot [Mean Train/Test RMSE]  we can see mean train  RMSE falls as the model complexity increases (more predictors). However for the test RMSE the model 6 performs the better with least RMSE. As model complexity increases beyond 6, the test RMSE starts increasing indicating the model 7 and beyond ovefit the training data resulting in poor fit on unseen test data.  
 
+* From the plot [Model no. wins vs model number] we can see the method does select the correct model (model 6) on an average. The method do well in rejecting the models with less or more parameters than true model on an average. 
 
-* As we can see from plot the method does select the correct model (model 6) on an average. The method do well in rejecting the models with less or more parameters than true model on an average. 
-
-* The variance also tends to increase the test/train RMSE. Moreover we tend to select incorrect model with increased variance. As an example with variance of 1 and 2 the method does not pick any model with less than 2 predictors but at variance of 4  the method starts to select  models with 1 predictor as best model as well. The noise has a detrimental affect on test RMSE as a metric of model selection. 
+* The variance also tends to increase the test/train RMSE. Moreover we tend to select incorrect model with increased variance. As an example (plot [Mean Train/Test RMSE]) with variance of 1 and 2 the method does not pick any model with less than 2 predictors but at variance of 4  the method starts to select  models with 1 predictor as best model as well. Thus  the noise seems to result in detrimental affect on test RMSE as a metric of model selection. 
 
 # Simulation Study 3: Power
 
-##Introduction 
+## Introduction 
 
-In this simulation study we will investigate the power of the significance of regression test for simple linear regression.
+In this simulation study we will investigate the power of the significance of regression test defined as the probability of rejecting the NULL hypothesis when NULL hypothesis is false. We will also study  for SLR how power is affected by sample size, variance and signal strength ($\beta_1$). 
 
-##Methods 
+## Methods 
 ```{r}
 #Function to Simulate SLR
 sim_slr = function(x, beta_0 , beta_1, sigma) {
@@ -576,22 +514,25 @@ sim_slr = function(x, beta_0 , beta_1, sigma) {
   data.frame(predictor = x, response = y)
 }
 
+```
 
+
+```{r}
+set.seed(19771212)
 beta1_list = seq(from = -2, to = 2, by = .1)
 
 sigmas = c(1,2,4)
 alpha = 0.05
 sample_list  = c(10,20,40)
 num_sim = 1000
-
+p_val = rep(0,num_sim)
+  
 results <- array(rep(0, length(sample_list)*length(sigmas)*length(beta1_list)), dim=c(length(beta1_list), length(sigmas), length(sample_list)))
 
-```
-
-
-```{r}
 for(beta1_idx in 1:length(beta1_list))
 {
+  
+
   #cat("beta1_idx:", beta1_idx, "beta1_list",beta1_list[beta1_idx], "\n")
   for(sigma_idx in 1:length(sigmas))
   {
@@ -603,9 +544,9 @@ for(beta1_idx in 1:length(beta1_list))
       {
         df1 = sim_slr(x_values,0,beta1_list[beta1_idx],sigmas[sigma_idx])
         model_sum = summary(lm(predictor~response, data = df1))
-        p_val = model_sum$coefficients["response","Pr(>|t|)"]
+        p_val[i] = model_sum$coefficients["response","Pr(>|t|)"]
         #print(p_val)
-        if(p_val < alpha)
+        if(p_val[i] < alpha)
         {
           null_rej_count =  null_rej_count +1
           #cat("null reject_count", null_rej_count,"\n")
@@ -619,8 +560,11 @@ for(beta1_idx in 1:length(beta1_list))
 
 ```
 
-##Results
-```{r}
+## Results
+
+### Power vs signal curves
+
+```{r, echo = FALSE}
 #Plot the power vs signal curve 
 for(sigma_idx in 1:length(sigmas))
 {
@@ -637,21 +581,83 @@ for(sigma_idx in 1:length(sigmas))
 }  
 
 ```
-```{r}
+
+## Discussion
+
+* As we can see from the plots [Power vs signal curves]  above with same signal ($\beta_1$) the power increase with sample size.  
+
+* The standard deviation $\sigma$ seems  to have detrimental effect on the power as seen from plot [Mean Power vs sigma] .The mean power (averaged across beta) decreases   as the standard deviation increases for all sample size 
+
+  
+### Mean Power vs sigma
+
+```{r, echo=FALSE}
+power_sd = c(mean(results[,1,1]), mean(results[,2,1]), mean(results[,3,1]))
+
+plot(power_sd, x=sigmas, col = "green", main = "Mean Power vs Sigma", ylab = "Power", xlab = "standard deviation",cex = 1.5, pch =15, ylim=c(0, 1), lty = 2, type = "o")
+
+power_sd = c(mean(results[,1,2]), mean(results[,2,2]), mean(results[,3,2]))
+
+lines(power_sd, x=sigmas, col = "red", main = "Mean Power vs Sigma", ylab = "Power", xlab = "standard deviation",cex = 1.5, pch =15,lty = 2, type = "o")
+  
+power_sd = c(mean(results[,1,3]), mean(results[,2,3]), mean(results[,3,3]))
+
+lines(power_sd, x=sigmas, col = "blue", main = "Mean Power vs Sigma", ylab = "Power", xlab = "standard deviation",cex = 1.5, pch =15, type = "o", lty = 2)
+  
+grid()
+
+legend("topright", 
+       c("n = 10", "n = 20","n = 40"), 
+       lty=c(2),  
+       col=c("green", "red", "blue")
+       )
 
 ```
+  
+  
+### Power vs Signal to noise ratio
+```{r, echo = FALSE}
+snr = abs(c(beta1_list/1, beta1_list/2, beta1_list/4))
 
+power = c(results[,1,1], results[,2,1],results[,3,1] ) 
 
-##Discussion
+xlab1= expression("Signal to noise ratio (" * beta[1]/sigma * ")")
 
-```{r}
-beta1_list[c(TRUE, FALSE)]
-beta1_list
+plot(snr, power, xlab = xlab1 , col = "green")
+
+power = c(results[,1,2], results[,2,2],results[,3,2] ) 
+
+points(snr, power, col = "red")
+
+power = c(results[,1,3], results[,2,3],results[,3,3] ) 
+
+points(snr, power, col = "blue")
+
+legend("bottomright", 
+       c("n = 10", "n = 20","n = 40"), 
+       pch =c(1),  
+       col=c("green", "red", "blue")
+       )
+grid()
 ```
+  
+    
+* Moreover as seen from [Power vs Signal to noise ratio]  signal magnitude had a positive effect on power, with increased signal magnitude (for same sd)  the power tends to increase,  more specifically its the signal to noise ratio  defined as snr = $|\frac {\beta_1} {\sigma}|$ that improves the power of the regression. Also with increasing sample size the power is improving, lower sample size increases the uncertainty (increased sample variance)  it acts like noise and contributes to the lower power. 
 
-```{r}
-results[,1,1]
+### P value Histogram
+```{r echo = FALSE}
+hist(p_val, main = "  p value for 1000 simulations (sigma = 4, n = 40 and beta1 = 2.0)")
+
 ```
+  
+* 1000 simulations seems to be sufficient since we can see from p_val histogram [P value Histogram] for a run  (sigma = 4, n = 40 and $\beta_1$ = 2.0)  there seems to be single mode and the simulated p values seems to have converged. There seems to agreement among the generated p value from simulation. This is also indicated by low standard deviation `r sd(p_val)` in generated p values. It seems additional simulations will not change the conclusions.  
+
+
+
+
+
+
+
 
 
 
