@@ -10,11 +10,6 @@ output:
 urlcolor: cyan
 ---
 
-
-# Directions
-
-
-
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80, fig.alin = "center")
 ```
@@ -359,8 +354,11 @@ We will repeat the following process a number of times.
 ```{r}
 set.seed(20)
 sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
+names(summary(lm(values ~ groups, data = sim_data)))
 summary(lm(values ~ groups, data = sim_data))
-t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+result = t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+result$p.value
+test = as.numeric(result$statistic)
 ```
 
 We use `lm()` to test
@@ -404,11 +402,64 @@ The variable `num_sims` controls how many times we will repeat this process, whi
 
 **(a)** Set a seed equal to your birthday. Then write code that repeats the above process `300` times. Each time, store the appropriate values in `lm_t`, `lm_p`, `tt_t`, and `tt_p`. Specifically, each time you should use `sim_data$values = rnorm(n, mean = 42, sd = 3.5)` to update the data. The grouping will always stay the same.
 
+
+```{r}
+set.seed(19771212)
+
+for (i in 1: num_sims)
+{
+  sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
+
+  #Store p/t value from LM
+  lm_summary = summary(lm(values ~ groups, data = sim_data))
+  lm_t[i] = lm_summary$coefficients["groupsB", "t value"]
+  lm_p[i] = lm_summary$coefficients["groupsB", "Pr(>|t|)"]
+  
+  #Store p/t value from t test
+  t_summary =  t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+  tt_p[i] =  t_summary$p.value
+  tt_t[i] =  t_summary$statistic
+  
+}  
+
+```
+
+
 **(b)** Report the value obtained by running `mean(lm_t == tt_t)`, which tells us what proportion of the test statistics is equal. The result may be extremely surprising!
+
+```{r}
+mean(lm_t == tt_t)
+```
+
+
 
 **(c)** Report the value obtained by running `mean(lm_p == tt_p)`, which tells us what proportion of the p-values is equal. The result may be extremely surprising!
 
+```{r}
+mean(lm_p == tt_p)
+```
+
+
 **(d)** If you have done everything correctly so far, your answers to the last two parts won't indicate the equivalence we want to show! What the heck is going on here? The first issue is one of using a computer to do calculations. When a computer checks for equality, it demands **equality**; nothing can be different. However, when a computer performs calculations, it can only do so with a certain level of precision. So, if we calculate two quantities we know to be analytically equal, they can differ numerically. Instead of `mean(lm_p == tt_p)` run `all.equal(lm_p, tt_p)`. This will perform a similar calculation, but with a very small error tolerance for each equality. What is the result of running this code? What does it mean?
 
+```{r}
+all.equal(lm_p, tt_p)
+```
+
 **(e)** Your answer in **(d)** should now make much more sense. Then what is going on with the test statistics? Look at the values stored in `lm_t` and `tt_t`. What do you notice? Is there a relationship between the two? Can you explain why this is happening?
+
+```{r}
+head(lm_t)
+head(tt_t)
+```
+
+  
+  * The lm_tt and tt_t seems to have same magnitude but opposite signs. 
+
+
+
+
+
+
+
 
