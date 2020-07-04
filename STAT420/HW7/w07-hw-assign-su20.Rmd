@@ -458,11 +458,49 @@ head(lm_t)
 head(tt_t)
 ```
 
+    
+The lm_tt and tt_t seems to have same magnitude but opposite signs. The sign of t indicates which group mean A or B is used as a reference. It seems for linear regresion (using lm)   and t test (using t.test ) they are swapped. We can  try swapping the reference level for lm and test again
+
+```{r}
+set.seed(19771212)
+
+#Create a new column in data frame with swapped ref. level 
+sim_data$groups_swap =  relevel(sim_data$groups, ref = "B")
+
+#Check ref. level is now B
+levels(sim_data$groups_swap)
+```
+
+
+```{r}
+
+#Rerun LM with swapped ref level (B is ref. for LM)
+for (i in 1: num_sims)
+{
+  sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
+
+  #Store p/t value from LM
+  lm_summary = summary(lm(values ~ groups_swap, data = sim_data))
+  lm_t[i] = lm_summary$coefficients["groups_swapA", "t value"]
+  lm_p[i] = lm_summary$coefficients["groups_swapA", "Pr(>|t|)"]
   
-  * The lm_tt and tt_t seems to have same magnitude but opposite signs. The sign of t indicates which group mean A or B is used as a reference. It seems for linear regresion and t test they are swapped. 
 
+  #Store p/t value from t test
+  t_summary =  t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+  tt_p[i] =  t_summary$p.value
+  tt_t[i] =  t_summary$statistic
+  
+}  
+```
 
+```{r}
+head(lm_t)
+head(tt_t)
 
+all.equal(lm_t,tt_t)
+```
+
+* We can see now the t value sign and magnitude match and all.equal is returning TRUE. It seems t.test is using B as ref level. 
 
 
 
