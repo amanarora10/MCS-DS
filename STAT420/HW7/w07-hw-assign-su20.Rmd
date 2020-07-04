@@ -253,6 +253,7 @@ anova(model_add, model_int1)
 model_int2  = lm(Blood ~ Age + Education + Income + Sex + Sex*Age + Sex*Income + Income*Age + Age*Income*Sex , data = df)
 anova(model_add, model_int2)
 
+sum = summary(model_int2)
 ```
   
   * Based on the p-value of 0.074 we prefer this  interaction
@@ -306,7 +307,7 @@ where
 
 **(a)** Fit the model above. Also fit a smaller model using the provided `R` code.
 
-```{r, eval = FALSE}
+```{r}
 hospital = read.csv("hospital.csv")
 days_small = lm(Days ~ Pressure + Blood, data = hospital)
 days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)
@@ -398,6 +399,7 @@ tt_p = rep(0, num_sims)
 - `tt_t` will store the test statistic for the test $H_0: \mu_A = \mu_B$.
 - `tt_p` will store the p-value for the test $H_0: \mu_A = \mu_B$.
 
+
 The variable `num_sims` controls how many times we will repeat this process, which we have chosen to be `300`.
 
 **(a)** Set a seed equal to your birthday. Then write code that repeats the above process `300` times. Each time, store the appropriate values in `lm_t`, `lm_p`, `tt_t`, and `tt_p`. Specifically, each time you should use `sim_data$values = rnorm(n, mean = 42, sd = 3.5)` to update the data. The grouping will always stay the same.
@@ -445,6 +447,9 @@ mean(lm_p == tt_p)
 ```{r}
 all.equal(lm_p, tt_p)
 ```
+  
+  * The p values from t test and linear regression are now matching (after accounting for numerical precision.) this indicates two-sample $t$-test with equal variance is equivalent to a $t$-test for the coefficient of a single two-level factor variable (dummy variable) in a linear model.
+
 
 **(e)** Your answer in **(d)** should now make much more sense. Then what is going on with the test statistics? Look at the values stored in `lm_t` and `tt_t`. What do you notice? Is there a relationship between the two? Can you explain why this is happening?
 
@@ -454,7 +459,7 @@ head(tt_t)
 ```
 
   
-  * The lm_tt and tt_t seems to have same magnitude but opposite signs. 
+  * The lm_tt and tt_t seems to have same magnitude but opposite signs. The sign of t indicates which group mean A or B is used as a reference. It seems for linear regresion and t test they are swapped. 
 
 
 

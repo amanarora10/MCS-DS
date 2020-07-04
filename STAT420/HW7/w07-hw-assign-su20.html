@@ -382,17 +382,13 @@ summary {
 
 <div id="TOC">
 <ul>
-<li><a href="#directions">Directions</a><ul>
 <li><a href="#exercise-1-epa-emissions-data">Exercise 1 (EPA Emissions Data)</a></li>
 <li><a href="#exercise-2-hospital-support-data-white-blood-cells">Exercise 2 (Hospital SUPPORT Data, White Blood Cells)</a></li>
 <li><a href="#exercise-3-hospital-support-data-stay-duration">Exercise 3 (Hospital SUPPORT Data, Stay Duration)</a></li>
 <li><a href="#exercise-4-t-test-is-a-linear-model">Exercise 4 (<span class="math inline">\(t\)</span>-test Is a Linear Model)</a></li>
-</ul></li>
 </ul>
 </div>
 
-<div id="directions" class="section level1">
-<h1>Directions</h1>
 <div id="exercise-1-epa-emissions-data" class="section level2">
 <h2>Exercise 1 (EPA Emissions Data)</h2>
 <p>For this exercise, we will use the data stored in <a href="epa2017.csv"><code>epa2017.csv</code></a>. It contains detailed descriptions of vehicles manufactured in 2017 that were used for fuel economy testing <a href="https://www.epa.gov/air-emissions-inventories">as performed by the Environment Protection Agency</a>. The variables in the dataset are:</p>
@@ -596,12 +592,44 @@ summary(model_add)</code></pre>
 ## Residual standard error: 7.88 on 575 degrees of freedom
 ## Multiple R-squared:  0.0197, Adjusted R-squared:  0.0129 
 ## F-statistic:  2.9 on 4 and 575 DF,  p-value: 0.0216</code></pre>
-<ul>
-<li>R is using following ref. levels ** Education: High ** Income: High ** Sex: female</li>
-</ul>
+<p>R is using following ref. levels * Education: High * Income: High * Sex: female</p>
 <p><strong>(c)</strong> Fit a multiple regression model with <code>Blood</code> as the response. Use the main effects of <code>Age</code>, <code>Education</code>, <code>Income</code>, and <code>Sex</code>, as well as the interaction of <code>Sex</code> with <code>Age</code> and the interaction of <code>Sex</code> and <code>Income</code>. Use a statistical test to compare this model to the additive model using a significance level of <span class="math inline">\(\alpha = 0.10\)</span>. Which do you prefer?</p>
+<pre class="r"><code>model_int1  = lm(Blood ~ Age + Education + Income + Sex + Sex*Age + Sex*Income, data = df)
+
+anova(model_add, model_int1)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: Blood ~ Age + Education + Income + Sex
+## Model 2: Blood ~ Age + Education + Income + Sex + Sex * Age + Sex * Income
+##   Res.Df   RSS Df Sum of Sq    F Pr(&gt;F)
+## 1    575 35694                         
+## 2    573 35423  2       271 2.19   0.11</code></pre>
+<ul>
+<li>Based on the p-value of 0.11 we prefer the addtitive model</li>
+</ul>
 <p><strong>(d)</strong> Fit a model similar to that in <strong>(c)</strong>, but additionally add the interaction between <code>Income</code> and <code>Age</code> as well as a three-way interaction between <code>Age</code>, <code>Income</code>, and <code>Sex</code>. Use a statistical test to compare this model to the preferred model from <strong>(c)</strong> using a significance level of <span class="math inline">\(\alpha = 0.10\)</span>. Which do you prefer?</p>
+<pre class="r"><code>model_int2  = lm(Blood ~ Age + Education + Income + Sex + Sex*Age + Sex*Income + Income*Age + Age*Income*Sex , data = df)
+anova(model_add, model_int2)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: Blood ~ Age + Education + Income + Sex
+## Model 2: Blood ~ Age + Education + Income + Sex + Sex * Age + Sex * Income + 
+##     Income * Age + Age * Income * Sex
+##   Res.Df   RSS Df Sum of Sq    F Pr(&gt;F)  
+## 1    575 35694                           
+## 2    571 35166  4       528 2.14  0.074 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>sum = summary(model_int2)</code></pre>
+<ul>
+<li>Based on the p-value of 0.074 we prefer this interaction</li>
+</ul>
 <p><strong>(e)</strong> Using the model in <strong>(d)</strong>, give an estimate of the change in average <code>Blood</code> for a one-unit increase in <code>Age</code> for a highly educated, low income, male patient.</p>
+<pre class="r"><code>result = sum$coefficients[&quot;Age&quot;,&quot;Estimate&quot;] + sum$coefficients[&quot;Age:Sexmale&quot;,&quot;Estimate&quot;] +  sum$coefficients[&quot;Age:Incomelow&quot;,&quot;Estimate&quot;]+
+  sum$coefficients[&quot;Age:Incomelow:Sexmale&quot;,&quot;Estimate&quot;]</code></pre>
+<ul>
+<li>The estimate of the change in average <code>Blood</code> for a one-unit increase in <code>Age</code> for a highly educated, low income, male patient is : 0.0053</li>
+</ul>
 <hr />
 </div>
 <div id="exercise-3-hospital-support-data-stay-duration" class="section level2">
@@ -635,7 +663,9 @@ Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_1 x_2 + \beta_
 <li><span class="math inline">\(x_3\)</span> is <code>Rate</code>.</li>
 </ul>
 <p><strong>(a)</strong> Fit the model above. Also fit a smaller model using the provided <code>R</code> code.</p>
-<pre class="r"><code>days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)</code></pre>
+<pre class="r"><code>hospital = read.csv(&quot;hospital.csv&quot;)
+days_small = lm(Days ~ Pressure + Blood, data = hospital)
+days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)</code></pre>
 <p>Use a statistical test to compare the two models. Report the following:</p>
 <ul>
 <li>The null and alternative hypotheses in terms of the model given in the exercise description</li>
@@ -644,6 +674,16 @@ Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_1 x_2 + \beta_
 <li>A statistical decision using a significance level of <span class="math inline">\(\alpha = 0.10\)</span></li>
 <li>Which model you prefer</li>
 </ul>
+<pre class="r"><code>anova(days_small,days_add )</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: Days ~ Pressure + Blood
+## Model 2: Days ~ Pressure + Blood + Rate
+##   Res.Df    RSS Df Sum of Sq    F  Pr(&gt;F)    
+## 1    577 289422                              
+## 2    576 279493  1      9929 20.5 7.4e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p><strong>(b)</strong> Give an expression based on the model in the exercise description for the true change in length of hospital stay in days for a 1 bpm increase in <code>Rate</code> for a patient with a <code>Pressure</code> of 139 mmHg and a <code>Blood</code> of 10 gm/dL. Your answer should be a linear function of the <span class="math inline">\(\beta\)</span>s.</p>
 <p><strong>(c)</strong> Give an expression based on the additive model in part <strong>(a)</strong> for the true change in length of hospital stay in days for a 1 bpm increase in <code>Rate</code> for a patient with a <code>Pressure</code> of 139 mmHg and a <code>Blood</code> of 10 gm/dL. Your answer should be a linear function of the <span class="math inline">\(\beta\)</span>s.</p>
 <hr />
@@ -659,13 +699,17 @@ sim_data = data.frame(
   values = rep(0, n))
 str(sim_data)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    30 obs. of  2 variables:
-##  $ groups: chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
+##  $ groups: Factor w/ 2 levels &quot;A&quot;,&quot;B&quot;: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ values: num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 <p>We will use a total sample size of <code>30</code>, <code>15</code> for each group. The <code>groups</code> variable splits the data into two groups, <code>A</code> and <code>B</code>, which will be the grouping variable for the <span class="math inline">\(t\)</span>-test and a factor variable in a regression. The <code>values</code> variable will store simulated data.</p>
 <p>We will repeat the following process a number of times.</p>
 <pre class="r"><code>set.seed(20)
 sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
-summary(lm(values ~ groups, data = sim_data))</code></pre>
+names(summary(lm(values ~ groups, data = sim_data)))</code></pre>
+<pre><code>##  [1] &quot;call&quot;          &quot;terms&quot;         &quot;residuals&quot;     &quot;coefficients&quot; 
+##  [5] &quot;aliased&quot;       &quot;sigma&quot;         &quot;df&quot;            &quot;r.squared&quot;    
+##  [9] &quot;adj.r.squared&quot; &quot;fstatistic&quot;    &quot;cov.unscaled&quot;</code></pre>
+<pre class="r"><code>summary(lm(values ~ groups, data = sim_data))</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = values ~ groups, data = sim_data)
@@ -684,18 +728,10 @@ summary(lm(values ~ groups, data = sim_data))</code></pre>
 ## Residual standard error: 3.68 on 28 degrees of freedom
 ## Multiple R-squared:  1.66e-05,   Adjusted R-squared:  -0.0357 
 ## F-statistic: 0.000465 on 1 and 28 DF,  p-value: 0.983</code></pre>
-<pre class="r"><code>t.test(values ~ groups, data = sim_data, var.equal = TRUE)</code></pre>
-<pre><code>## 
-##  Two Sample t-test
-## 
-## data:  values by groups
-## t = -0.022, df = 28, p-value = 1
-## alternative hypothesis: true difference in means is not equal to 0
-## 95 percent confidence interval:
-##  -2.781  2.723
-## sample estimates:
-## mean in group A mean in group B 
-##           40.92           40.95</code></pre>
+<pre class="r"><code>result = t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+result$p.value</code></pre>
+<pre><code>## [1] 0.983</code></pre>
+<pre class="r"><code>test = as.numeric(result$statistic)</code></pre>
 <p>We use <code>lm()</code> to test</p>
 <p><span class="math display">\[
 H_0: \beta_1 = 0
@@ -724,11 +760,40 @@ tt_p = rep(0, num_sims)</code></pre>
 </ul>
 <p>The variable <code>num_sims</code> controls how many times we will repeat this process, which we have chosen to be <code>300</code>.</p>
 <p><strong>(a)</strong> Set a seed equal to your birthday. Then write code that repeats the above process <code>300</code> times. Each time, store the appropriate values in <code>lm_t</code>, <code>lm_p</code>, <code>tt_t</code>, and <code>tt_p</code>. Specifically, each time you should use <code>sim_data$values = rnorm(n, mean = 42, sd = 3.5)</code> to update the data. The grouping will always stay the same.</p>
+<pre class="r"><code>set.seed(19771212)
+
+for (i in 1: num_sims)
+{
+  sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
+
+  #Store p/t value from LM
+  lm_summary = summary(lm(values ~ groups, data = sim_data))
+  lm_t[i] = lm_summary$coefficients[&quot;groupsB&quot;, &quot;t value&quot;]
+  lm_p[i] = lm_summary$coefficients[&quot;groupsB&quot;, &quot;Pr(&gt;|t|)&quot;]
+  
+  #Store p/t value from t test
+  t_summary =  t.test(values ~ groups, data = sim_data, var.equal = TRUE)
+  tt_p[i] =  t_summary$p.value
+  tt_t[i] =  t_summary$statistic
+  
+}  </code></pre>
 <p><strong>(b)</strong> Report the value obtained by running <code>mean(lm_t == tt_t)</code>, which tells us what proportion of the test statistics is equal. The result may be extremely surprising!</p>
+<pre class="r"><code>mean(lm_t == tt_t)</code></pre>
+<pre><code>## [1] 0</code></pre>
 <p><strong>(c)</strong> Report the value obtained by running <code>mean(lm_p == tt_p)</code>, which tells us what proportion of the p-values is equal. The result may be extremely surprising!</p>
+<pre class="r"><code>mean(lm_p == tt_p)</code></pre>
+<pre><code>## [1] 0.02333</code></pre>
 <p><strong>(d)</strong> If you have done everything correctly so far, your answers to the last two parts won’t indicate the equivalence we want to show! What the heck is going on here? The first issue is one of using a computer to do calculations. When a computer checks for equality, it demands <strong>equality</strong>; nothing can be different. However, when a computer performs calculations, it can only do so with a certain level of precision. So, if we calculate two quantities we know to be analytically equal, they can differ numerically. Instead of <code>mean(lm_p == tt_p)</code> run <code>all.equal(lm_p, tt_p)</code>. This will perform a similar calculation, but with a very small error tolerance for each equality. What is the result of running this code? What does it mean?</p>
+<pre class="r"><code>all.equal(lm_p, tt_p)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <p><strong>(e)</strong> Your answer in <strong>(d)</strong> should now make much more sense. Then what is going on with the test statistics? Look at the values stored in <code>lm_t</code> and <code>tt_t</code>. What do you notice? Is there a relationship between the two? Can you explain why this is happening?</p>
-</div>
+<pre class="r"><code>head(lm_t)</code></pre>
+<pre><code>## [1]  0.8120 -1.6704  0.8181 -0.4501  0.8828 -0.7788</code></pre>
+<pre class="r"><code>head(tt_t)</code></pre>
+<pre><code>## [1] -0.8120  1.6704 -0.8181  0.4501 -0.8828  0.7788</code></pre>
+<ul>
+<li>The lm_tt and tt_t seems to have same magnitude but opposite signs.</li>
+</ul>
 </div>
 
 
