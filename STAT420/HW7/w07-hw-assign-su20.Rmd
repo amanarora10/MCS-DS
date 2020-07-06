@@ -326,11 +326,19 @@ Use a statistical test to compare the two models. Report the following:
 anova(days_small,days_add )
 ```
 
-
+  * The NULL hypothesis is $\beta_4 = \beta_5 = \beta_6 =  \beta_7 = 0$
+  * The Alternate hypothesis at least one of coefficient $\beta_4,  \beta_5, \beta_6,   \beta_7, $ is non zero.
+  * The p value is  0.087
+  * At $\alpha = 0.1$ we can reject the NULL hypothesis.
+  * Thus We prefer the interaction model.
 
 **(b)** Give an expression based on the model in the exercise description for the true change in length of hospital stay in days for a 1 bpm increase in `Rate` for a patient with a `Pressure` of 139 mmHg and a `Blood` of 10 gm/dL. Your answer should be a linear function of the $\beta$s.
 
+\[\beta_3 + 10\beta_5+ 139\beta_6+ 1390 \beta_7\]
+
 **(c)** Give an expression based on the additive model in part **(a)** for the true change in length of hospital stay in days for a 1 bpm increase in `Rate` for a patient with a `Pressure` of 139 mmHg and a `Blood` of 10 gm/dL. Your answer should be a linear function of the $\beta$s.
+
+$\beta_3$ is the  true change in length of hospital stay in days for a 1 bpm increase in `Rate` for a patient with all other predictors remaining the same. Since its a additive model the affects of pressure and blood stay the same. 
 
 ***
 

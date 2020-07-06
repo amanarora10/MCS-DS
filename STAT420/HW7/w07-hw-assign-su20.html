@@ -689,8 +689,17 @@ days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)</code></pre>
 ## 2    576 279493  1      9929 20.5 7.4e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<ul>
+<li>The NULL hypothesis is <span class="math inline">\(\beta_4 = \beta_5 = \beta_6 = \beta_7 = 0\)</span></li>
+<li>The Alternate hypothesis at least one of coefficient $_4, _5, _6, _7, $ is non zero.</li>
+<li>The p value is 0.087</li>
+<li>At <span class="math inline">\(\alpha = 0.1\)</span> we can reject the NULL hypothesis.</li>
+<li>Thus We prefer the interaction model.</li>
+</ul>
 <p><strong>(b)</strong> Give an expression based on the model in the exercise description for the true change in length of hospital stay in days for a 1 bpm increase in <code>Rate</code> for a patient with a <code>Pressure</code> of 139 mmHg and a <code>Blood</code> of 10 gm/dL. Your answer should be a linear function of the <span class="math inline">\(\beta\)</span>s.</p>
+<p><span class="math display">\[\beta_3 + 10\beta_5+ 139\beta_6+ 1390 \beta_7\]</span></p>
 <p><strong>(c)</strong> Give an expression based on the additive model in part <strong>(a)</strong> for the true change in length of hospital stay in days for a 1 bpm increase in <code>Rate</code> for a patient with a <code>Pressure</code> of 139 mmHg and a <code>Blood</code> of 10 gm/dL. Your answer should be a linear function of the <span class="math inline">\(\beta\)</span>s.</p>
+<p><span class="math inline">\(\beta_3\)</span> is the true change in length of hospital stay in days for a 1 bpm increase in <code>Rate</code> for a patient with all other predictors remaining the same. Since its a additive model the affects of pressure and blood stay the same.</p>
 <hr />
 </div>
 <div id="exercise-4-t-test-is-a-linear-model" class="section level2">
