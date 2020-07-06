@@ -227,7 +227,8 @@ summary(model_add)
 ```
 
     
- R is using following ref. levels
+ R is using following ref. levels  
+   
   * Education: High
   * Income: High
   * Sex: female
@@ -256,7 +257,7 @@ anova(model_add, model_int2)
 sum = summary(model_int2)
 ```
   
-  * Based on the p-value of 0.074 we prefer this  interaction
+  * Based on the p-value of 0.074 we prefer this  interaction model
 
 
 **(e)** Using the model in **(d)**, give an estimate of the change in average `Blood` for a one-unit increase in `Age` for a highly educated, low income, male patient.
@@ -479,7 +480,7 @@ for (i in 1: num_sims)
 {
   sim_data$values = rnorm(n, mean = 42, sd = 3.5) # simulate response data
 
-  #Store p/t value from LM
+  #Store p/t value from LM (using B as ref. level)
   lm_summary = summary(lm(values ~ groups_swap, data = sim_data))
   lm_t[i] = lm_summary$coefficients["groups_swapA", "t value"]
   lm_p[i] = lm_summary$coefficients["groups_swapA", "Pr(>|t|)"]
@@ -493,6 +494,9 @@ for (i in 1: num_sims)
 }  
 ```
 
+We can see below now the t value sign and magnitude match and all.equal is returning TRUE. It seems t.test is using B as ref level. 
+
+
 ```{r}
 head(lm_t)
 head(tt_t)
@@ -500,7 +504,6 @@ head(tt_t)
 all.equal(lm_t,tt_t)
 ```
 
-* We can see now the t value sign and magnitude match and all.equal is returning TRUE. It seems t.test is using B as ref level. 
 
 
 
