@@ -691,7 +691,7 @@ days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)</code></pre>
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <ul>
 <li>The NULL hypothesis is <span class="math inline">\(\beta_4 = \beta_5 = \beta_6 = \beta_7 = 0\)</span></li>
-<li>The Alternate hypothesis at least one of coefficient $_4, _5, _6, _7, $ is non zero.</li>
+<li>The Alternate hypothesis at least one of coefficient <span class="math inline">\(\beta_4, \beta_5, \beta_6, \beta_7\)</span> is non zero.</li>
 <li>The p value is 0.087</li>
 <li>At <span class="math inline">\(\alpha = 0.1\)</span> we can reject the NULL hypothesis.</li>
 <li>Thus We prefer the interaction model.</li>
@@ -713,7 +713,7 @@ sim_data = data.frame(
   values = rep(0, n))
 str(sim_data)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    30 obs. of  2 variables:
-##  $ groups: Factor w/ 2 levels &quot;A&quot;,&quot;B&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ groups: chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
 ##  $ values: num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 <p>We will use a total sample size of <code>30</code>, <code>15</code> for each group. The <code>groups</code> variable splits the data into two groups, <code>A</code> and <code>B</code>, which will be the grouping variable for the <span class="math inline">\(t\)</span>-test and a factor variable in a regression. The <code>values</code> variable will store simulated data.</p>
 <p>We will repeat the following process a number of times.</p>
@@ -812,7 +812,7 @@ for (i in 1: num_sims)
 <pre class="r"><code>set.seed(19771212)
 
 #Create a new column in data frame with swapped ref. level 
-sim_data$groups_swap =  relevel(sim_data$groups, ref = &quot;B&quot;)
+sim_data$groups_swap =  relevel(as.factor(sim_data$groups), ref = &quot;B&quot;)
 
 #Check ref. level is now B
 levels(sim_data$groups_swap)</code></pre>

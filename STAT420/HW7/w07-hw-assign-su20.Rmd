@@ -327,7 +327,7 @@ anova(days_small,days_add )
 ```
 
   * The NULL hypothesis is $\beta_4 = \beta_5 = \beta_6 =  \beta_7 = 0$
-  * The Alternate hypothesis at least one of coefficient $\beta_4,  \beta_5, \beta_6,   \beta_7, $ is non zero.
+  * The Alternate hypothesis at least one of coefficient $\beta_4,  \beta_5, \beta_6,   \beta_7$ is non zero.
   * The p value is  0.087
   * At $\alpha = 0.1$ we can reject the NULL hypothesis.
   * Thus We prefer the interaction model.
@@ -474,7 +474,7 @@ The lm_tt and tt_t seems to have same magnitude but opposite signs. The sign of 
 set.seed(19771212)
 
 #Create a new column in data frame with swapped ref. level 
-sim_data$groups_swap =  relevel(sim_data$groups, ref = "B")
+sim_data$groups_swap =  relevel(as.factor(sim_data$groups), ref = "B")
 
 #Check ref. level is now B
 levels(sim_data$groups_swap)
