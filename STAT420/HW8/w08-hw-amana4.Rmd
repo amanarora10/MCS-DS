@@ -139,20 +139,68 @@ diagnostics(model_fit)
 **(d)** Check for any high leverage observations. Report any observations you determine to have high leverage.
 
 ```{r}
-hatvalues(model_fit) > 2*mean(hatvalues(model_fit))
+high_lev_idx = hatvalues(model_fit) > 2*mean(hatvalues(model_fit))
 
+prostate [high_lev_idx,]
+
+```
+  
+  * There are 5 observations with high leverage as shown above 
+
+**(e)** Check for any influential observations. Report any observations you determine to be influential.
+
+```{r}
+influ_idx =  cooks.distance(model_fit) > 4/length(cooks.distance(model_fit))
+prostate[influ_idx,]
+
+```
+
+  * There are 7 influential observations  as shown above 
+
+**(f)** Refit the additive multiple regression model without any points you identified as influential. Compare the coefficients of this fitted model to the previously fitted model.
+
+```{r}
+#Find indices of rows that do not have influential observations
+retain_idx =  cooks.distance(model_fit) < 4/length(cooks.distance(model_fit))
+
+#Fit a new model without influential observations
+model_new = lm(lpsa ~ ., data = prostate[retain_idx,])
+
+coef(model_fit)
+coef(model_new)
 
 
 ```
 
+The new coefficients after removing influential observations are significantly different than original coefficients. 
 
-
-
-**(e)** Check for any influential observations. Report any observations you determine to be influential.
-
-**(f)** Refit the additive multiple regression model without any points you identified as influential. Compare the coefficients of this fitted model to the previously fitted model.
 
 **(g)** Create a data frame that stores the observations that were "removed" because they were influential. Use the two models you have fit to make predictions with these observations. Comment on the difference between these two sets of predictions.
+
+
+```{r}
+#new data frame with influential observation 
+new_data1 = prostate[influ_idx,]
+
+#predict with original model
+result = predict(model_fit, newdata = new_data1 )
+
+plot(result, col = "blue")
+
+#predict with model with influential observation removed
+result_new = predict(model_new, newdata = new_data1 )
+
+points(result_new,col = "red")
+
+#The actual response values
+real = prostate[influ_idx, "lpsa"]
+
+ylim=c(0,10))
+
+points(real,col = "green")
+
+```
+
 
 ***
 
