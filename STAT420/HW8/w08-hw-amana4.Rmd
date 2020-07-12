@@ -87,7 +87,7 @@ data_3$y = with(data_3, 2 + 1 * x + rnorm(n = 40, sd = x))
 fit_3 = lm(y ~ x, data = data_3)
 ```
 
-```{r, eval = FALSE}
+```{r}
 diagnostics(fit_1, plotit = FALSE)$p_val
 diagnostics(fit_2, plotit = FALSE)$decision
 diagnostics(fit_1, testit = FALSE, pcol = "black", lcol = "black")
@@ -109,11 +109,11 @@ library(faraway)
 
 ```{r}
 model_fit =  lm(lpsa~., data = prostate)
-model_sum = summary(model_fit)
+summary(model_fit)$r.squared
 
 ```
   
-  * The $R^2$ value for this model `r is model_sum$r.squared`
+The $R^2$ value for this model is 0.6548
 
 **(b)** Check the constant variance assumption for this model. Do you feel it has been violated? Justify your answer.
 
@@ -183,24 +183,28 @@ The new coefficients after removing influential observations are significantly d
 new_data1 = prostate[influ_idx,]
 
 #predict with original model
-result = predict(model_fit, newdata = new_data1 )
-
-plot(result, col = "blue")
+result = predict(model_fit, newdata = new_data1)
 
 #predict with model with influential observation removed
-result_new = predict(model_new, newdata = new_data1 )
-
-points(result_new,col = "red")
+result_new = predict(model_new, newdata = new_data1)
 
 #The actual response values
 real = prostate[influ_idx, "lpsa"]
 
-ylim=c(0,10))
+#Plot all the predictions and real data
+plot(result, col = "blue", ylim = c(0,6), pch =1, ylab = "Prediction")
 
-points(real,col = "green")
+points(result_new,col = "red", pch =2)
+
+points(real,col = "green", pch =3)
+grid()
+
+legend("bottomright", c("original model", "inf. pt. removed ","actual data"), col= c("blue","red","green"), pch = 1:3)
+
 
 ```
-
+  
+  * We can see from the plot the prediction with original model are closer to actual value than the model which has the influential points removed.
 
 ***
 
@@ -280,7 +284,59 @@ library(faraway)
 
 **(a)** Fit a simple linear regression with `loss` as the response and `Fe` as the predictor. Plot a scatterplot and add the fitted line. Check the assumptions of this model.
 
+```{r}
+fitted_model = lm(loss~Fe, data = corrosion )
+
+plot(loss~Fe, data = corrosion)
+abline(fitted_model, col = "red")
+
+#Evaluate the assumptions
+diagnostics(fitted_model)
+bptest(fitted_model)
+
+```
+  
+* The assumption of constant variance seems to hold from  fitted vs residual plot and high p value from Breusch-Pagan test
+
+* The assumption of normal residuals seems to hold from  Q-Q plot and high p value from Shapiro-Wilks test
+
 **(b)** Fit higher order polynomial models of degree 2, 3, and 4. For each, plot a fitted versus residuals plot and comment on the constant variance assumption. Based on those plots, which of these three models do you think are acceptable? Use a statistical test(s) to compare the models you just chose. Based on the test, which is preferred? Check the normality assumption of this model. Identify any influential observations of this model.
+
+
+```{r}
+library(knitr )
+model2 = lm(loss~ Fe + I(Fe^2), data = corrosion )
+model3 = lm(loss~ Fe + I(Fe^2) + I(Fe^3), data = corrosion )
+model4 = lm(loss~ Fe + I(Fe^2)+ I(Fe^3)+ I(Fe^4), data = corrosion )
+
+name_model = c("2nd degree", "3rd degree", "4th Degree" )
+p_val  = c(diagnostics(model2)$p_val, diagnostics(model3)$p_val, diagnostics(model4)$p_val)
+
+result = data.frame("Model Type" = name_model, "Shaprio(p value) " =  p_val ) 
+
+```
+
+`r kable(result,"markdown",caption ="Model Comparison")`  
+
+
+* Based on the plots and shaprio wilk test  the model with degree 3 seems to have the residuals with  variance that seems constant and highest p value. 
+
+```{r}
+bptest(model3)
+```
+
+
+* Based on the normal QQ plots and high p value in  BP test  the model with degree 3 seems to hold the normality assumption as well. 
+
+
+```{r}
+inf_idx =  cooks.distance(model3) >  4/length(cooks.distance(model3))
+corrosion[inf_idx,]
+
+```
+  
+  
+* No influential observations were found in the data for the model with degree 3.
 
 ***
 
@@ -294,17 +350,70 @@ library(ggplot2)
 
 **(a)** Fit a linear model with `price` as the response variable $y$, and `carat` as the predictor $x$. Return the summary information of this model.
 
+```{r}
+model1 = lm(price ~ carat, data = diamonds )
+summary(model1)
+
+```
+
 **(b)** Plot a scatterplot of price versus carat and add the line for the fitted model in part **(a)**. Using a fitted versus residuals plot and/or a Q-Q plot, comment on the diagnostics. 
 
+
+```{r}
+plot(price ~ carat, data = diamonds)
+abline(model1, col = "red")
+diagnostics(model1, testit = FALSE)
+```
+  
+  * From Residuals vs fitted plot we do not see constant variance assumption is appropriate for this model and data.
+  * From Q-Q plot we see constant normality  assumption does not  look valid. 
 
 **(c)** Seeing as the price stretches over several orders of magnitude, it seems reasonable to try a log transformation of the response. Fit a model with a logged response, plot a scatterplot of log-price versus carat and add the line for the fitted model, then use a fitted versus residuals plot and/or a Q-Q plot to comment on the diagnostics of the model.
 
 ```{r}
 qplot(price, data = diamonds, bins = 30)
 ```
+```{r}
+model2 = lm(log(price) ~ carat, data = diamonds)
 
+plot(diamonds$carat, log(diamonds$price))
+abline(model2, col = "red")
+
+diagnostics(model2, testit = FALSE)
+
+```
+  
+   
+  * From Residuals vs fitted plot we do not see constant variance assumption is appropriate for this model and data.
+  * From Q-Q plot we see constant normality  assumption does not  look valid. 
 
 **(d)** Try adding log transformation of the predictor. Fit a model with a logged response and logged predictor, plot a scatterplot of log-price versus log-carat and add the line for the fitted model, then use a fitted versus residuals plot and/or a Q-Q plot to comment on the diagnostics of the model.
 
+```{r}
+model3 = lm(log(price) ~ log(carat), data = diamonds)
+
+plot(log(diamonds$carat), log(diamonds$price))
+abline(model3, col = "red")
+
+diagnostics(model3, testit = FALSE)
+
+
+```
+   
+   
+ * From Residuals vs fitted plot we do see constant variance assumption is seems appropriate for this model and data vs previous models although not pefect.
+ 
+ * From Q-Q plot we see constant normality  assumption does look valid vs previous models although not perfect. 
+
+
 **(e)** Use the model from part **(d)** to predict the price (in dollars) of a 3-carat diamond. Construct a 99% prediction interval for the price (in dollars).
+
+```{r}
+newdata1 = data.frame(carat = 3)
+result = predict(model3, newdata = newdata1, interval = "prediction", level = 0.99)
+result_dollars = exp(result)
+
+```
+  
+  99% prediction interval of price for a 3-carat diamond is (14959, 57894)
 
