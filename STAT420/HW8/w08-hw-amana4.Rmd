@@ -258,7 +258,7 @@ bptest(fit_2)
 num_sims = 2500
 p_val_1 = rep(0, num_sims)
 p_val_2 = rep(0, num_sims)
-birthday = 19081014
+birthday = 19771212
 set.seed(birthday)
 ```
 
@@ -270,8 +270,50 @@ Repeat the above process of generating `y_1` and `y_2` as defined above, and fit
 
 using both models, in the appropriate variables defined above. (You do not need to use a data frame as we have in the past. Although, feel free to modify the code to instead use a data frame.)
 
+```{r}
+
+for(i in 1:num_sims)
+{
+  y_1 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = 1)
+  fit_1 = lm(y_1 ~ x_1 + x_2)
+  p_val_1[i] =   bptest(fit_1)$p.value
+  
+  y_2 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = abs(x_2))
+  fit_2 = lm(y_2 ~ x_1 + x_2)
+  p_val_2[i] =   bptest(fit_2)$p.value
+
+  
+}  
+  
+```
+  
+  
+
 **(b)** What proportion of the `p_val_1` values is less than 0.01? Less than 0.05? Less than 0.10? What proportion of the `p_val_2` values is less than 0.01? Less than 0.05? Less than 0.10? Arrange your results in a table. Briefly explain these results.
 
+```{r}
+library(knitr)
+
+thresholds = c("< 0.01", "< 0.05", "< 0.1" )
+
+p_val1_count  = c( mean(p_val_1 < .01), mean(p_val_1 < .05),mean(p_val_1 < .1)   )
+
+p_val2_count  = c( mean(p_val_2 < .01),mean(p_val_2 < .05),mean(p_val_2 < .1)   )
+  
+result = data.frame("Thresholds" = thresholds, "Model 1 " =  p_val1_count, "Model 2 " =  p_val2_count ) 
+
+```
+
+
+`r kable(result,"markdown",caption ="Model Comparison")` 
+  
+  * We can see from the table above the with model 2, the no of p values is higher than thresholds is also greater i.e. there are more p values that indicate the presence of non constant variance vs model 1.  
+  
+  * We also see that the BP test does not always  indicate the presence of non constant variance for model 2 (which we know has non constant variance) since the fraction of total values that are with in the threshold is always high i.e. BP test is not 100% accurate predictor of non constant variance. 
+  
+  * Conversely we also see that the BP test flags  constant variance data (model 1) as non constant for fraction of the runs. Again reinforcing the conclusion that its not a fully accurate method to test for non constant variance. 
+  
+  
 ***
 
 ## Exercise 4 (Corrosion Data)
@@ -373,6 +415,8 @@ diagnostics(model1, testit = FALSE)
 ```{r}
 qplot(price, data = diamonds, bins = 30)
 ```
+
+
 ```{r}
 model2 = lm(log(price) ~ carat, data = diamonds)
 
