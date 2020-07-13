@@ -358,6 +358,10 @@ result = data.frame("Model Type" = name_model, "Shaprio(p value) " =  p_val )
 ```
 
 `r kable(result,"markdown",caption ="Model Comparison")`  
+  
+  * Based on the plots above the model with order 3 seems be most appropriate with constant variance and normal residuals. 
+
+
 
 ```{r}
 #Check for significance of 3rd order term
