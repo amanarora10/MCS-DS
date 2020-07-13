@@ -304,7 +304,6 @@ result = data.frame("Thresholds" = thresholds, "Model 1 " =  p_val1_count, "Mode
 
 ```
 
-
 `r kable(result,"markdown",caption ="Model Comparison")` 
   
   * We can see from the table above the with model 2, the no of p values is higher than thresholds is also greater i.e. there are more p values that indicate the presence of non constant variance vs model 1.  
@@ -360,8 +359,17 @@ result = data.frame("Model Type" = name_model, "Shaprio(p value) " =  p_val )
 
 `r kable(result,"markdown",caption ="Model Comparison")`  
 
+```{r}
+#Check for significance of 3rd order term
+anova(model2,model3)
 
-* Based on the plots and shaprio wilk test  the model with degree 3 seems to have the residuals with  variance that seems constant and highest p value. 
+```
+```{r}
+#Check for significance of 4th order term
+anova(model3,model4)
+```
+
+* Based on the ANOVA tests the 3rd order term seems to be significant while 4th order term is not. We thus prefer the model with degree of 3.  
 
 ```{r}
 bptest(model3)
@@ -407,7 +415,7 @@ abline(model1, col = "red")
 diagnostics(model1, testit = FALSE)
 ```
   
-  * From Residuals vs fitted plot we do not see constant variance assumption is appropriate for this model and data.
+  * From Residuals vs fitted plot we see constant variance assumption is not appropriate for this model and data.
   * From Q-Q plot we see constant normality  assumption does not  look valid. 
 
 **(c)** Seeing as the price stretches over several orders of magnitude, it seems reasonable to try a log transformation of the response. Fit a model with a logged response, plot a scatterplot of log-price versus carat and add the line for the fitted model, then use a fitted versus residuals plot and/or a Q-Q plot to comment on the diagnostics of the model.
@@ -445,7 +453,7 @@ diagnostics(model3, testit = FALSE)
 ```
    
    
- * From Residuals vs fitted plot we do see constant variance assumption is seems appropriate for this model and data vs previous models although not pefect.
+ * From Residuals vs fitted plot we do see constant variance assumption  seems appropriate for this model and data vs previous models although not prefect.
  
  * From Q-Q plot we see constant normality  assumption does look valid vs previous models although not perfect. 
 
