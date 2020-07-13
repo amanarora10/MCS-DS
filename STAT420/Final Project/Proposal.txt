@@ -1,0 +1,21 @@
+OVERVIEW
+Make sure you have reviewed the Data Analysis Project Information page.
+
+The proposal of your intended project should include the following:
+
+The names of the students who will be contributing to the group project.
+A tentative title for the project.
+Description of the data file (what they contain including number of variables and number of records). You do not necessarily have to list all the variables, but at least mention those of greatest importance.
+Background information on the data sets, including specific citation of their source (so that I can also access it).
+A brief statement of the business, science, research, or personal interest you have in the data set which you hope to explore.
+Evidence that the data can be loaded into `R`. Load the data, and print the first few values of the response variable as evidence.
+As a group, you will submit a .zip file (as you would for homework) that contains an .html and .Rmd file, as well as the data if it cannot be linked online. If your data is too large to submit and cannot be linked, please let us know and we will find an alternative.
+
+REVIEW CRITERIA
+After review of your proposal, it will be evaluated in one of two ways:
+
+Approved: Your group may proceed with your plans for the data and project.
+Pending: We will provide suggestions, concerns, or needed information that must be addressed before the proposal will be approved.
+The proposal is worth 3% of your final course grade. Grading of the proposal will be based on meeting the requirements, as well as neatness, organization, RMarkdown usage, and ability to communicate your ideas.
+
+
