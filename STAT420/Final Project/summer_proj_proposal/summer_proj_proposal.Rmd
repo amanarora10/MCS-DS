@@ -1,0 +1,116 @@
+---
+title: "Box Office Blues"
+author: "STAT-420, Team: Summer Proj, A Arora, S Dani, G Shrivastava"
+date: 'July 2020'
+output:
+  html_document: 
+    theme: readable
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80, fig.align = "center")
+```
+  
+
+## Team
+The names of the students who will be contributing to the group project:  
+
+- **amana4** (Aman Arora)
+- **dani4** (Savvy Dani)
+- **gaurav4** (Gourav Shrivastava)
+
+## Project
+A tentative title for the project: **Box Office Blues** 
+
+****
+
+## Dataset
+
+The data file is a cvs file with 4803 records and 20 columns. It contains metadata and revenue information for over 5000 movies sourced from Kaggle [TMDB 5000 Movie Dataset](https://www.kaggle.com/tmdb/tmdb-movie-metadata?select=tmdb_5000_movies.csv) .  A few  variables of interest are:
+
+-  **Original_title**: Name of the movie
+-  **Budget**: Budget of movies in USD (numeric)
+-  **Revenue**: Revenue of movie in USD (numeric)
+-  **Original Language**: The language in which movie was originally produced (factor variable) 
+-  **Genres**: Genre of the movie (factor variable) 
+-  **Popularity**: A numeric metric to measure popularity of the movie (numeric) 
+-  **Vote Average**: A numeric metric to measure average vote from audience (numeric) 
+-  **Runtime** : A numeric metric for the total runtime(in min) of the movie (numeric)
+-  **Production Companies** : A categorical for the production companies name  (factor)
+
+
+****
+
+## Goals
+
+In 2018, the global box office was worth \$41.7 billion. In 2019, total earnings at the North American box office amounted to \$11.32 billion. The magic movies create in our daily lives is undeniable, but more interesting to us is the story the data tells us. 
+
+As part of this project, we will like to predict the 'Revenue' of the movie. We will be exploring different features like 'genres', 'runtime', 'budget', 'vote_average','vote_count','production_companies' to find the best possible model. We will validate our model performance by holding a 'validation' dataset.
+
+
+****
+
+## Sample DataSet with Preliminary Data Analysis
+- Evidence that the data can be loaded into `R`. Load the data, and print the first few values of the response variable as evidence.
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library('readr')
+library(broom)
+library(tidyverse)
+library(kableExtra)
+library(flextable)
+library(pagedown)
+```
+
+```{r}
+tmdb_movies = read_csv("tmdb_5000_movies.csv")
+```
+
+
+
+
+```{r}
+#Select the relevant columns 
+col_sel = c( "original_title","revenue", "budget","popularity", "vote_average","runtime","genres","production_companies","original_language")
+tmdb_movies_small = tmdb_movies[,col_sel]
+
+```
+### Data Snippet
+
+Here is a snippet of data with only the  columns considered.
+
+```{r}
+ft <- flextable(head(tmdb_movies_small,n=10))
+ft <- autofit(ft)
+ft
+
+```
+
+```{r}
+#Find rows with 0 values and set to NA
+tmdb_movies_small[tmdb_movies_small$budget == 0, "budget" ] = NA
+tmdb_movies_small[tmdb_movies_small$revenue == 0, "revenue" ] = NA
+tmdb_movies_small[tmdb_movies_small$popularity == 0, "popularity" ] = NA
+#tmdb_movies_small[tmdb_movies_small$vote_count == 0, "vote_average" ] = NA
+tmdb_movies_small$original_language = as.factor(tmdb_movies_small$original_language)
+
+#remove invalid rows
+tmdb_movies_small =  na.omit(tmdb_movies_small)
+
+```
+
+```{r}
+#Fit a simple  model and print summary
+boxoffice_model_1 = lm(revenue ~  budget+popularity , tmdb_movies_small)
+summary(boxoffice_model_1)
+```
+  
+  A simple additive model above was used to predict revenue based on popularity and budget of the movie. The predictors seems to be significant, our objective is to improve this simplistic model in final report of this project. 
+  
+  

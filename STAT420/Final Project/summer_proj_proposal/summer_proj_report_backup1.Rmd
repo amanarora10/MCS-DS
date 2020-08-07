@@ -1,0 +1,943 @@
+---
+title: "Box Office Blues"
+author: "STAT-420, Team: Summer Proj, A Arora, S Dani, G Shrivastava"
+date: 'July 2020'
+output:
+  html_document:
+    theme: readable
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80, fig.align = "center")
+
+cbPalette = c("orange2", "darkturquoise", "hotpink", "green", "royalblue", "darkgreen", "tomato", "lightseagreen")
+
+```
+
+
+# Introduction
+In 2018, the global box office was worth \$41.7 billion. In 2019, total earnings at the North American box office amounted to \$11.32 billion. The magic movies create in our daily lives is undeniable, but more interesting to us is the story the data tells us.
+
+In this work, we build multiple linear regression models to predict the **Revenue** of a movie, given its attributes. Different features like 'genre', 'runtime', 'budget', 'vote_average', 'vote_count','production_companies' and their interactions and higher order terms are explored to find the best model for revenue prediction.
+
+We follow a systematic process of model selection. Starting with an additive linear regression model of the form
+\[
+Y_i = \beta_0 + \beta_1 x_{1} + \beta_2 x_{2} + \epsilon
+\]  
+we work our way quickly through full additive models, log responses, power response, interaction terms and polynomial predictors. We use stepwise approaches and exhaustive search to find the best models for each approach. Model assumptions of normal distribution and constant variance are also tested. The following values are recorded for the models under consideration:
+
+- **loocv_rmse** or cross-validated RMSE as a measure of generalization of the model.
+- **Adjusted $R^2$** as a measure of the explainability of revenue with the chosen predictors.
+- **Predictor Count** as a measure of model complexity.
+- **Normality Assumption**: The Breusch-Pagan test statistic and decision given a significance level of $\alpha = 0.01$.
+- **Equal Variance Assumption**: The Shapiro-Wilk test statistic and decision given a significance level of $\alpha = 0.01$.
+- **Average Percent Error**: Our final measure of model success is obtained by validating model performance on a test dataset.
+
+
+## Dataset
+Our search for high quality movie metadata led us to the [TMDB 5000 Movie Dataset](https://www.kaggle.com/tmdb/tmdb-movie-metadata?select=tmdb_5000_movies.csv) provided by Kaggle. This dataset contains metadata and revenue information for over 5000 movies. A few  variables of interest are:
+
+-  **Original_title**: Name of the movie
+-  **Budget**: Budget of movies in USD (numeric)
+-  **Revenue**: Revenue of movie in USD (numeric)
+-  **Original Language**: The language in which movie was originally produced (factor variable)
+-  **Genres**: Genre of the movie (factor variable)
+-  **Popularity**: A numeric metric to measure popularity of the movie (numeric)
+-  **Vote Average**: A numeric metric to measure average vote from audience (numeric)
+-  **Runtime** : A numeric metric for the total runtime(in min) of the movie (numeric)
+-  **Production Companies** : A categorical for the production companies name  (factor)
+
+The TMDB 5000 Movie Dataset contains two csv files - one related to movies and the other on movie credits. While both containing interesting information that could impact revenue, this project's focus was on the attributes contained in [`tmdb_5000_movies.csv`](tmdb_5000_movies.csv). This data file is a csv file with 4803 records and 20 columns and formed the basis for the entirety of this study.
+
+
+****
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library('readr')
+library(broom)
+library(tidyverse)
+library(kableExtra)
+library(faraway)
+library(leaps)
+library(flextable)
+library(pagedown)
+library(tm)
+library(data.table)
+library(Metrics)
+library(MASS)
+```
+
+# Methods
+
+```{r message = FALSE, warning = FALSE}
+tmdb_movies = read.csv("tmdb_5000_movies.csv" , stringsAsFactors = FALSE)
+
+```
+
+As a first step, we create a data frame from the tmdb_5000_movies.csv file. This data frame contains `r length(tmdb_movies)` attributes of `r nrow(tmdb_movies)` movies.
+
+## Data Preparation
+Before creating the models, we go through a process of data analysis, transformation and cleaning. In this step, tmdb_movies is transformed to extract relevant data points which could be useful for model building. Some of the tenets we adopted during this process:
+
+- **Value Distribution**: To be considered as a predictor, the attribute's value range should have reasonable coverage within the dataset.
+- **Numeric vs Categorical Variables**: Consider predictor count inflation while deciding whether a predictor should be modeled as numeric or categorical.
+- **Text Content**: While movie overview, keywords and other textual content in movie metadata could be interesting predictors if we used NLP techniques, we drop unique content attributes while building the linear regression models.
+
+```{r message = FALSE, warning = FALSE}
+#----DATA Analysis: original_language ----#
+
+#retain top 5 languages; else make it "not"
+top_5_lang = tmdb_movies %>%
+  group_by(original_language) %>%
+  tally(sort = T) %>%
+  ungroup() %>%
+  arrange(desc(n))
+top_5_lang = head(top_5_lang, 5)
+
+
+tmdb_movies$top_5_lang = ifelse(tmdb_movies$original_language %in%
+                                  top_5_lang$original_language,
+                                 tmdb_movies$original_language,
+                                 "not")
+
+en_percent = mean(tmdb_movies$top_5_lang == 'en') * 100
+top_5_lang_percent = mean(tmdb_movies$top_5_lang != 'not') * 100
+
+```
+
+```{r message = FALSE, warning = FALSE}
+#----DATA Cleaning and Transformation: release_date ----#
+
+
+
+tmdb_movies$top_5_lang = ifelse(tmdb_movies$original_language %in%
+                                  top_5_lang$original_language,
+                                 tmdb_movies$original_language,
+                                 "not")
+
+en_percent = mean(tmdb_movies$top_5_lang == 'en') * 100
+top_5_lang_percent = mean(tmdb_movies$top_5_lang != 'not') * 100
+
+```
+
+```{r message = FALSE, warning = FALSE}
+#----DATA Cleaning and Transformation: release_date ----#
+
+
+#Break up date into month and year
+tmdb_movies$release_month=format(as.Date(tmdb_movies$release_date), "%m")
+tmdb_movies$release_year=format(as.Date(tmdb_movies$release_date), "%Y")
+
+```
+
+```{r message = FALSE, warning = FALSE}
+
+#----DATA Cleaning and Transformation: genres ----#
+
+#Get the first genre of the movie. Typically a movie is a combination of many genres, but our dataset represents the most weighted genre as the first genre. We extract this so that we have a 1:1 mapping of a movie to its top genre.
+
+tmdb_movies$first_genre=as.numeric(gsub(",","",substr(tmdb_movies$genres,9, regexpr(",", tmdb_movies$genres))))
+
+```
+
+```{r message = FALSE, warning = FALSE}
+#----DATA Cleaning and Transformation: production_companies ----#
+
+#remove punctuation
+tmdb_movies$clean_company = removePunctuation(tmdb_movies$production_companies)
+#remove spaces
+tmdb_movies$clean_company = tolower(gsub("[[:blank:]]", "", tmdb_movies$clean_company))
+
+###  variable creation #####
+company_rnk = read.csv("company_ranking.csv" , stringsAsFactors = FALSE)
+
+#remove punctuation
+company_rnk$clean_company = removePunctuation(company_rnk$Production_company)
+#remove spaces and lower case for each of mathching
+company_rnk$clean_company = tolower(gsub("[[:blank:]]", "", company_rnk$clean_company))
+
+#take top 10 as Big Banners
+top_10 = head(company_rnk,n=10)
+top_10_list = paste(unique(top_10$clean_company), collapse = '|')
+
+#Create a new variable 'is_big_banner' which is dummy variable to indicate if the movie was produced by a Top 10 production  companies'
+#tmdb_movies$is_big_banner <- as.integer(as.logical(tmdb_movies$clean_company %like% top_10_list))
+tmdb_movies$is_big_banner <- tmdb_movies$clean_company %like% top_10_list
+
+```
+
+The following columns are of specific interest:
+
+- **original_language**: The data contained in tmdb_movies is very skewed towards English. `r en_percent`% mvoies in the dataset are in English and `r top_5_lang_percent`% movies are in the top 5 languages. We drop original_language as a predictor of revenue because of the nature of its distribution.
+- **release_date**: The month and year of the release date are extracted as two separate columns. This will allow us to test month independently as a predictor (e.g. revenue of summer movies or movies released during holiday season) versus the year of release.
+- **genres**: The tmdb_movies data contains 'genres' variable as a key:value pair. To make it more useful as a predictor, transformation is applied to extract the first genre from the list. Based on visual scan of the data, it is apparent that the first genre in list is predominately the major genre of the movie. We add a new variable 'first_genre' to the tmdb_movies data frame. first_genre is later set as a categorical variable with genre id as the value.
+- **production_companies**: Basic data cleaning tasks are performed with standardization of production companies in mind. Special characters are removed and the string is converted to uppercase. This step is a precursor to the creation of a custom variable **is_banner_flag** which will be set if the production company is a top 10 production company. We use data from [Movie Production Companies](https://www.the-numbers.com/movies/production-companies/) to create a reference table for our lookups to determine whether a production company is in the top 10 or not. Please refer to [company_ranking.csv](company_ranking.csv) for details.
+
+
+A new data frame **tmdb_movies_small** is created with just the columns of interest. This data frame is used for further exploration and model building.
+
+```{r message = FALSE, warning = FALSE}
+#Select the relevant columns
+col_sel = c( "original_title","revenue", "budget","popularity",
+             "vote_average","vote_count", "runtime",
+             "release_month", "release_year",
+             "first_genre", "is_big_banner")
+
+tmdb_movies_small = tmdb_movies[,col_sel]
+```
+
+## Exploratory Analysis
+Before creating the models, we go through a process of data exploration with tmdb_movies_small to understand the value range of various features, their relationships with each other and with Revenue, our target variable.
+
+Here is a snippet of the data with the columns under consideration:
+
+```{r message = FALSE, warning = FALSE}
+ft <- flextable(head(tmdb_movies_small, n=10))
+ft <- autofit(ft)
+ft
+
+```
+
+Following the tenets outlined earlier, we make the following decisions:
+
+- **release_month**: We treat release_month as a categorical variable. This will help us analyze revenue outcomes by month.
+- **release_year**: tmdb_movies_small contains movies release between `r min(tmdb_movies_small$release_year)` and `r max(tmdb_movies_small$release_year)`. While release_year can be treated as a categorical ordinal variable, we decide to treat it as an integer to reduce model complexity.
+- **first_genre**: we treat this as a categorical variable with `r length(unique(tmdb_movies_small$first_genre))` distinct values in its value set.
+- **is_big_banner**: we treat this as a categorical variable with values {true, false}
+
+```{r message = FALSE, warning = FALSE}
+#Find rows with 0 values and set to NA
+tmdb_movies_small[tmdb_movies_small$revenue == 0, "revenue" ] = NA
+tmdb_movies_small[tmdb_movies_small$budget == 0, "budget" ] = NA
+tmdb_movies_small[tmdb_movies_small$popularity == 0, "popularity" ] = NA
+#tmdb_movies_small[tmdb_movies_small$vote_count == 0, "vote_average" ] = NA
+
+tmdb_movies_small$release_year = as.integer(tmdb_movies_small$release_year)
+tmdb_movies_small$release_month = as.factor(tmdb_movies_small$release_month)
+tmdb_movies_small$first_genre = as.factor(tmdb_movies_small$first_genre)
+tmdb_movies_small$is_big_banner = as.factor(tmdb_movies_small$is_big_banner)
+
+#remove invalid rows
+tmdb_movies_small =  na.omit(tmdb_movies_small)
+
+#dropping original_title as we build the models. Retaining tmdb_movies_small so we can use original_title during results analysis
+tmdb_movies_small_no_title = subset(tmdb_movies_small, select = -c(original_title))
+
+```
+
+We drop the movie title column from tmdb_movies_small. If needed, we will look at the title later during results analysis.
+
+```{r fig.width=12, fig.height=12, message = FALSE, warning = FALSE}
+pairs(tmdb_movies_small_no_title, col = cbPalette[2])
+```
+```{r}
+cor(tmdb_movies_small_no_title[,1:6])
+
+```
+Interestingly from pairs plots the release month seems to have impact on the revenue - with movies released in summer months (April/May/June) and Nov/Dec months  having a higher revenue than other months on average. Since month is factor variable we leave it unmodified. The pairs plot of numeric variables show positive relationship which we investigate with correlation table. 
+
+From the correlation table  of the numeric predictors we can see the vote count and budget of a movie seems to have highest and positive co-relation with  revenue.This is followed by popularity. The vote average and  run time seems to have low co-relation with revenue. 
+
+## Test-Train Split
+
+```{r message = FALSE, warning = FALSE}
+set.seed(420)
+train_idx  = sample(nrow(tmdb_movies_small_no_title), size = trunc(0.80 * nrow(tmdb_movies_small_no_title)))
+
+tmdb_movies_train = tmdb_movies_small_no_title[train_idx, ]
+tmdb_movies_test = tmdb_movies_small_no_title[-train_idx, ]
+```
+
+We withold a validation set so that we can assess model performance. We split our tmdb_movies_small dataset randomly into 2 parts - train (80% ) and test(20%).
+
+- **Train Dataset**: The train dataset is used to train the models and also create a leave-oneout cross-validated RMSE (loocv_rmse). By creating RMSE scores for different sets created by leaving one observation out, we obtain a measure that can be used to assess how the model will generalize. Lower the loocv_rmse, better the model performance against unseen data.
+
+- **Test Dataset**: We run every model on the test dataset and obtain the average percent error as a measure of model generalization.
+
+### Issue: Unseen Factor Levels
+
+Because of the test-train split, we encounter a new problem with respect to categorical variables during model building. If the test dataset contains unseen values for a factor variable, the model would output errors while trying to predict revenue for the test dataset. Our approach is to drop those rows from test set before we begin modeling.
+
+```{r message = FALSE, warning = FALSE}
+# We need to make sure our training set has all the values for the factor variables, else when we call predict on the test data set, we get errors. Our approach is to drop those rows from test set before we begin modeling.
+
+drop_new_factor_levels = function(i) {
+   train_i = tmdb_movies_train[, i]
+   test_i = tmdb_movies_test[, i]
+
+   diff = (unique(test_i) %in% unique(train_i))
+   if (is.factor(test_i) & any(!diff)) {
+      test_i_levels = unique(test_i)
+      apply(test_i ==
+              matrix(rep(test_i_levels[diff], each = nrow(tmdb_movies_test)),
+                     nrow = nrow(tmdb_movies_test)),
+            1,
+            any)
+   } else {
+      rep(TRUE, nrow(tmdb_movies_test))
+   }
+}
+
+keep = apply(sapply(1:ncol(tmdb_movies_test),
+                    drop_new_factor_levels),
+             1,
+             all)
+tmdb_movies_test = tmdb_movies_test[keep, ]
+
+```
+
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(lmtest)
+
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+
+get_rse = function(model) {
+  summary(model)$sigma
+}
+
+
+get_rmse = function(model, lamda = NA) {
+  mse=anova(model)['Residuals', 'Mean Sq']
+predicted = predict( model, newdata = tmdb_movies_test )
+
+if(!is.na(lamda))
+{  
+  cat("Model:", deparse1(model$call$formula), "lamda:", lamda)
+  # Response is in log scale
+  if( lamda ==0)
+  {
+    predicted = exp(predicted)
+  }
+# Response is units of ^lambda convert back to linear units before calculating RMSE
+  else if (!is.na(lamda))
+  {
+    predicted =  predicted^(1/lamda)
+  }
+}
+
+actual_revenue = tmdb_movies_test$revenue
+
+rmse(actual_revenue, predicted)/10^6
+}
+
+
+get_model_results = function(model, alpha = 0.01, lamda = NA) {
+  model_str = as.character(as.formula(model))[3]
+  loocv_rmse = get_loocv_rmse(model)
+  adj_r2 = get_adj_r2(model)
+  bp_decision = get_bp_decision(model, alpha)
+  bp_value = bptest(model)$p.value
+  sw_decision = get_sw_decision(model, alpha)
+  sw_value = shapiro.test(resid(model))$p.value
+  num_params = get_num_params(model)
+  model_rse =  get_rse(model)
+  model_test_rmse = get_rmse(model, lamda)
+
+  list(
+       model = model_str,
+       loocv_rmse = loocv_rmse,
+       adj_r2 = adj_r2,
+       bp_decision = bp_decision,
+       bp_value = bp_value,
+       sw_decision = sw_decision,
+       sw_value = sw_value,
+       num_params = num_params,
+       model_rse = model_rse,
+       model_test_rmse=model_test_rmse)
+}
+
+pasteFormula = function(outcome, variables) {
+  pastef = ""
+  if (!is.null(outcome)) {
+    pastef = paste(outcome, paste(variables, collapse = " + "), sep = " ~ ")
+  } else {
+    pastef = paste(" ~ ", paste(variables, collapse = " + "))
+  }
+  return (pastef)
+}
+
+removeInfluencers = function(data) {
+  model = lm(Revenue ~ ., data=data)
+  cd_mod_a = cooks.distance(model)
+  influential_ind = cd_mod_a > 4 / length(cd_mod_a)
+  data_modified = data[influential_ind == FALSE, ]
+  return (data_modified)
+}
+
+```
+
+```{r message = FALSE, warning = FALSE}
+revenue_mod_results = tribble(~model_name, ~model,~model_rse, ~adj_r2,~model_test_rmse,~num_params, ~sw_value, ~sw_decision, ~bp_value, ~bp_decision )
+revenue_mod_results_discard = tribble(~model_name, ~model,~model_rse, ~adj_r2,~model_test_rmse,~num_params, ~sw_value, ~sw_decision, ~bp_value, ~bp_decision )
+
+
+```
+
+## Baseline: Simple Additive Model
+Our model creation process starts with a simple additive model with two predictors that we can use as a baseline.
+
+```{r }
+boxoffice_model_1 = lm(revenue ~  budget + popularity , tmdb_movies_small)
+results_simple = get_model_results(boxoffice_model_1)
+revenue_mod_results = rbind(revenue_mod_results,
+                          (tibble_row(model_name = "simple",
+                                      model = results_simple$model,
+                                      model_rse = results_simple$model_rse,
+                                      adj_r2 = results_simple$adj_r2,
+                                      model_test_rmse = results_simple$model_test_rmse,
+                                      num_params = results_simple$num_params,
+                                      sw_value = results_simple$sw_value,
+                                      sw_decision = results_simple$sw_decision,
+                                      bp_value = results_simple$bp_value,
+                                      bp_decision = results_simple$bp_decision
+                                      )))
+
+
+
+
+```
+<<<<<<< HEAD
+  
+Looking at the model summary, the two predictors, popularity and budget, appear to be significant and the model has an Adjusted $R^2$ of `r summary(boxoffice_model_1)$adj.r.squared`. Our objective is to improve this simplistic model and find the best performing model as the preferred model for predicting revenue. Various attributes of the baseline model are stored for later analysis.
+=======
+>>>>>>> 5491b94ac4d78543b855eef53604594dd502270a
+
+Looking at the model summary, the two predictors, popularity and budget, appear to be significiant and the model has an Adjusted $R^2$ of `r summary(boxoffice_model_1)$adj.r.squared`. Our objective is to improve this simplistic model and find the best performing model as the preferred model for predicting revenue. Various attributes of the baseline model are stored for later analysis.
+
+
+## Full Additive Model
+Our second step is to evaluate a full additive model. Apart from the usual results, we also check the Variance Inflation Factor for the predictors and check for high correlation between the predictors.
+
+```{r}
+
+
+fit_revenue_add = lm(revenue ~ .,
+                     data = tmdb_movies_train)
+
+results_add = get_model_results(fit_revenue_add)
+revenue_mod_results_discard = rbind(revenue_mod_results_discard,
+                          (tibble_row(model_name = "full additive",
+                                      model = results_add$model,
+                                       model_rse = results_add$model_rse,
+                                      adj_r2 = results_add$adj_r2,
+                                      model_test_rmse = results_add$model_test_rmse,
+                                      num_params = results_add$num_params,
+                                      sw_value = results_add$sw_value,
+                                      sw_decision = results_add$sw_decision,
+                                      bp_value = results_add$bp_value,
+                                      bp_decision = results_add$bp_decision
+                                      )))
+
+
+```
+
+### Variance Inflation Factors
+
+```{r message = FALSE, warning = FALSE}
+vif_revenue_add = car::vif(fit_revenue_add)
+ knitr::kable(vif_revenue_add,
+              caption = "<center><strong>Variance Inflation Factors</strong></center>") %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+
+We find that all the VIF values are less than 5 which is desirable. We draw the conclusion that none of the predictors are highly collinear and we can include all of them in the model if there is support from other considerations like test statistics and p_values.
+
+## Additive Model Improvements
+With the full additive model as a starting point, we try a number of approaches to come up with a better model:
+
+- Backward Search using AIC as the criterion on the main effects
+- Box Cox method to infer the best lambda to use as the exponent of the response variable
+
+```{r fig.width=4, fig.height=4, message = FALSE, warning = FALSE}
+#Find best model based on AIC using main effects
+fit_revenue_add_sel = step(fit_revenue_add, trace = 0)
+
+<<<<<<< HEAD
+```
+
+```{r fig.width=16, fig.height=4, message = FALSE, warning = FALSE}
+par(mar = c(5, 4, 5, 4), mfrow = c(1, 4))
+plot(fit_revenue_add_sel,
+    col = "grey",
+    pch = 20,
+    lwd = 2,
+    main = "Selective Additive")
+```
+
+  
+The Q-Q plot and residuals vs fitted plots do not look like a good fit to LINE assumption. We now  attempt boxcox transformations to improve normal fit for residuals.  
+
+```{r fig.width=16, fig.height=4, message = FALSE, warning = FALSE}
+=======
+>>>>>>> 5491b94ac4d78543b855eef53604594dd502270a
+#Try to find a better fit with Box Cox methods
+# Find the best lambda for the response
+bc = boxcox(fit_revenue_add_sel)
+best.lamda = bc$x[which.max(bc$y)]
+
+#Use the lamda found from boxcox method and do model diagnostics
+fit_revenue_add_lambda = lm(revenue^best.lamda  ~ budget + popularity + vote_count + release_month + first_genre,data = tmdb_movies_train)
+```
+
+```{r fig.width=16, fig.height=8, message = FALSE, warning = FALSE}
+
+par(mar = c(5, 4, 5, 4), mfrow = c(2, 4))
+plot(fit_revenue_add_sel,
+    col = "grey",
+    pch = 20,
+    lwd = 2,
+    main = "Selective Additive")
+
+plot(fit_revenue_add_lambda,
+    col = "grey",
+    pch = 20,
+    lwd = 2,
+    main = "Lambda Additive")
+
+shapiro.test(resid(fit_revenue_add_lambda))
+
+
+```
+
+```{r}
+results_add_sel = get_model_results(fit_revenue_add_sel, lamda = NA)
+revenue_mod_results_discard = rbind(revenue_mod_results_discard,
+                          (tibble_row(model_name = "BIC Selective Additive",
+                                      model = results_add_sel$model,
+                                      model_rse = results_add_sel$model_rse,
+                                      adj_r2 = results_add_sel$adj_r2,
+                                      model_test_rmse = results_add_sel$model_test_rmse,
+                                      num_params = results_add_sel$num_params,
+                                      sw_value = results_add_sel$sw_value,
+                                      sw_decision = results_add_sel$sw_decision,
+                                      bp_value = results_add_sel$bp_value,
+                                      bp_decision = results_add_sel$bp_decision
+
+                                      )))
+
+results_add_lambda = get_model_results(fit_revenue_add_lambda)
+revenue_mod_results_discard = rbind(revenue_mod_results_discard,
+                          (tibble_row(model_name = "Best Lambda Additive",
+                                      model = results_add_lambda$model,
+                                      model_rse = results_add_lambda$model_rse,
+                                      adj_r2 = results_add_lambda$adj_r2,
+                                      model_test_rmse = results_add_lambda$model_test_rmse,
+                                      num_params = results_add_lambda$num_params,
+                                      sw_value = results_add_lambda$sw_value,
+                                      sw_decision = results_add_lambda$sw_decision,
+                                      bp_value = results_add_lambda$bp_value,
+                                      bp_decision = results_add_lambda$bp_decision
+
+                                      )))
+
+```
+
+The QQ plot looks better after box cox transformation, but the normal vs residual plot indicated presence of non linearity.
+
+
+## Interaction Model
+We rescan the scatter plots between the chosen predictors to add interaction and higher order terms to the additive model. We add a new column that contains the value of $revenue ^ \lambda$ to evaluate the relationships against our higher order response variable.
+
+```{r fig.width=8, fig.height=8}
+
+# Check for polynomial and interaction relationships with powered revenue
+retain_col = c("budget", "popularity", "vote_count", "release_month", "first_genre")
+tmdb_temp = tmdb_movies_train[retain_col]
+tmdb_temp$revenue_lambda = tmdb_movies_train$revenue ^ best.lamda
+
+pairs(tmdb_temp, col = cbPalette[3])
+
+<<<<<<< HEAD
+tmdb_movies_train_mod = tmdb_movies_train
+
+# Scale the revenue based on boxcox lambda
+tmdb_movies_train_mod$revenue = (tmdb_movies_train_mod$revenue)^best.lamda
+
+pairs(tmdb_movies_train_mod[retain_col], col = cbPalette[3])
+=======
+>>>>>>> 5491b94ac4d78543b855eef53604594dd502270a
+```
+Polynomial and interaction terms are added based on visual inspection of the pairs plot and we obtain the results for this interactive polynomial model. A stepwise backward search is once again performed, with AIC as the criterion.
+
+From pairs plot it does seems adding  polynomial and interaction terms could get better fitting models with numeric predictors of budget, popularity and vole count. We modify the model to add interaction and polynomial terms for numeric predictors. 
+
+  
+
+
+```{r fig.width=16, fig.height=4}
+#Add polynomial and interaction terms, based on visual inspection of pairs plot
+
+fit_revenue_int_sel = lm(revenue^best.lamda  ~ budget + popularity + sqrt(vote_count) + release_month + first_genre +  budget*vote_count*release_month + I(budget^2) + I(popularity^2) +  I(popularity^3) + I(vote_count^2),data = tmdb_movies_train)
+
+par(mar = c(5, 4, 5, 4), mfrow = c(1, 4))
+plot(fit_revenue_int_sel,
+    col = "grey",
+    pch = 20,
+    lwd = 2,
+    main = "Interactive/Polynomial")
+
+```
+
+```{r}
+results_int_sel = get_model_results(fit_revenue_int_sel, lamda = best.lamda)
+revenue_mod_results = rbind(revenue_mod_results,
+                          (tibble_row(model_name = "Interactive/Polynomial",
+                                      model = results_int_sel$model,
+                                      model_rse = results_int_sel$model_rse,
+                                   model_test_rmse = results_int_sel$model_test_rmse,
+                                   num_params = results_int_sel$num_param,
+                                      adj_r2 = results_int_sel$adj_r2,
+                                      sw_value = results_int_sel$sw_value,
+                                      sw_decision = results_int_sel$sw_decision,
+                                      bp_value = results_int_sel$bp_value,
+                                      bp_decision = results_int_sel$bp_decision
+
+
+                                      )))
+
+```
+
+
+```{r fig.width=16, fig.height=4}
+fit_revenue_int_best = step(fit_revenue_int_sel, trace =FALSE)
+
+par(mar = c(5, 4, 5, 4), mfrow = c(1, 4))
+plot(fit_revenue_int_best,
+    col = "grey",
+    pch = 20,
+    lwd = 2,
+    main = "Interactive/Polynomial AIC")
+
+shapiro.test(resid(fit_revenue_int_best))
+
+sum = summary(fit_revenue_int_best)
+
+sum$r.squared
+
+```
+
+```{r}
+results_int_best = get_model_results(fit_revenue_int_best, lamda = best.lamda)
+revenue_mod_results = rbind(revenue_mod_results,
+                          (tibble_row(model_name = "Interactive/Polynomial AIC",
+                                      model = results_int_best$model,
+                                        model_rse = results_int_best$model_rse,
+                                      adj_r2 = results_int_best$adj_r2,
+                                         model_test_rmse = results_int_best$model_test_rmse,
+                                          num_params = results_int_best$num_params,
+                                      sw_value = results_int_best$sw_value,
+                                      sw_decision = results_int_best$sw_decision,
+                                      bp_value = results_int_best$bp_value,
+                                      bp_decision = results_int_best$bp_decision
+
+
+                                      )))
+
+```
+
+
+<<<<<<< HEAD
+TODO: Add code chunks for other approaches and get best models for each. Add to revenue_mod_results tibble
+=======
+```{r}
+fit_log_revenue_add = lm(log(revenue) ~ .,
+                     data = tmdb_movies_train)
+
+results_log_add = get_model_results(fit_log_revenue_add)
+revenue_mod_results_discard = rbind(revenue_mod_results_discard,
+                          (tibble_row(model_name = "full log additive",
+                                      model = results_log_add$model,
+                                      model_rse = results_log_add$model_rse,
+                                      adj_r2 = results_log_add$adj_r2,
+                                      model_test_rmse = results_log_add$model_test_rmse,
+                                      num_params = results_log_add$num_params,
+                                      sw_value = results_log_add$sw_value,
+                                      sw_decision = results_log_add$sw_decision,
+                                      bp_value = results_log_add$bp_value,
+                                      bp_decision = results_log_add$bp_decision
+                                      )))
+
+```
+
+```{r}
+n = nrow(tmdb_movies_train)
+fit_revenue_both_bic = step(lm(revenue ~ 1, data = tmdb_movies_train),
+                             scope = revenue ~ budget + popularity + vote_average +
+                              vote_count + runtime + release_month + first_genre + is_big_banner,
+                             direction = "both",
+                             k = log(n),
+                             trace = 0)
+
+results_both_bic = get_model_results(fit_revenue_both_bic)
+revenue_mod_results_discard = rbind(revenue_mod_results_discard,
+                          (tibble_row(model_name = "Bidirectional BIC",
+                                      model = results_both_bic$model,
+                                      model_rse = results_both_bic$model_rse,
+                                      adj_r2 = results_both_bic$adj_r2,
+                                      model_test_rmse = results_both_bic$model_test_rmse,
+                                      num_params = results_both_bic$num_params,
+                                      sw_value = results_both_bic$sw_value,
+                                      sw_decision = results_both_bic$sw_decision,
+                                      bp_value = results_both_bic$bp_value,
+                                      bp_decision = results_both_bic$bp_decision
+                                      )))
+
+```
+>>>>>>> 5491b94ac4d78543b855eef53604594dd502270a
+
+# Results
+
+```{r fig.width=12, fig.height=18}
+
+#TODO: Add as many rows as best models we want to compare
+par(mar = c(5, 4, 5, 4), mfrow = c(6, 4))
+
+#TODO: Add a plot for each best model
+plot(boxoffice_model_1,          
+     col = "grey",
+     pch = 20,
+     lwd = 2,
+     main = "Simple")
+
+#plot(fit_revenue_add,          
+ #    col = "grey",
+  #   pch = 20,
+   #  lwd = 2,
+    # main = "Additive")
+
+plot(fit_log_revenue_add,          
+     col = "grey",
+     pch = 20,
+     lwd = 2,
+     main = "Log Additive")
+
+#plot(fit_revenue_add_sel,          
+ #    col = "grey",
+  #   pch = 20,
+   #  lwd = 2,
+    # main = "Lambda Additive")
+
+plot(fit_revenue_int_sel,          
+     col = "grey",
+     pch = 20,
+     lwd = 2,
+     main = "Interactive/Polynomial")
+
+plot(fit_revenue_int_best,          
+     col = "grey",
+     pch = 20,
+     lwd = 2,
+     main = "Interaction/Polynomial AIC")
+```
+
+TODO: compare the graphs for the best models we have found  
+
+```{r}
+
+knitr::kable(revenue_mod_results,
+              caption = "<center><strong>Revenue Model Selection</strong></center>") %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+
+
+
+TODO: Analyze the results table and conclude on best model. Update the below chunk with the best_model's values.
+
+```{r}
+fit_revenue_best = fit_revenue_int_best
+fit_revenue_best_mse = results_int_best$model_mse
+fit_revenue_best_adj_r2_b = results_int_best$adj_r2
+fit_revenue_best_rmse = results_int_best$model_test_rmse
+fit_revenue_best_sw_decision = results_int_best$sw_decision
+fit_revenue_best_num_params = results_int_best$num_params
+fit_revenue_best_preds = as.character(as.formula(fit_revenue_int_best))[3]
+```
+
+
+
+TODO: Discuss average percent error in prediction using test data
+
+```{r fig.width=12, fig.height=4}
+par(mar = c(5, 4, 5, 4), mfrow = c(1, 2))
+predicted_revenue = predict( fit_revenue_int_best, newdata = tmdb_movies_test )
+actual_revenue = tmdb_movies_test$revenue
+
+#plot 1
+plot(predicted_revenue, actual_revenue, col = "grey", pch = 20,
+xlab = "Predicted", ylab = "Actual",
+main = "Predicted vs Actual")
+
+abline(0, 1, col = cbPalette[3], lwd = 2)
+
+#plot 2
+plot(density(actual_revenue), col = cbPalette[4], lwd = 2,
+xlab = "Revenue", ylab = "Density",
+main = "Revenue Density")
+lines(density(predicted_revenue), col = cbPalette[5], lwd = 2)
+
+legend("right",
+       title = "Density",
+       legend = c("Actual", "Predicted"),
+       lwd = 2,
+       col = c(cbPalette[4], cbPalette[5]))
+
+```
+
+### Discarded Models
+
+In addition to the above models, team did tried the following models but where discarded due to inferior perfomance than the model which we selected.
+
+```{r}
+
+knitr::kable(revenue_mod_results_discard,
+              caption = "<center><strong>Discarded Models </strong></center>") %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+The Best Lambda Selective model has a lower RSE but when the adj_r2 was lower than then the base model(simple). So we had discarded this model.
+
+# Discussion
+
+TODO: Discuss the results
+
+# Appendix
+
+## Model Building: Support Methods
+To create a structured approach to the model building process, we implemented a number of support methods:
+
+- **get_bp_decision**: Given a model and significance level, make a decision on whether the model rejects or fails to reject the normality assumption.
+- **get_sw_decision**: Given a model and significance level, make a decision on whether the model rejects or fails to reject the constant variance assumption.
+- **get_num_params**: Given a model, returns how many coefficients the model has.
+- **get_loocv_rmse**: Given a model, obtain the loocv_rmse.
+- **get_adj_r2**: Return the adjusted $R^2$ of a model.
+- **get_rse**: Return the Residual Std Error of a model.
+- **get_rmse**: Return the RMSE  of a modelwhile prediction against the test dataste.
+- **get_model_results**: Return a list all the results we need to evaluate a model
+- **pasteFormula**: return a display string that consolidates the model parameters.
+- **removeInfluencers**: Use Cook's distance and normal evaluation criteria to drop influential points.
+
+```{r, message = FALSE, warning = FALSE}
+library(lmtest)
+
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+get_rse = function(model) {
+  summary(model)$sigma
+}
+
+
+get_rmse = function(model, lamda) {
+  mse=anova(model)['Residuals', 'Mean Sq']
+predicted = predict( model, newdata = tmdb_movies_test )
+actual_revenue = tmdb_movies_test$revenue
+cat( "Model", model$call$formula ,"lambda = ",lamda)
+if( !is.na(lamda))
+{
+  cat("Converting")
+  predicted = ifelse(lambda ==0, exp(predicted),predicted^(1/lamda) )
+}
+
+rmse(actual_revenue, predicted)/10^6
+}
+
+get_model_results = function(model, alpha = 0.01, lamda = NA) {
+  model_str = as.character(as.formula(model))[3]
+  loocv_rmse = get_loocv_rmse(model)
+  adj_r2 = get_adj_r2(model)
+  bp_decision = get_bp_decision(model, alpha)
+  bp_value = bptest(model)$p.value
+  sw_decision = get_sw_decision(model, alpha)
+  sw_value = shapiro.test(resid(model))$p.value
+  num_params = get_num_params(model)
+  model_rse =  get_rse(model)
+  model_test_rmse = get_rmse(model, lamda)
+
+  list(
+       model = model_str,
+       loocv_rmse = loocv_rmse,
+       adj_r2 = adj_r2,
+       bp_decision = bp_decision,
+       bp_value = bp_value,
+       sw_decision = sw_decision,
+       sw_value = sw_value,
+       num_params = num_params,
+       model_rse = model_rse,
+       model_test_rmse=model_test_rmse)
+}
+
+
+pasteFormula = function(outcome, variables) {
+  pastef = ""
+  if (!is.null(outcome)) {
+    pastef = paste(outcome, paste(variables, collapse = " + "), sep = " ~ ")
+  } else {
+    pastef = paste(" ~ ", paste(variables, collapse = " + "))
+  }
+  return (pastef)
+}
+
+removeInfluencers = function(data) {
+  model = lm(Revenue ~ ., data=data)
+  cd_mod_a = cooks.distance(model)
+  influential_ind = cd_mod_a > 4 / length(cd_mod_a)
+  data_modified = data[influential_ind == FALSE, ]
+  return (data_modified)
+}
+
+```
+
+
+## Team
+The names of the students who contributed to this group project:  
+
+- **amana4** (Aman Arora)
+- **dani4** (Savvy Dani)
+- **gaurav4** (Gaurav Shrivastava)

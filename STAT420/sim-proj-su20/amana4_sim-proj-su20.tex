@@ -1,0 +1,569 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Week 6 - Simulation Project},
+  pdfauthor={Aman Arora},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=cyan,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Week 6 - Simulation Project}
+\author{Aman Arora}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{itemize}
+\tightlist
+\item
+  Simulation Study 1
+\end{itemize}
+
+** Introduction
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{birthday =}\StringTok{ }\DecValTok{12121977}
+\KeywordTok{set.seed}\NormalTok{(birthday)}
+
+\NormalTok{df1 =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"study_1.csv"}\NormalTok{)}
+\CommentTok{#No of simulations}
+\NormalTok{m =}\StringTok{ }\DecValTok{2000}
+
+\CommentTok{#No of parameters}
+\NormalTok{p =}\StringTok{ }\DecValTok{4}
+
+\CommentTok{#Function to Simulate MLR}
+\NormalTok{sim_mlr =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df, betas, sigma) \{}
+\NormalTok{  n =}\StringTok{ }\KeywordTok{nrow}\NormalTok{(df)}
+\NormalTok{  X =}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{x0=} \KeywordTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,n), }\KeywordTok{as.matrix}\NormalTok{(df[}\OperatorTok{-}\DecValTok{1}\NormalTok{]))}
+\NormalTok{  epsilon =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(n, }\DataTypeTok{mean =} \DecValTok{0}\NormalTok{, }\DataTypeTok{sd =}\NormalTok{ sigma)}
+\NormalTok{  Y =}\StringTok{ }\NormalTok{X }\OperatorTok{%*%}\StringTok{ }\NormalTok{betas1 }\OperatorTok{+}\StringTok{ }\NormalTok{epsilon}
+\NormalTok{  df[}\StringTok{"y"}\NormalTok{] =}\StringTok{ }\NormalTok{Y}
+  \KeywordTok{return}\NormalTok{(df)}
+\NormalTok{\}}
+
+\CommentTok{#sigmas to be simulated}
+\NormalTok{sigmas =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{)}
+
+\CommentTok{#Model 1}
+\NormalTok{betas1 =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+
+\CommentTok{#Initialize matrices to store results for model 1}
+\NormalTok{f_stat_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{p_val_}\DecValTok{1}\NormalTok{ =}\StringTok{  }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{r_squared_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{n =}\StringTok{ }\KeywordTok{nrow}\NormalTok{(df1)}
+
+\CommentTok{#Simulate MLR for each sigma and store results}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{\{  }
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m)}
+\NormalTok{  \{}
+\NormalTok{    df1 =}\StringTok{ }\KeywordTok{sim_mlr}\NormalTok{(df1,betas1,sigmas[j])}
+\NormalTok{    model_fitted_sum =}\StringTok{ }\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x1}\OperatorTok{+}\NormalTok{x2}\OperatorTok{+}\NormalTok{x3, }\DataTypeTok{data =}\NormalTok{ df1) )}
+\NormalTok{    f_stat_}\DecValTok{1}\NormalTok{[i,j] =}\StringTok{ }\NormalTok{model_fitted_sum}\OperatorTok{$}\NormalTok{fstatistic[}\StringTok{"value"}\NormalTok{]}
+\NormalTok{    r_squared_}\DecValTok{1}\NormalTok{[i,j]=}\StringTok{ }\NormalTok{model_fitted_sum}\OperatorTok{$}\NormalTok{r.squared}
+\NormalTok{    p_val_}\DecValTok{1}\NormalTok{[i,j] =}\StringTok{ }\KeywordTok{pf}\NormalTok{(f_stat_}\DecValTok{1}\NormalTok{[i,j],p}\DecValTok{-1}\NormalTok{,n}\OperatorTok{-}\NormalTok{p,}\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}  }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Model 2}
+
+\NormalTok{betas1 =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+
+\CommentTok{#Initialize matrices to store results for model 2}
+\NormalTok{f_stat_}\DecValTok{2}\NormalTok{ =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{p_val_}\DecValTok{2}\NormalTok{ =}\StringTok{  }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{r_squared_}\DecValTok{2}\NormalTok{ =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\KeywordTok{length}\NormalTok{(sigmas))}
+
+\CommentTok{#Simulate MLR for each sigma and store results}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(sigmas))}
+\NormalTok{\{  }
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m)}
+\NormalTok{  \{}
+\NormalTok{    df1 =}\StringTok{ }\KeywordTok{sim_mlr}\NormalTok{(df1,betas1,sigmas[j])}
+\NormalTok{    model_fitted_sum =}\StringTok{ }\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x1}\OperatorTok{+}\NormalTok{x2}\OperatorTok{+}\NormalTok{x3, }\DataTypeTok{data =}\NormalTok{ df1) )}
+\NormalTok{    f_stat_}\DecValTok{2}\NormalTok{[i,j] =}\StringTok{ }\NormalTok{model_fitted_sum}\OperatorTok{$}\NormalTok{fstatistic[}\StringTok{"value"}\NormalTok{]}
+\NormalTok{    r_squared_}\DecValTok{2}\NormalTok{[i,j]=}\StringTok{ }\NormalTok{model_fitted_sum}\OperatorTok{$}\NormalTok{r.squared}
+\NormalTok{    p_val_}\DecValTok{2}\NormalTok{[i,j] =}\StringTok{ }\KeywordTok{pf}\NormalTok{(f_stat_}\DecValTok{2}\NormalTok{[i,j],p}\DecValTok{-1}\NormalTok{,n}\OperatorTok{-}\NormalTok{p,}\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}  }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{simulation-study-2-using-rmse-for-selection}{%
+\section{Simulation Study 2: Using RMSE for
+Selection?}\label{simulation-study-2-using-rmse-for-selection}}
+
+In homework we saw how Test RMSE can be used to select the ``best''
+model. In this simulation study we will investigate how well this
+procedure works. Since splitting the data is random, we don't expect it
+to work correctly each time. We could get unlucky. But averaged over
+many attempts, we should expect it to select the appropriate model.
+
+We will simulate from the model
+
+\[
+Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \beta_4 x_{i4} + \beta_5 x_{i5} + \beta_6 x_{i6} + \epsilon_i
+\]
+
+where \(\epsilon_i \sim N(0, \sigma^2)\) and
+
+\begin{itemize}
+\tightlist
+\item
+  \(\beta_0 = 0\),
+\item
+  \(\beta_1 = 3\),
+\item
+  \(\beta_2 = -4\),
+\item
+  \(\beta_3 = 1.6\),
+\item
+  \(\beta_4 = -1.1\),
+\item
+  \(\beta_5 = 0.7\),
+\item
+  \(\beta_6 = 0.5\).
+\end{itemize}
+
+We will consider a sample size of \(500\) and three possible levels of
+noise. That is, three values of \(\sigma\).
+
+\begin{itemize}
+\tightlist
+\item
+  \(n = 500\)
+\item
+  \(\sigma \in (1, 2, 4)\)
+\end{itemize}
+
+Use the data found in \href{study_2.csv}{\texttt{study\_2.csv}} for the
+values of the predictors. These should be kept constant for the entirety
+of this study. The \texttt{y} values in this data are a blank
+placeholder.
+
+Each time you simulate the data, randomly split the data into train and
+test sets of equal sizes (250 observations for training, 250
+observations for testing).
+
+For each, fit \textbf{nine} models, with forms:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{y\ \textasciitilde{}\ x1}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4\ +\ x5}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4\ +\ x5\ +\ x6},
+  the correct form of the model as noted above
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4\ +\ x5\ +\ x6\ +\ x7}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4\ +\ x5\ +\ x6\ +\ x7\ +\ x8}
+\item
+  \texttt{y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3\ +\ x4\ +\ x5\ +\ x6\ +\ x7\ +\ x8\ +\ x9}
+\end{itemize}
+
+For each model, calculate Train and Test RMSE.
+
+\[
+\text{RMSE}(\text{model, data}) = \sqrt{\frac{1}{n} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2}
+\]
+
+Repeat this process with \(1000\) simulations for each of the \(3\)
+values of \(\sigma\). For each value of \(\sigma\), create a plot that
+shows how average Train RMSE and average Test RMSE changes as a function
+of model size. Also show the number of times the model of each size was
+chosen for each value of \(\sigma\).
+
+Done correctly, you will have simulated the \(y\) vector \(3×1000=3000\)
+times. You will have fit \(9×3×1000=27000\) models. A minimal result
+would use \(3\) plots. Additional plots may also be useful.
+
+Potential discussions:
+
+\begin{itemize}
+\tightlist
+\item
+  Does the method \textbf{always} select the correct model? On average,
+  does is select the correct model?
+\item
+  How does the level of noise affect the results?
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df1 =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"study_2.csv"}\NormalTok{)}
+\CommentTok{#No of simulations}
+\NormalTok{m =}\StringTok{ }\DecValTok{500}
+\KeywordTok{library}\NormalTok{(knitr)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{12121977}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Function to Simulate MLR}
+\NormalTok{sim_mlr =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df, betas, sigma) \{}
+\NormalTok{  n =}\StringTok{ }\KeywordTok{nrow}\NormalTok{(df)}
+\NormalTok{  X =}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{x0=} \KeywordTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,n), }\KeywordTok{as.matrix}\NormalTok{(df[}\DecValTok{2}\OperatorTok{:}\DecValTok{7}\NormalTok{]))}
+\NormalTok{  epsilon =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(n, }\DataTypeTok{mean =} \DecValTok{0}\NormalTok{, }\DataTypeTok{sd =}\NormalTok{ sigma)}
+\NormalTok{  Y =}\StringTok{ }\NormalTok{X }\OperatorTok{%*%}\StringTok{ }\NormalTok{betas }\OperatorTok{+}\StringTok{ }\NormalTok{epsilon}
+\NormalTok{  df[}\StringTok{"y"}\NormalTok{] =}\StringTok{ }\NormalTok{Y}
+  \KeywordTok{return}\NormalTok{(df)}
+\NormalTok{\}}
+
+\CommentTok{#sigmas to be simulated}
+\NormalTok{sigma =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{4}\NormalTok{)}
+
+\CommentTok{#Model betas}
+\NormalTok{betas1 =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{3}\NormalTok{,}\OperatorTok{-}\DecValTok{4}\NormalTok{,}\FloatTok{1.6}\NormalTok{,}\OperatorTok{-}\FloatTok{1.1}\NormalTok{,}\FloatTok{0.7}\NormalTok{,}\FloatTok{0.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Function to calculate and return training RMSE and test RMSE for a model}
+\NormalTok{evaluate_model <-}\ControlFlowTok{function}\NormalTok{(fitted_model,train_data, test_data)}
+\NormalTok{\{}
+
+\NormalTok{ rmse_train =}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{(fitted_model}\OperatorTok{$}\NormalTok{residuals}\OperatorTok{^}\DecValTok{2}\NormalTok{))}
+  
+\NormalTok{ new_data1 =}\StringTok{ }\NormalTok{test_data[,}\KeywordTok{names}\NormalTok{(fitted_model}\OperatorTok{$}\NormalTok{model)][}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+ 
+\NormalTok{ y_test_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(fitted_model, }\DataTypeTok{newdata =}\NormalTok{ new_data1) }
+
+\NormalTok{ residual_test =}\StringTok{   }\KeywordTok{as.vector}\NormalTok{(y_test_pred }\OperatorTok{-}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(test_data[}\StringTok{"y"}\NormalTok{]))[,}\DecValTok{1}\NormalTok{]}
+
+\NormalTok{ rmse_test  =}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{(residual_test}\OperatorTok{^}\DecValTok{2}\NormalTok{))}
+  
+\NormalTok{ result =}\StringTok{ }\KeywordTok{c}\NormalTok{(rmse_train, rmse_test)}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{result_test =}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1000}\NormalTok{)  }
+\NormalTok{result_train =}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1000}\NormalTok{)  }
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{12121977}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(q }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{)}
+\NormalTok{\{}
+\NormalTok{  df1 =}\StringTok{ }\KeywordTok{sim_mlr}\NormalTok{(df1,betas1,}\DecValTok{4}\NormalTok{)}
+\NormalTok{  model_true =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x1}\OperatorTok{+}\NormalTok{x2}\OperatorTok{+}\NormalTok{x3}\OperatorTok{+}\NormalTok{x4}\OperatorTok{+}\NormalTok{x5}\OperatorTok{+}\NormalTok{x6,df1)}
+  \CommentTok{#Split training and test data}
+\NormalTok{  trn_idx =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df1), }\DecValTok{250}\NormalTok{)}
+\NormalTok{  tst_idx =}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df1), trn_idx)}
+\NormalTok{  trn_data =}\StringTok{ }\NormalTok{df1[trn_idx,]}
+\NormalTok{  tst_data  =}\StringTok{ }\NormalTok{df1[tst_idx,]}
+
+\NormalTok{  result_train[q] =}\StringTok{ }\KeywordTok{evaluate_model}\NormalTok{(model_true,trn_data,tst_data)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{  result_test[q] =}\StringTok{ }\KeywordTok{evaluate_model}\NormalTok{(model_true,trn_data,tst_data)[}\DecValTok{2}\NormalTok{]}
+\NormalTok{\}}
+
+\KeywordTok{mean}\NormalTok{(result_train)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.971
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(result_test)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.961
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{result_test =}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1000}\NormalTok{)  }
+\NormalTok{result_train =}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1000}\NormalTok{)  }
+  
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{12121977}\NormalTok{)}
+
+\ControlFlowTok{for}\NormalTok{(q }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{)}
+\NormalTok{\{}
+\NormalTok{  df1 =}\StringTok{ }\KeywordTok{sim_mlr}\NormalTok{(df1,betas1,}\DecValTok{4}\NormalTok{)}
+\NormalTok{  model_all =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x1}\OperatorTok{+}\NormalTok{x2}\OperatorTok{+}\NormalTok{x3}\OperatorTok{+}\NormalTok{x4}\OperatorTok{+}\NormalTok{x5}\OperatorTok{+}\NormalTok{x6}\OperatorTok{+}\NormalTok{x7}\OperatorTok{+}\NormalTok{x8}\OperatorTok{+}\NormalTok{x9 , }\DataTypeTok{data =}\NormalTok{ df1)}
+  \CommentTok{#Split training and test data}
+\NormalTok{  trn_idx =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df1), }\DecValTok{250}\NormalTok{)}
+\NormalTok{  tst_idx =}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df1), trn_idx)}
+\NormalTok{  trn_data =}\StringTok{ }\NormalTok{df1[trn_idx,]}
+\NormalTok{  tst_data  =}\StringTok{ }\NormalTok{df1[tst_idx,]}
+\NormalTok{  result_train[q] =}\StringTok{ }\KeywordTok{evaluate_model}\NormalTok{(model_all,trn_data,tst_data)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{  result_test[q] =}\StringTok{ }\KeywordTok{evaluate_model}\NormalTok{(model_all,trn_data,tst_data)[}\DecValTok{2}\NormalTok{]}
+\NormalTok{\}}
+
+\KeywordTok{mean}\NormalTok{(result_train)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.959
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(result_test)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.95
+\end{verbatim}
+
+\hypertarget{simulation-study-3-power}{%
+\section{Simulation Study 3: Power}\label{simulation-study-3-power}}
+
+In this simulation study we will investigate the \textbf{power} of the
+significance of regression test for simple linear regression.
+
+\[
+H_0: \beta_{1} = 0 \ \text{vs} \ H_1: \beta_{1} \neq 0
+\]
+
+Recall, we had defined the \emph{significance} level, \(\alpha\), to be
+the probability of a Type I error.
+
+\[
+\alpha = P[\text{Reject } H_0 \mid H_0 \text{ True}] = P[\text{Type I Error}]
+\]
+
+Similarly, the probability of a Type II error is often denoted using
+\(\beta\); however, this should not be confused with a regression
+parameter.
+
+\[
+\beta = P[\text{Fail to Reject } H_0 \mid H_1 \text{ True}] = P[\text{Type II Error}]
+\]
+
+\emph{Power} is the probability of rejecting the null hypothesis when
+the null is not true, that is, the alternative is true and \(\beta_{1}\)
+is non-zero.
+
+\[
+\text{Power} = 1 - \beta = P[\text{Reject } H_0 \mid H_1 \text{ True}]
+\]
+
+Essentially, power is the probability that a signal of a particular
+strength will be detected. Many things affect the power of a test. In
+this case, some of those are:
+
+\begin{itemize}
+\tightlist
+\item
+  Sample Size, \(n\)
+\item
+  Signal Strength, \(\beta_1\)
+\item
+  Noise Level, \(\sigma\)
+\item
+  Significance Level, \(\alpha\)
+\end{itemize}
+
+We'll investigate the first three.
+
+To do so we will simulate from the model
+
+\[
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+where \(\epsilon_i \sim N(0, \sigma^2)\).
+
+For simplicity, we will let \(\beta_0 = 0\), thus \(\beta_1\) is
+essentially controlling the amount of ``signal.'' We will then consider
+different signals, noises, and sample sizes:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\beta_1 \in (-2, -1.9, -1.8, \ldots, -0.1, 0, 0.1, 0.2, 0.3, \ldots 1.9, 2)\)
+\item
+  \(\sigma \in (1, 2, 4)\)
+\item
+  \(n \in (10, 20, 30)\)
+\end{itemize}
+
+We will hold the significance level constant at \(\alpha = 0.05\).
+
+Use the following code to generate the predictor values, \texttt{x}:
+values for different sample sizes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x_values =}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DataTypeTok{length =}\NormalTok{ n)}
+\end{Highlighting}
+\end{Shaded}
+
+For each possible \(\beta_1\) and \(\sigma\) combination, simulate from
+the true model at least \(1000\) times. Each time, perform the
+significance of the regression test. To estimate the power with these
+simulations, and some \(\alpha\), use
+
+\[
+\hat{\text{Power}} = \hat{P}[\text{Reject } H_0 \mid H_1 \text{ True}] = \frac{\text{# Tests Rejected}}{\text{# Simulations}}
+\]
+
+It is \emph{possible} to derive an expression for power mathematically,
+but often this is difficult, so instead, we rely on simulation.
+
+Create three plots, one for each value of \(\sigma\). Within each of
+these plots, add a ``power curve'' for each value of \(n\) that shows
+how power is affected by signal strength, \(\beta_1\).
+
+Potential discussions:
+
+\begin{itemize}
+\tightlist
+\item
+  How do \(n\), \(\beta_1\), and \(\sigma\) affect power? Consider
+  additional plots to demonstrate these effects.
+\item
+  Are \(1000\) simulations sufficient?
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Function to Simulate SLR}
+\NormalTok{sim_slr =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, beta_}\DecValTok{0}\NormalTok{ , beta_}\DecValTok{1}\NormalTok{, sigma) \{}
+\NormalTok{  n =}\StringTok{ }\KeywordTok{length}\NormalTok{(x)}
+\NormalTok{  epsilon =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(n, }\DataTypeTok{mean =} \DecValTok{0}\NormalTok{, }\DataTypeTok{sd =}\NormalTok{ sigma)}
+\NormalTok{  y =}\StringTok{ }\NormalTok{beta_}\DecValTok{0} \OperatorTok{+}\StringTok{ }\NormalTok{beta_}\DecValTok{1} \OperatorTok{*}\StringTok{ }\NormalTok{x }\OperatorTok{+}\StringTok{ }\NormalTok{epsilon}
+  \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{predictor =}\NormalTok{ x, }\DataTypeTok{response =}\NormalTok{ y)}
+\NormalTok{\}}
+
+\NormalTok{x_values =}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DataTypeTok{length =} \DecValTok{40}\NormalTok{)}
+
+\NormalTok{beta1 =}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DataTypeTok{from =} \DecValTok{-2}\NormalTok{, }\DataTypeTok{to =} \DecValTok{2}\NormalTok{, }\DataTypeTok{by =} \FloatTok{.1}\NormalTok{)}
+
+\NormalTok{sigma =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{4}\NormalTok{)}
+
+\NormalTok{n =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{20}\NormalTok{,}\DecValTok{40}\NormalTok{)}
+
+\CommentTok{#sim_slr(n,0,beta1,sigma[1])}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

@@ -1,0 +1,1453 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Box Office Blues},
+  pdfauthor={STAT-420, Team: Summer Proj, A Arora, S Dani, G Shrivastava},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=cyan,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+\title{Box Office Blues}
+\author{STAT-420, Team: Summer Proj, A Arora, S Dani, G Shrivastava}
+\date{July 2020}
+
+\begin{document}
+\maketitle
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+In 2018, the global box office was worth \$41.7 billion. In 2019, total
+earnings at the North American box office amounted to \$11.32 billion.
+The magic movies create in our daily lives is undeniable, but more
+interesting to us is the story the data tells us.
+
+In this work, we build multiple linear regression models to predict the
+\textbf{Revenue} of a movie, given its attributes. Different features
+like `genre', `runtime', `budget', `vote\_average',
+`vote\_count',`production\_companies' and their interactions and higher
+order terms are explored to find the best model for revenue prediction.
+
+We follow a systematic process of model selection. Starting with an
+additive linear regression model of the form \[
+Y_i = \beta_0 + \beta_1 x_{1} + \beta_2 x_{2} + \epsilon
+\]\\
+we work our way quickly through full additive models, log responses,
+power response, interaction terms and polynomial predictors. We use
+stepwise approaches and exhaustive search to find the best models for
+each approach. Model assumptions of normal distribution and constant
+variance are also tested. The following values are recorded for the
+models under consideration:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{loocv\_rmse} or cross-validated RMSE as a measure of
+  generalization of the model.
+\item
+  \textbf{Adjusted \(R^2\)} as a measure of the explainability of
+  revenue with the chosen predictors.
+\item
+  \textbf{Predictor Count} as a measure of model complexity.
+\item
+  \textbf{Normality Assumption}: The Breusch-Pagan test statistic and
+  decision given a significance level of \(\alpha = 0.01\).
+\item
+  \textbf{Equal Variance Assumption}: The Shapiro-Wilk test statistic
+  and decision given a significance level of \(\alpha = 0.01\).
+\item
+  \textbf{Average Percent Error}: Our final measure of model success is
+  obtained by validating model performance on a test dataset.
+\end{itemize}
+
+\hypertarget{dataset}{%
+\subsection{Dataset}\label{dataset}}
+
+Our search for high quality movie metadata led us to the
+\href{https://www.kaggle.com/tmdb/tmdb-movie-metadata?select=tmdb_5000_movies.csv}{TMDB
+5000 Movie Dataset} provided by Kaggle. This dataset contains metadata
+and revenue information for over 5000 movies. A few variables of
+interest are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Original\_title}: Name of the movie
+\item
+  \textbf{Budget}: Budget of movies in USD (numeric)
+\item
+  \textbf{Revenue}: Revenue of movie in USD (numeric)
+\item
+  \textbf{Original Language}: The language in which movie was originally
+  produced (factor variable)
+\item
+  \textbf{Genres}: Genre of the movie (factor variable)
+\item
+  \textbf{Popularity}: A numeric metric to measure popularity of the
+  movie (numeric)
+\item
+  \textbf{Vote Average}: A numeric metric to measure average vote from
+  audience (numeric)
+\item
+  \textbf{Runtime} : A numeric metric for the total runtime(in min) of
+  the movie (numeric)
+\item
+  \textbf{Production Companies} : A categorical for the production
+  companies name (factor)
+\end{itemize}
+
+The TMDB 5000 Movie Dataset contains two csv files - one related to
+movies and the other on movie credits. While both containing interesting
+information that could impact revenue, this project's focus was on the
+attributes contained in
+\href{tmdb_5000_movies.csv}{\texttt{tmdb\_5000\_movies.csv}}. This data
+file is a csv file with 4803 records and 20 columns and formed the basis
+for the entirety of this study.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tmdb_movies =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"tmdb_5000_movies.csv"}\NormalTok{ , }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+As a first step, we create a data frame from the tmdb\_5000\_movies.csv
+file. This data frame contains 20 attributes of 4803 movies.
+
+\hypertarget{data-preparation}{%
+\subsection{Data Preparation}\label{data-preparation}}
+
+Before creating the models, we go through a process of data analysis,
+transformation and cleaning. In this step, tmdb\_movies is transformed
+to extract relevant data points which could be useful for model
+building. Some of the tenets we adopted during this process:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Value Distribution}: To be considered as a predictor, the
+  attribute's value range should have reasonable coverage within the
+  dataset.
+\item
+  \textbf{Numeric vs Categorical Variables}: Consider predictor count
+  inflation while deciding whether a predictor should be modeled as
+  numeric or categorical.
+\item
+  \textbf{Text Content}: While movie overview, keywords and other
+  textual content in movie metadata could be interesting predictors if
+  we used NLP techniques, we drop unique content attributes while
+  building the linear regression models.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#----DATA Analysis: original_language ----#}
+
+\CommentTok{#retain top 5 languages; else make it "not"}
+\NormalTok{top_}\DecValTok{5}\NormalTok{_lang =}\StringTok{ }\NormalTok{tmdb_movies }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(original_language) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{tally}\NormalTok{(}\DataTypeTok{sort =}\NormalTok{ T) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ungroup}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(n))}
+\NormalTok{top_}\DecValTok{5}\NormalTok{_lang =}\StringTok{ }\KeywordTok{head}\NormalTok{(top_}\DecValTok{5}\NormalTok{_lang, }\DecValTok{5}\NormalTok{)}
+
+
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang =}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{original_language }\OperatorTok{%in%}
+\StringTok{                                  }\NormalTok{top_}\DecValTok{5}\NormalTok{_lang}\OperatorTok{$}\NormalTok{original_language,}
+\NormalTok{                                 tmdb_movies}\OperatorTok{$}\NormalTok{original_language,}
+                                 \StringTok{"not"}\NormalTok{)}
+
+\NormalTok{en_percent =}\StringTok{ }\KeywordTok{mean}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang }\OperatorTok{==}\StringTok{ 'en'}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+\NormalTok{top_}\DecValTok{5}\NormalTok{_lang_percent =}\StringTok{ }\KeywordTok{mean}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang }\OperatorTok{!=}\StringTok{ 'not'}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#----DATA Cleaning and Transformation: release_date ----#}
+
+
+
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang =}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{original_language }\OperatorTok{%in%}
+\StringTok{                                  }\NormalTok{top_}\DecValTok{5}\NormalTok{_lang}\OperatorTok{$}\NormalTok{original_language,}
+\NormalTok{                                 tmdb_movies}\OperatorTok{$}\NormalTok{original_language,}
+                                 \StringTok{"not"}\NormalTok{)}
+
+\NormalTok{en_percent =}\StringTok{ }\KeywordTok{mean}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang }\OperatorTok{==}\StringTok{ 'en'}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+\NormalTok{top_}\DecValTok{5}\NormalTok{_lang_percent =}\StringTok{ }\KeywordTok{mean}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{top_}\DecValTok{5}\NormalTok{_lang }\OperatorTok{!=}\StringTok{ 'not'}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#----DATA Cleaning and Transformation: release_date ----#}
+
+
+\CommentTok{#Break up date into month and year}
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{release_month=}\KeywordTok{format}\NormalTok{(}\KeywordTok{as.Date}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{release_date), }\StringTok{"%m"}\NormalTok{)}
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{release_year=}\KeywordTok{format}\NormalTok{(}\KeywordTok{as.Date}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{release_date), }\StringTok{"%Y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#----DATA Cleaning and Transformation: genres ----#}
+
+\CommentTok{#Get the first genre of the movie. Typically a movie is a combination of many genres, but our dataset represents the most weighted genre as the first genre. We extract this so that we have a 1:1 mapping of a movie to its top genre.}
+
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{first_genre=}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{","}\NormalTok{,}\StringTok{""}\NormalTok{,}\KeywordTok{substr}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{genres,}\DecValTok{9}\NormalTok{, }\KeywordTok{regexpr}\NormalTok{(}\StringTok{","}\NormalTok{, tmdb_movies}\OperatorTok{$}\NormalTok{genres))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#----DATA Cleaning and Transformation: production_companies ----#}
+
+\CommentTok{#remove punctuation}
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{clean_company =}\StringTok{ }\KeywordTok{removePunctuation}\NormalTok{(tmdb_movies}\OperatorTok{$}\NormalTok{production_companies)}
+\CommentTok{#remove spaces}
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{clean_company =}\StringTok{ }\KeywordTok{tolower}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{"[[:blank:]]"}\NormalTok{, }\StringTok{""}\NormalTok{, tmdb_movies}\OperatorTok{$}\NormalTok{clean_company))}
+
+\CommentTok{###  variable creation #####}
+\NormalTok{company_rnk =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"company_ranking.csv"}\NormalTok{ , }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{#remove punctuation}
+\NormalTok{company_rnk}\OperatorTok{$}\NormalTok{clean_company =}\StringTok{ }\KeywordTok{removePunctuation}\NormalTok{(company_rnk}\OperatorTok{$}\NormalTok{Production_company)}
+\CommentTok{#remove spaces and lower case for each of mathching}
+\NormalTok{company_rnk}\OperatorTok{$}\NormalTok{clean_company =}\StringTok{ }\KeywordTok{tolower}\NormalTok{(}\KeywordTok{gsub}\NormalTok{(}\StringTok{"[[:blank:]]"}\NormalTok{, }\StringTok{""}\NormalTok{, company_rnk}\OperatorTok{$}\NormalTok{clean_company))}
+
+\CommentTok{#take top 10 as Big Banners}
+\NormalTok{top_}\DecValTok{10}\NormalTok{ =}\StringTok{ }\KeywordTok{head}\NormalTok{(company_rnk,}\DataTypeTok{n=}\DecValTok{10}\NormalTok{)}
+\NormalTok{top_}\DecValTok{10}\NormalTok{_list =}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\KeywordTok{unique}\NormalTok{(top_}\DecValTok{10}\OperatorTok{$}\NormalTok{clean_company), }\DataTypeTok{collapse =} \StringTok{'|'}\NormalTok{)}
+
+\CommentTok{#Create a new variable 'is_big_banner' which is dummy variable to indicate if the movie was produced by a Top 10 production  companies'}
+\CommentTok{#tmdb_movies$is_big_banner <- as.integer(as.logical(tmdb_movies$clean_company %like% top_10_list))}
+\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{is_big_banner <-}\StringTok{ }\NormalTok{tmdb_movies}\OperatorTok{$}\NormalTok{clean_company }\OperatorTok{%like%}\StringTok{ }\NormalTok{top_}\DecValTok{10}\NormalTok{_list}
+\end{Highlighting}
+\end{Shaded}
+
+The following columns are of specific interest:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{original\_language}: The data contained in tmdb\_movies is
+  very skewed towards English. 93.7955\% mvoies in the dataset are in
+  English and 97.0435\% movies are in the top 5 languages. We drop
+  original\_language as a predictor of revenue because of the nature of
+  its distribution.
+\item
+  \textbf{release\_date}: The month and year of the release date are
+  extracted as two separate columns. This will allow us to test month
+  independently as a predictor (e.g.~revenue of summer movies or movies
+  released during holiday season) versus the year of release.
+\item
+  \textbf{genres}: The tmdb\_movies data contains `genres' variable as a
+  key:value pair. To make it more useful as a predictor, transformation
+  is applied to extract the first genre from the list. Based on visual
+  scan of the data, it is apparent that the first genre in list is
+  predominately the major genre of the movie. We add a new variable
+  `first\_genre' to the tmdb\_movies data frame. first\_genre is later
+  set as a categorical variable with genre id as the value.
+\item
+  \textbf{production\_companies}: Basic data cleaning tasks are
+  performed with standardization of production companies in mind.
+  Special characters are removed and the string is converted to
+  uppercase. This step is a precursor to the creation of a custom
+  variable \textbf{is\_banner\_flag} which will be set if the production
+  company is a top 10 production company. We use data from
+  \href{https://www.the-numbers.com/movies/production-companies/}{Movie
+  Production Companies} to create a reference table for our lookups to
+  determine whether a production company is in the top 10 or not. Please
+  refer to \url{company_ranking.csv} for details.
+\end{itemize}
+
+A new data frame \textbf{tmdb\_movies\_small} is created with just the
+columns of interest. This data frame is used for further exploration and
+model building.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Select the relevant columns}
+\NormalTok{col_sel =}\StringTok{ }\KeywordTok{c}\NormalTok{( }\StringTok{"original_title"}\NormalTok{,}\StringTok{"revenue"}\NormalTok{, }\StringTok{"budget"}\NormalTok{,}\StringTok{"popularity"}\NormalTok{,}
+             \StringTok{"vote_average"}\NormalTok{,}\StringTok{"vote_count"}\NormalTok{, }\StringTok{"runtime"}\NormalTok{,}
+             \StringTok{"release_month"}\NormalTok{, }\StringTok{"release_year"}\NormalTok{,}
+             \StringTok{"first_genre"}\NormalTok{, }\StringTok{"is_big_banner"}\NormalTok{)}
+
+\NormalTok{tmdb_movies_small =}\StringTok{ }\NormalTok{tmdb_movies[,col_sel]}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{exploratory-analysis}{%
+\subsection{Exploratory Analysis}\label{exploratory-analysis}}
+
+Before creating the models, we go through a process of data exploration
+with tmdb\_movies\_small to understand the value range of various
+features, their relationships with each other and with Revenue, our
+target variable.
+
+Here is a snippet of the data with the columns under consideration:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ft <-}\StringTok{ }\KeywordTok{flextable}\NormalTok{(}\KeywordTok{head}\NormalTok{(tmdb_movies_small, }\DataTypeTok{n=}\DecValTok{10}\NormalTok{))}
+\NormalTok{ft <-}\StringTok{ }\KeywordTok{autofit}\NormalTok{(ft)}
+\NormalTok{ft}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=13.91in,height=3.39in,keepaspectratio]{summer_proj_report_files/figure-latex/unnamed-chunk-9-1.png}
+
+Following the tenets outlined earlier, we make the following decisions:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{release\_month}: We treat release\_month as a categorical
+  variable. This will help us analyze revenue outcomes by month.
+\item
+  \textbf{release\_year}: tmdb\_movies\_small contains movies release
+  between NA and NA. While release\_year can be treated as a categorical
+  ordinal variable, we decide to treat it as an integer to reduce model
+  complexity.
+\item
+  \textbf{first\_genre}: we treat this as a categorical variable with 21
+  distinct values in its value set.
+\item
+  \textbf{is\_big\_banner}: we treat this as a categorical variable with
+  values \{true, false\}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Find rows with 0 values and set to NA}
+\NormalTok{tmdb_movies_small[tmdb_movies_small}\OperatorTok{$}\NormalTok{revenue }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\StringTok{"revenue"}\NormalTok{ ] =}\StringTok{ }\OtherTok{NA}
+\NormalTok{tmdb_movies_small[tmdb_movies_small}\OperatorTok{$}\NormalTok{budget }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\StringTok{"budget"}\NormalTok{ ] =}\StringTok{ }\OtherTok{NA}
+\NormalTok{tmdb_movies_small[tmdb_movies_small}\OperatorTok{$}\NormalTok{popularity }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\StringTok{"popularity"}\NormalTok{ ] =}\StringTok{ }\OtherTok{NA}
+\CommentTok{#tmdb_movies_small[tmdb_movies_small$vote_count == 0, "vote_average" ] = NA}
+
+\NormalTok{tmdb_movies_small}\OperatorTok{$}\NormalTok{release_year =}\StringTok{ }\KeywordTok{as.integer}\NormalTok{(tmdb_movies_small}\OperatorTok{$}\NormalTok{release_year)}
+\NormalTok{tmdb_movies_small}\OperatorTok{$}\NormalTok{release_month =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(tmdb_movies_small}\OperatorTok{$}\NormalTok{release_month)}
+\NormalTok{tmdb_movies_small}\OperatorTok{$}\NormalTok{first_genre =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(tmdb_movies_small}\OperatorTok{$}\NormalTok{first_genre)}
+\NormalTok{tmdb_movies_small}\OperatorTok{$}\NormalTok{is_big_banner =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(tmdb_movies_small}\OperatorTok{$}\NormalTok{is_big_banner)}
+
+\CommentTok{#remove invalid rows}
+\NormalTok{tmdb_movies_small =}\StringTok{  }\KeywordTok{na.omit}\NormalTok{(tmdb_movies_small)}
+
+\CommentTok{#dropping original_title as we build the models. Retaining tmdb_movies_small so we can use original_title during results analysis}
+\NormalTok{tmdb_movies_small_no_title =}\StringTok{ }\KeywordTok{subset}\NormalTok{(tmdb_movies_small, }\DataTypeTok{select =} \OperatorTok{-}\KeywordTok{c}\NormalTok{(original_title))}
+\end{Highlighting}
+\end{Shaded}
+
+We drop the movie title column from tmdb\_movies\_small. If needed, we
+will look at the title later during results analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pairs}\NormalTok{(tmdb_movies_small_no_title, }\DataTypeTok{col =}\NormalTok{ cbPalette[}\DecValTok{2}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+Interestingly from pairs plots the release month seems to have impact on
+the revenue - with movies released in summer months (April/May/June) and
+Nov/Dec months having a higher revenue than other months on average.
+Since month is factor variable we leave it unmodified. The pairs plot of
+numeric variables show positive relationship which we investigate with
+correlation table below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cor}\NormalTok{(tmdb_movies_small_no_title[,}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              revenue   budget popularity vote_average vote_count runtime
+## revenue       1.0000  0.70535     0.6022      0.18762     0.7562  0.2332
+## budget        0.7054  1.00000     0.4319     -0.03163     0.5401  0.2296
+## popularity    0.6022  0.43187     1.0000      0.28675     0.7490  0.1823
+## vote_average  0.1876 -0.03163     0.2868      1.00000     0.3775  0.3790
+## vote_count    0.7562  0.54008     0.7490      0.37750     1.0000  0.2580
+## runtime       0.2332  0.22964     0.1823      0.37899     0.2580  1.0000
+\end{verbatim}
+
+From the correlation table of the numeric predictors we can see the vote
+count and budget of a movie seems to have highest and positive
+correlation with revenue. This is followed by popularity. The vote
+average and run time seems to have low correlation with revenue.
+
+\hypertarget{test-train-split}{%
+\subsection{Test-Train Split}\label{test-train-split}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tmdb_movies_small_no_title_mod =}\StringTok{ }\KeywordTok{subset}\NormalTok{(tmdb_movies_small_no_title, budget}\OperatorTok{>}\DecValTok{50000}\NormalTok{)}
+\CommentTok{#tmdb_movies_small_no_title_mod = removeInfluencers(tmdb_movies_small_no_title_mod1)}
+\end{Highlighting}
+\end{Shaded}
+
+We removed the records which has the budget \textless50K as those are
+the outliers.These rows typically have a very low and unrealistic target
+variable (revenue) like \$1 ,\$10 etc.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{420}\NormalTok{)}
+\NormalTok{train_idx  =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(tmdb_movies_small_no_title_mod), }\DataTypeTok{size =} \KeywordTok{trunc}\NormalTok{(}\FloatTok{0.80} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(tmdb_movies_small_no_title_mod)))}
+
+\NormalTok{tmdb_movies_train =}\StringTok{ }\NormalTok{tmdb_movies_small_no_title_mod[train_idx, ]}
+\NormalTok{tmdb_movies_test =}\StringTok{ }\NormalTok{tmdb_movies_small_no_title_mod[}\OperatorTok{-}\NormalTok{train_idx, ]}
+\end{Highlighting}
+\end{Shaded}
+
+We withold a validation set so that we can assess model performance. We
+split our tmdb\_movies\_small dataset randomly into 2 parts - train
+(80\% ) and test(20\%).
+
+\begin{itemize}
+\item
+  \textbf{Train Dataset}: The train dataset is used to train the models
+  and also create a leave-oneout cross-validated RMSE (loocv\_rmse). By
+  creating RMSE scores for different sets created by leaving one
+  observation out, we obtain a measure that can be used to assess how
+  the model will generalize. Lower the loocv\_rmse, better the model
+  performance against unseen data.
+\item
+  \textbf{Test Dataset}: We run every model on the test dataset and
+  obtain the average percent error as a measure of model generalization.
+\end{itemize}
+
+\hypertarget{issue-unseen-factor-levels}{%
+\subsubsection{Issue: Unseen Factor
+Levels}\label{issue-unseen-factor-levels}}
+
+Because of the test-train split, we encounter a new problem with respect
+to categorical variables during model building. If the test dataset
+contains unseen values for a factor variable, the model would output
+errors while trying to predict revenue for the test dataset. Our
+approach is to drop those rows from test set before we begin modeling.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# We need to make sure our training set has all the values for the factor variables, else when we call predict on the test data set, we get errors. Our approach is to drop those rows from test set before we begin modeling.}
+
+\NormalTok{drop_new_factor_levels =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(i) \{}
+\NormalTok{   train_i =}\StringTok{ }\NormalTok{tmdb_movies_train[, i]}
+\NormalTok{   test_i =}\StringTok{ }\NormalTok{tmdb_movies_test[, i]}
+
+\NormalTok{   diff =}\StringTok{ }\NormalTok{(}\KeywordTok{unique}\NormalTok{(test_i) }\OperatorTok{%in%}\StringTok{ }\KeywordTok{unique}\NormalTok{(train_i))}
+   \ControlFlowTok{if}\NormalTok{ (}\KeywordTok{is.factor}\NormalTok{(test_i) }\OperatorTok{&}\StringTok{ }\KeywordTok{any}\NormalTok{(}\OperatorTok{!}\NormalTok{diff)) \{}
+\NormalTok{      test_i_levels =}\StringTok{ }\KeywordTok{unique}\NormalTok{(test_i)}
+      \KeywordTok{apply}\NormalTok{(test_i }\OperatorTok{==}
+\StringTok{              }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rep}\NormalTok{(test_i_levels[diff], }\DataTypeTok{each =} \KeywordTok{nrow}\NormalTok{(tmdb_movies_test)),}
+                     \DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(tmdb_movies_test)),}
+            \DecValTok{1}\NormalTok{,}
+\NormalTok{            any)}
+\NormalTok{   \} }\ControlFlowTok{else}\NormalTok{ \{}
+      \KeywordTok{rep}\NormalTok{(}\OtherTok{TRUE}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(tmdb_movies_test))}
+\NormalTok{   \}}
+\NormalTok{\}}
+
+\NormalTok{keep =}\StringTok{ }\KeywordTok{apply}\NormalTok{(}\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(tmdb_movies_test),}
+\NormalTok{                    drop_new_factor_levels),}
+             \DecValTok{1}\NormalTok{,}
+\NormalTok{             all)}
+\NormalTok{tmdb_movies_test =}\StringTok{ }\NormalTok{tmdb_movies_test[keep, ]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+
+```r
+revenue_mod_results = tribble(~model_name, ~model,~model_rse, ~adj_r2,~model_test_rmse,~num_params, ~sw_value, ~sw_decision, ~bp_value, ~bp_decision )
+revenue_mod_results_discard = tribble(~model_name, ~model,~model_rse, ~adj_r2,~model_test_rmse,~num_params, ~sw_value, ~sw_decision, ~bp_value, ~bp_decision )
+\end{verbatim}
+
+\hypertarget{baseline-simple-additive-model}{%
+\subsection{Baseline: Simple Additive
+Model}\label{baseline-simple-additive-model}}
+
+Our model creation process starts with a simple additive model with two
+predictors that we can use as a baseline.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{boxoffice_model_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{lm}\NormalTok{(revenue }\OperatorTok{~}\StringTok{  }\NormalTok{budget }\OperatorTok{+}\StringTok{ }\NormalTok{popularity , tmdb_movies_small)}
+\NormalTok{results_simple =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(boxoffice_model_}\DecValTok{1}\NormalTok{)}
+\NormalTok{revenue_mod_results =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Baseline"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_simple}\OperatorTok{$}\NormalTok{bp_decision}
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+Looking at the model summary, the two predictors, popularity and budget,
+appear to be significiant and the model has an Adjusted \(R^2\) of
+0.6061. Our objective is to improve this simplistic model and find the
+best performing model as the preferred model for predicting revenue.
+Various attributes of the baseline model are stored for later analysis.
+
+\hypertarget{full-additive-model}{%
+\subsection{Full Additive Model}\label{full-additive-model}}
+
+Our second step is to evaluate a full additive model. Apart from the
+usual results, we also check the Variance Inflation Factor for the
+predictors and check for high correlation between the predictors.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_revenue_add =}\StringTok{ }\KeywordTok{lm}\NormalTok{(revenue }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+                     \DataTypeTok{data =}\NormalTok{ tmdb_movies_train)}
+
+\NormalTok{results_add =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_add)}
+\NormalTok{revenue_mod_results_discard =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results_discard,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Full Additive"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{model,}
+                                       \DataTypeTok{model_rse =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_add}\OperatorTok{$}\NormalTok{bp_decision}
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{variance-inflation-factors}{%
+\subsubsection{Variance Inflation
+Factors}\label{variance-inflation-factors}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{vif_revenue_add =}\StringTok{ }\NormalTok{car}\OperatorTok{::}\KeywordTok{vif}\NormalTok{(fit_revenue_add)}
+\NormalTok{ knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(vif_revenue_add,}
+              \DataTypeTok{caption =} \StringTok{"<center><strong>Variance Inflation Factors</strong></center>"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{kable_styling}\NormalTok{(}\DataTypeTok{bootstrap_options =} \KeywordTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{, }\StringTok{"responsive"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-20}<center><strong>Variance Inflation Factors</strong></center>}
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+  & GVIF & Df & GVIF\textasciicircum{}(1/(2*Df))\\
+\hline
+budget & 2.184 & 1 & 1.478\\
+\hline
+popularity & 2.206 & 1 & 1.485\\
+\hline
+vote\_average & 1.661 & 1 & 1.289\\
+\hline
+vote\_count & 2.999 & 1 & 1.732\\
+\hline
+runtime & 1.664 & 1 & 1.290\\
+\hline
+release\_month & 1.378 & 11 & 1.015\\
+\hline
+release\_year & 1.319 & 1 & 1.149\\
+\hline
+first\_genre & 2.231 & 18 & 1.022\\
+\hline
+is\_big\_banner & 1.160 & 1 & 1.077\\
+\hline
+\end{tabular}
+\end{table}
+
+We find that all the VIF values are less than 5 which is desirable. We
+draw the conclusion that none of the predictors are highly collinear and
+we can include all of them in the model if there is support from other
+considerations like test statistics and p\_values.
+
+\hypertarget{additive-model-improvements}{%
+\subsection{Additive Model
+Improvements}\label{additive-model-improvements}}
+
+With the full additive model as a starting point, we try a number of
+approaches to come up with a better model:
+
+\begin{itemize}
+\tightlist
+\item
+  Backward Search using AIC as the criterion on the main effects
+\item
+  Box Cox method to infer the best lambda to use as the exponent of the
+  response variable
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Find best model based on AIC using main effects}
+\NormalTok{fit_revenue_add_sel =}\StringTok{ }\KeywordTok{step}\NormalTok{(fit_revenue_add, }\DataTypeTok{trace =} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{results_add_sel =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_add_sel, }\DataTypeTok{lambda =} \OtherTok{NA}\NormalTok{)}
+\NormalTok{revenue_mod_results_discard =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results_discard,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"AIC Selective Additive"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_add_sel}\OperatorTok{$}\NormalTok{bp_decision}
+
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Try to find a better fit with Box Cox methods}
+\CommentTok{# Find the best lambda for the response}
+\NormalTok{bc =}\StringTok{ }\KeywordTok{boxcox}\NormalTok{(fit_revenue_add_sel)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{best.lambda =}\StringTok{ }\NormalTok{bc}\OperatorTok{$}\NormalTok{x[}\KeywordTok{which.max}\NormalTok{(bc}\OperatorTok{$}\NormalTok{y)]}
+
+\CommentTok{#Use the lambda found from boxcox method and do model diagnostics}
+\NormalTok{fit_revenue_add_lambda =}\StringTok{ }\KeywordTok{lm}\NormalTok{(revenue}\OperatorTok{^}\NormalTok{best.lambda  }\OperatorTok{~}\StringTok{ }\NormalTok{budget }\OperatorTok{+}\StringTok{ }\NormalTok{popularity }\OperatorTok{+}\StringTok{ }\NormalTok{vote_count }\OperatorTok{+}\StringTok{ }\NormalTok{release_month }\OperatorTok{+}\StringTok{ }\NormalTok{first_genre,}\DataTypeTok{data =}\NormalTok{ tmdb_movies_train)}
+
+\NormalTok{results_add_lambda =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_add_lambda)}
+\NormalTok{revenue_mod_results_discard =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results_discard,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Best Lambda Additive"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_add_lambda}\OperatorTok{$}\NormalTok{bp_decision}
+
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mar =} \KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{), }\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(fit_revenue_add_sel,}
+    \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+    \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+    \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+    \DataTypeTok{main =} \StringTok{"Selective Additive"}\NormalTok{)}
+
+\KeywordTok{plot}\NormalTok{(fit_revenue_add_lambda,}
+    \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+    \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+    \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+    \DataTypeTok{main =} \StringTok{"Lambda Additive"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+The QQ plot looks better after box cox transformation, but the normal vs
+residual plot indicated presence of non linearity.
+
+\hypertarget{interaction-model}{%
+\subsection{Interaction Model}\label{interaction-model}}
+
+We rescan the scatter plots between the chosen predictors to add
+interaction and higher order terms to the additive model. We add a new
+column that contains the value of \(revenue ^ \lambda\) to evaluate the
+relationships against our higher order response variable.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Check for polynomial and interaction relationships with powered revenue}
+\NormalTok{retain_col =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"budget"}\NormalTok{, }\StringTok{"popularity"}\NormalTok{, }\StringTok{"vote_count"}\NormalTok{, }\StringTok{"release_month"}\NormalTok{, }\StringTok{"first_genre"}\NormalTok{)}
+\NormalTok{tmdb_temp =}\StringTok{ }\NormalTok{tmdb_movies_train[retain_col]}
+\NormalTok{tmdb_temp}\OperatorTok{$}\NormalTok{revenue_lambda =}\StringTok{ }\NormalTok{tmdb_movies_train}\OperatorTok{$}\NormalTok{revenue }\OperatorTok{^}\StringTok{ }\NormalTok{best.lambda}
+
+\KeywordTok{pairs}\NormalTok{(tmdb_temp, }\DataTypeTok{col =}\NormalTok{ cbPalette[}\DecValTok{3}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+Polynomial and interaction terms are added based on visual inspection of
+the pairs plot and we obtain the results for this interactive polynomial
+model. A stepwise backward search is once again performed, with AIC as
+the criterion. We then obtain the performance results for the best
+model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Add polynomial and interaction terms, based on visual inspection of pairs plot}
+
+\NormalTok{fit_revenue_int_sel =}\StringTok{ }\KeywordTok{lm}\NormalTok{(revenue}\OperatorTok{^}\NormalTok{best.lambda  }\OperatorTok{~}\StringTok{ }\NormalTok{budget }\OperatorTok{+}\StringTok{ }\NormalTok{popularity }\OperatorTok{+}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(vote_count) }\OperatorTok{+}\StringTok{ }\NormalTok{release_month }\OperatorTok{+}\StringTok{ }\NormalTok{first_genre }\OperatorTok{+}\StringTok{  }\NormalTok{budget}\OperatorTok{*}\NormalTok{vote_count}\OperatorTok{*}\NormalTok{release_month }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(budget}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(popularity}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{  }\KeywordTok{I}\NormalTok{(popularity}\OperatorTok{^}\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(vote_count}\OperatorTok{^}\DecValTok{2}\NormalTok{),}\DataTypeTok{data =}\NormalTok{ tmdb_movies_train)}
+
+\NormalTok{results_int_sel =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_int_sel, }\DataTypeTok{lambda =}\NormalTok{ best.lambda)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Model: revenue^best.lambda ~ budget + popularity + sqrt(vote_count) + release_month + first_genre + budget * vote_count * release_month + I(budget^2) + I(popularity^2) + I(popularity^3) + I(vote_count^2) lambda: 0.3434
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{revenue_mod_results =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Interactive/Polynomial"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{model_rse,}
+                                   \DataTypeTok{model_test_rmse =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                   \DataTypeTok{num_params =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{num_param,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_int_sel}\OperatorTok{$}\NormalTok{bp_decision}
+
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Backward search using AIC criterion}
+\NormalTok{fit_revenue_int_best =}\StringTok{ }\KeywordTok{step}\NormalTok{(fit_revenue_int_sel, }\DataTypeTok{trace =}\OtherTok{FALSE}\NormalTok{)}
+
+\NormalTok{results_int_best =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_int_best, }\DataTypeTok{lambda =}\NormalTok{ best.lambda)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Model: revenue^best.lambda ~ budget + sqrt(vote_count) + release_month + first_genre + vote_count + I(budget^2) + I(vote_count^2) + budget:vote_count + budget:release_month + release_month:vote_count + budget:release_month:vote_count lambda: 0.3434
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{revenue_mod_results =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Interactive/Polynomial AIC"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{model,}
+                                        \DataTypeTok{model_rse =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{adj_r2,}
+                                         \DataTypeTok{model_test_rmse =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                          \DataTypeTok{num_params =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_int_best}\OperatorTok{$}\NormalTok{bp_decision}
+
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{other-approaches}{%
+\subsection{Other Approaches}\label{other-approaches}}
+
+To complete the search for a good model, other attempted approaches
+start with the full additive model as a baseline:
+
+\begin{itemize}
+\tightlist
+\item
+  Use log(revenue) as target variable
+\item
+  Use Backward search with BIC as the criterion to see if a smaller
+  additive model will give desired performance
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_log_revenue_add =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(revenue) }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+                     \DataTypeTok{data =}\NormalTok{ tmdb_movies_train)}
+
+\NormalTok{results_log_add =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_log_revenue_add)}
+\NormalTok{revenue_mod_results_discard =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results_discard,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"full log additive"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_log_add}\OperatorTok{$}\NormalTok{bp_decision}
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n =}\StringTok{ }\KeywordTok{nrow}\NormalTok{(tmdb_movies_train)}
+\NormalTok{fit_revenue_both_bic =}\StringTok{ }\KeywordTok{step}\NormalTok{(}\KeywordTok{lm}\NormalTok{(revenue }\OperatorTok{~}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ tmdb_movies_train),}
+                             \DataTypeTok{scope =}\NormalTok{ revenue }\OperatorTok{~}\StringTok{ }\NormalTok{budget }\OperatorTok{+}\StringTok{ }\NormalTok{popularity }\OperatorTok{+}\StringTok{ }\NormalTok{vote_average }\OperatorTok{+}
+\StringTok{                              }\NormalTok{vote_count }\OperatorTok{+}\StringTok{ }\NormalTok{runtime }\OperatorTok{+}\StringTok{ }\NormalTok{release_month }\OperatorTok{+}\StringTok{ }\NormalTok{first_genre }\OperatorTok{+}\StringTok{ }\NormalTok{is_big_banner,}
+                             \DataTypeTok{direction =} \StringTok{"both"}\NormalTok{,}
+                             \DataTypeTok{k =} \KeywordTok{log}\NormalTok{(n),}
+                             \DataTypeTok{trace =} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{results_both_bic =}\StringTok{ }\KeywordTok{get_model_results}\NormalTok{(fit_revenue_both_bic)}
+\NormalTok{revenue_mod_results_discard =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(revenue_mod_results_discard,}
+\NormalTok{                          (}\KeywordTok{tibble_row}\NormalTok{(}\DataTypeTok{model_name =} \StringTok{"Bidirectional BIC"}\NormalTok{,}
+                                      \DataTypeTok{model =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{model,}
+                                      \DataTypeTok{model_rse =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{model_rse,}
+                                      \DataTypeTok{adj_r2 =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{adj_r2,}
+                                      \DataTypeTok{model_test_rmse =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{model_test_rmse,}
+                                      \DataTypeTok{num_params =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{num_params,}
+                                      \DataTypeTok{sw_value =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{sw_value,}
+                                      \DataTypeTok{sw_decision =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{sw_decision,}
+                                      \DataTypeTok{bp_value =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{bp_value,}
+                                      \DataTypeTok{bp_decision =}\NormalTok{ results_both_bic}\OperatorTok{$}\NormalTok{bp_decision}
+\NormalTok{                                      )))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+Our model search process covers a total of eight different models. For
+each model under consideration, we obtain the performance metrics, which
+is used to decide on the final model(s) of choice. A basic requirement
+is that the model has to perform better than our baseline. Since
+prediction is our goal, Test RMSE is an important decision factor.
+
+\hypertarget{best-model-shortlist}{%
+\subsection{Best Model Shortlist}\label{best-model-shortlist}}
+
+Narrowing the models down to a shortlist is the first step and we use
+both visual charts and performance metrics to select the best model(s).
+We retain the simple additive model as the baseline in the shortlist.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(revenue_mod_results[,}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{],}
+              \DataTypeTok{caption =} \StringTok{"<center><strong>Revenue Model Selection</strong></center>"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{kable_styling}\NormalTok{(}\DataTypeTok{bootstrap_options =} \KeywordTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{, }\StringTok{"responsive"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-29}<center><strong>Revenue Model Selection</strong></center>}
+\centering
+\begin{tabular}[t]{l|l|r|r|r|r}
+\hline
+model\_name & model & model\_rse & adj\_r2 & model\_test\_rmse & num\_params\\
+\hline
+Baseline & budget + popularity & 1.169e+08 & 0.6061 & 105.46 & 3\\
+\hline
+Interactive/Polynomial & budget + popularity + sqrt(vote\_count) + release\_month + first\_genre + budget * vote\_count * release\_month + I(budget\textasciicircum{}2) + I(popularity\textasciicircum{}2) + I(popularity\textasciicircum{}3) + I(vote\_count\textasciicircum{}2) & 1.263e+02 & 0.7501 & 96.99 & 72\\
+\hline
+Interactive/Polynomial AIC & budget + sqrt(vote\_count) + release\_month + first\_genre + vote\_count + I(budget\textasciicircum{}2) + I(vote\_count\textasciicircum{}2) + budget:vote\_count + budget:release\_month + release\_month:vote\_count + budget:release\_month:vote\_count & 1.262e+02 & 0.7501 & 96.72 & 69\\
+\hline
+\end{tabular}
+\end{table}
+
+As the numbers demonstrate, the models in this shortlist are better on
+all fronts when compared with the Baseline model:
+
+\begin{itemize}
+\tightlist
+\item
+  Lower Residual Standard Error than the Baseline model
+\item
+  Higher Adjusted \(R^2\) than the Baseline model
+\item
+  Lower Test RMSE than the Baseline model
+\end{itemize}
+
+A plot of the charts for the two models in the shortlist also
+demonstrates that the two models improve the normality and constant
+variance assumptions as compared to the Baseline model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mar =} \KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{), }\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{4}\NormalTok{))}
+
+\KeywordTok{plot}\NormalTok{(boxoffice_model_}\DecValTok{1}\NormalTok{,          }
+     \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+     \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+     \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Baseline"}\NormalTok{)}
+
+\KeywordTok{plot}\NormalTok{(fit_revenue_int_sel,          }
+     \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+     \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+     \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Interaction/Polynomial"}\NormalTok{)}
+
+\KeywordTok{plot}\NormalTok{(fit_revenue_int_best,          }
+     \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+     \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+     \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Interaction/Polynomial AIC"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-30-1.pdf}
+
+\hypertarget{discarded-models}{%
+\subsection{Discarded Models}\label{discarded-models}}
+
+In addition to the shortlist, we also create a table of the performance
+metrics of the discarded models. Apart from interesting insights about
+the inferior performance of the individual models, the models
+collectively strengthen the decision about the best model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(revenue_mod_results_discard[,}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{],}
+              \DataTypeTok{caption =} \StringTok{"<center><strong>Discarded Models </strong></center>"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{kable_styling}\NormalTok{(}\DataTypeTok{bootstrap_options =} \KeywordTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hover"}\NormalTok{, }\StringTok{"condensed"}\NormalTok{, }\StringTok{"responsive"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-31}<center><strong>Discarded Models </strong></center>}
+\centering
+\begin{tabular}[t]{l|l|r|r|r|r}
+\hline
+model\_name & model & model\_rse & adj\_r2 & model\_test\_rmse & num\_params\\
+\hline
+Full Additive & budget + popularity + vote\_average + vote\_count + runtime + release\_month + release\_year + first\_genre + is\_big\_banner & 1.018e+08 & 0.7194 & 94.06 & 37\\
+\hline
+AIC Selective Additive & budget + popularity + vote\_count + release\_month + release\_year + first\_genre & 1.018e+08 & 0.7194 & 94.24 & 34\\
+\hline
+Best Lambda Additive & budget + popularity + vote\_count + release\_month + first\_genre & 1.483e+02 & 0.6553 & 200.37 & 33\\
+\hline
+full log additive & budget + popularity + vote\_average + vote\_count + runtime + release\_month + release\_year + first\_genre + is\_big\_banner & 1.459e+00 & 0.4166 & 200.37 & 37\\
+\hline
+Bidirectional BIC & vote\_count + budget + popularity & 1.043e+08 & 0.7054 & 97.14 & 4\\
+\hline
+\end{tabular}
+\end{table}
+
+Interesting observations are as below:
+
+\begin{itemize}
+\tightlist
+\item
+  The Log Additive model has the lowest RSE, but has to be discarded
+  because it has the highest Test RMSE.
+\item
+  The Best Lambda Selective model has a lower RSE than the Basline
+  model, but has to be discarded because it has a very low adjusted
+  \(R^2\).
+\item
+  The Full Additive model is not a bad choice overall. It is better than
+  the AIC Selective model and is close in performance to the models in
+  our shortlist. It has a low model complexity and might have been our
+  best choice if our goal was explanation of the data.
+\end{itemize}
+
+\hypertarget{best-model-callout}{%
+\subsection{Best Model Callout}\label{best-model-callout}}
+
+Based on our analysis of the model performance metrics, we select the
+Interactive/Polynomial model as our best model. It outperforms the other
+models on all our criteria:
+
+\begin{itemize}
+\tightlist
+\item
+  Highest adjusted \(R^2\)
+\item
+  Second lowest RSE
+\item
+  Lowest Test RMSE
+\end{itemize}
+
+This model has a the highest model complexity of all the models we
+considered, but we still select it because our goal is prediction of
+revenue and not explanation of the data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_revenue_best =}\StringTok{ }\NormalTok{fit_revenue_int_sel}
+\NormalTok{fit_revenue_best_mse =}\StringTok{ }\NormalTok{results_int_sel}\OperatorTok{$}\NormalTok{model_mse}
+\NormalTok{fit_revenue_best_adj_r2_b =}\StringTok{ }\NormalTok{results_int_sel}\OperatorTok{$}\NormalTok{adj_r2}
+\NormalTok{fit_revenue_best_rmse =}\StringTok{ }\NormalTok{results_int_sel}\OperatorTok{$}\NormalTok{model_test_rmse}
+\NormalTok{fit_revenue_best_sw_decision =}\StringTok{ }\NormalTok{results_int_sel}\OperatorTok{$}\NormalTok{sw_decision}
+\NormalTok{fit_revenue_best_num_params =}\StringTok{ }\NormalTok{results_int_sel}\OperatorTok{$}\NormalTok{num_params}
+\NormalTok{fit_revenue_best_preds =}\StringTok{ }\KeywordTok{as.character}\NormalTok{(}\KeywordTok{as.formula}\NormalTok{(fit_revenue_int_sel))[}\DecValTok{3}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+We do further analysis of the best model's parameters, assumption
+compliance and predictions using the test dataset, tmdb\_movies\_test.
+
+\hypertarget{model-variables}{%
+\subsection{Model Variables}\label{model-variables}}
+
+The best model selected is the ``Interaction/Polynomial'' model which
+has budget, popularity, vote count, release\_month and first\_genre as
+the predictors. Here we look at the intuition behind their inclusion in
+the best model:
+
+\begin{itemize}
+\tightlist
+\item
+  Based on ancedotal evidence, we know that holiday season does play an
+  important role in the success of movies and thus included the
+  relase\_month column.
+\item
+  The popularity of the movie (based on ratings) is another variable
+  which influences revenue and is included in the model.
+\item
+  The vote\_average is not included as it is dependent on the
+  vote\_count (and we have that in our model).
+\item
+  One predictor we would expect to be present in the best model, but
+  isn't included is the `is\_big\_banner' variable. A visual analysis of
+  the collinearity charts provides the reasoning - we see that the
+  is\_big\_banner variable has collinearity with budget as typically big
+  banner has higher budgets. Since budget is included, it is ok to drop
+  it from our best model.
+\end{itemize}
+
+\hypertarget{model-assumptions}{%
+\subsection{Model Assumptions}\label{model-assumptions}}
+
+The chosen model rejects the constant variance (BP) and normality
+(Shapiro) tests (with \(\alpha\) = 0.01) although the Q-Q plot and
+residual vs fitted values looks reasonable as seen below.The fat tails
+in Q-Q plot is not concerning given that they only represent
+\textless5\% of the data.
+
+Moreover the model is primarily being used for prediction not inference
+hence overall we are not overly concerned about the BP and Shapiro test
+rejections.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mar =} \KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{), }\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{4}\NormalTok{))}
+
+\KeywordTok{plot}\NormalTok{(fit_revenue_best,          }
+     \DataTypeTok{col =} \StringTok{"grey"}\NormalTok{,}
+     \DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+     \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Best Model"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-33-1.pdf}
+
+\hypertarget{prediction-quality}{%
+\subsection{Prediction Quality}\label{prediction-quality}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mar =} \KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{), }\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\NormalTok{predicted_revenue =}\StringTok{ }\KeywordTok{get_predicted}\NormalTok{(fit_revenue_best, }\DataTypeTok{lambda =}\NormalTok{ best.lambda) }\OperatorTok{/}\StringTok{ }\DecValTok{10} \OperatorTok{^}\StringTok{ }\DecValTok{6}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Model: revenue^best.lambda ~ budget + popularity + sqrt(vote_count) + release_month + first_genre + budget * vote_count * release_month + I(budget^2) + I(popularity^2) + I(popularity^3) + I(vote_count^2) lambda: 0.3434
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{actual_revenue =}\StringTok{ }\NormalTok{tmdb_movies_test}\OperatorTok{$}\NormalTok{revenue }\OperatorTok{/}\StringTok{ }\DecValTok{10} \OperatorTok{^}\StringTok{ }\DecValTok{6}
+\NormalTok{average_percent_error =}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(predicted_revenue }\OperatorTok{-}\StringTok{ }\NormalTok{actual_revenue) }\OperatorTok{/}
+\StringTok{                              }\NormalTok{predicted_revenue) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+
+\NormalTok{revenue_cutoff =}\StringTok{ }\DecValTok{300}
+\NormalTok{le_cutoff_ind =}\StringTok{ }\NormalTok{actual_revenue }\OperatorTok{<=}\StringTok{ }\NormalTok{revenue_cutoff}
+\NormalTok{gt_cutoff_ind =}\StringTok{ }\NormalTok{actual_revenue }\OperatorTok{>}\StringTok{ }\NormalTok{revenue_cutoff}
+\NormalTok{average_percent_error_le_cutoff =}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(predicted_revenue[le_cutoff_ind] }\OperatorTok{-}\StringTok{ }\NormalTok{actual_revenue[le_cutoff_ind]) }\OperatorTok{/}
+\StringTok{                              }\NormalTok{predicted_revenue[le_cutoff_ind]) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+
+\NormalTok{average_percent_error_gt_cutoff =}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(predicted_revenue[gt_cutoff_ind] }\OperatorTok{-}\StringTok{ }\NormalTok{actual_revenue[gt_cutoff_ind]) }\OperatorTok{/}
+\StringTok{                              }\NormalTok{predicted_revenue[gt_cutoff_ind]) }\OperatorTok{*}\StringTok{ }\DecValTok{100}
+
+\CommentTok{#plot 1}
+\KeywordTok{plot}\NormalTok{(predicted_revenue, actual_revenue, }\DataTypeTok{col =} \StringTok{"grey"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+\DataTypeTok{xlab =} \StringTok{"Predicted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Actual"}\NormalTok{,}
+\DataTypeTok{main =} \StringTok{"Predicted vs Actual"}\NormalTok{)}
+
+\KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DataTypeTok{col =}\NormalTok{ cbPalette[}\DecValTok{3}\NormalTok{], }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+
+\CommentTok{#plot 2}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(actual_revenue), }\DataTypeTok{col =}\NormalTok{ cbPalette[}\DecValTok{4}\NormalTok{], }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+\DataTypeTok{xlab =} \StringTok{"Revenue"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Density"}\NormalTok{,}
+\DataTypeTok{ylim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FloatTok{0.01}\NormalTok{),}
+\DataTypeTok{main =} \StringTok{"Revenue Density"}\NormalTok{)}
+\KeywordTok{lines}\NormalTok{(}\KeywordTok{density}\NormalTok{(predicted_revenue), }\DataTypeTok{col =}\NormalTok{ cbPalette[}\DecValTok{5}\NormalTok{], }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+
+\KeywordTok{legend}\NormalTok{(}\StringTok{"right"}\NormalTok{,}
+       \DataTypeTok{title =} \StringTok{"Density"}\NormalTok{,}
+       \DataTypeTok{legend =} \KeywordTok{c}\NormalTok{(}\StringTok{"Actual"}\NormalTok{, }\StringTok{"Predicted"}\NormalTok{),}
+       \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{,}
+       \DataTypeTok{col =} \KeywordTok{c}\NormalTok{(cbPalette[}\DecValTok{4}\NormalTok{], cbPalette[}\DecValTok{5}\NormalTok{]))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{summer_proj_report_files/figure-latex/unnamed-chunk-34-1.pdf}
+
+The average percent error when we use our best model to predict the
+values for our test dataset is 76.8717\%. This means we are not able to
+predict accurately three out of four times. This is a high rate of error
+for a `good' model.
+
+The tmdb\_movies\_test set has revenue values in the range (12,
+1153304495) and the median revenue is 55946785. Our test RMSE amounts to
+173.3526\% of the median revenue which is too high relative to the
+revenue.
+
+We explore further if the model error rate is different for smaller
+versus larger revenue movies in the test dataset. We set a revenue
+cutoff of 300 to test this:
+
+\begin{itemize}
+\tightlist
+\item
+  69.8888 is the average percent error for movies whose actual revenue
+  is less than the cutoff.
+\item
+  132.1532 is the average percent error for movies whose actual revenue
+  is greater than the cutoff.
+\end{itemize}
+
+\hypertarget{next-steps}{%
+\subsection{Next Steps}\label{next-steps}}
+
+Our overall conclusion is that the model we have come up with is not
+sufficient to predict revenue accurately. We will need to change our
+criteria and reiterate the process of model selection. We outline a few
+next steps below:
+
+\begin{itemize}
+\item
+  As seen from the revenue density distributions, revenue is heavily
+  skewed to the right in our dataset. Currently we have split the
+  tmdb\_movies dataset into train and test dataset using random
+  selection. A future step could be tp ensure if our train and test
+  datasets mirror this revenue distribution.
+\item
+  As observed from the results, the best model performs better for low
+  budget movies then the high budget ones. In our future work, we need
+  to explore having seprate models for low versus high budget movies as
+  the predictors for the two groups might be different.
+\item
+  Other potential next steps include discovering other predictors which
+  can help us create a model with better performance metrics (which was
+  considered above). One possibility is to expand the input dataset to
+  include actor details with their previous hits/revenue etc which can
+  help us predict better. This can help us create a better model with
+  historical information for an actor.
+\item
+  Currently our model selection process uses backward and bidirectional
+  searches with a preliminary starting model that includes predictors
+  based on visual analysis of correlations. With sufficient compute
+  resources, a next step would be to use exhaustive model search using
+  \emph{regsubsets} to yield a better model.
+\end{itemize}
+
+\hypertarget{appendix}{%
+\section{Appendix}\label{appendix}}
+
+\hypertarget{model-building-support-methods}{%
+\subsection{Model Building: Support
+Methods}\label{model-building-support-methods}}
+
+To create a structured approach to the model building process, we
+implemented a number of support methods:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{get\_bp\_decision}: Given a model and significance level, make
+  a decision on whether the model rejects or fails to reject the
+  normality assumption.
+\item
+  \textbf{get\_sw\_decision}: Given a model and significance level, make
+  a decision on whether the model rejects or fails to reject the
+  constant variance assumption.
+\item
+  \textbf{get\_num\_params}: Given a model, returns how many
+  coefficients the model has.
+\item
+  \textbf{get\_loocv\_rmse}: Given a model, obtain the loocv\_rmse.
+\item
+  \textbf{get\_adj\_r2}: Return the adjusted \(R^2\) of a model.
+\item
+  \textbf{get\_rse}: Return the Residual Std Error of a model.
+\item
+  \textbf{get\_predicted}: Return the predicted values for the test
+  dataset.
+\item
+  \textbf{get\_rmse}: Return the RMSE of a model while prediction
+  against the test dataset.
+\item
+  \textbf{get\_model\_results}: Return a list all the results we need to
+  evaluate a model
+\item
+  \textbf{pasteFormula}: return a display string that consolidates the
+  model parameters.
+\item
+  \textbf{removeInfluencers}: Use Cook's distance and normal evaluation
+  criteria to drop influential points.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(lmtest)}
+
+\NormalTok{get_bp_decision =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model, alpha) \{}
+\NormalTok{  decide =}\StringTok{ }\KeywordTok{unname}\NormalTok{(}\KeywordTok{bptest}\NormalTok{(model)}\OperatorTok{$}\NormalTok{p.value }\OperatorTok{<}\StringTok{ }\NormalTok{alpha)}
+  \KeywordTok{ifelse}\NormalTok{(decide, }\StringTok{"Reject"}\NormalTok{, }\StringTok{"Fail to Reject"}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{get_sw_decision =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model, alpha) \{}
+\NormalTok{  decide =}\StringTok{ }\KeywordTok{unname}\NormalTok{(}\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model))}\OperatorTok{$}\NormalTok{p.value }\OperatorTok{<}\StringTok{ }\NormalTok{alpha)}
+  \KeywordTok{ifelse}\NormalTok{(decide, }\StringTok{"Reject"}\NormalTok{, }\StringTok{"Fail to Reject"}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{get_num_params =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model) \{}
+  \KeywordTok{length}\NormalTok{(}\KeywordTok{coef}\NormalTok{(model))}
+\NormalTok{\}}
+
+\NormalTok{get_loocv_rmse =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model) \{}
+  \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((}\KeywordTok{resid}\NormalTok{(model) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{-}\StringTok{ }\KeywordTok{hatvalues}\NormalTok{(model))) }\OperatorTok{^}\StringTok{ }\DecValTok{2}\NormalTok{))}
+\NormalTok{\}}
+
+\NormalTok{get_adj_r2 =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model) \{}
+  \KeywordTok{summary}\NormalTok{(model)}\OperatorTok{$}\NormalTok{adj.r.squared}
+\NormalTok{\}}
+
+\NormalTok{get_rse =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model) \{}
+  \KeywordTok{summary}\NormalTok{(model)}\OperatorTok{$}\NormalTok{sigma}
+\NormalTok{\}}
+
+\NormalTok{get_predicted =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model, }\DataTypeTok{lambda =} \OtherTok{NA}\NormalTok{) \{}
+\NormalTok{  predicted =}\StringTok{ }\KeywordTok{predict}\NormalTok{( model, }\DataTypeTok{newdata =}\NormalTok{ tmdb_movies_test )}
+
+  \CommentTok{# Response is units of ^lambda convert back to linear units before calculating RMSE}
+  \ControlFlowTok{if}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(lambda)) }
+\NormalTok{  \{  }
+    \KeywordTok{cat}\NormalTok{(}\StringTok{"Model:"}\NormalTok{, }\KeywordTok{deparse1}\NormalTok{(model}\OperatorTok{$}\NormalTok{call}\OperatorTok{$}\NormalTok{formula), }\StringTok{"lambda:"}\NormalTok{, lambda)}
+    \CommentTok{# Response is in log scale}
+    \ControlFlowTok{if}\NormalTok{( lambda }\OperatorTok{==}\DecValTok{0}\NormalTok{)}
+\NormalTok{    \{}
+\NormalTok{      predicted =}\StringTok{ }\KeywordTok{exp}\NormalTok{(predicted)}
+\NormalTok{    \}}
+    \ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(lambda))}
+\NormalTok{    \{}
+\NormalTok{      predicted =}\StringTok{  }\NormalTok{predicted}\OperatorTok{^}\NormalTok{(}\DecValTok{1}\OperatorTok{/}\NormalTok{lambda)}
+\NormalTok{    \}}
+\NormalTok{  \}}
+
+  \KeywordTok{return}\NormalTok{(predicted)}
+\NormalTok{\}}
+
+\NormalTok{get_rmse =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model, }\DataTypeTok{lambda =} \OtherTok{NA}\NormalTok{) \{}
+\NormalTok{  mse=}\KeywordTok{anova}\NormalTok{(model)[}\StringTok{'Residuals'}\NormalTok{, }\StringTok{'Mean Sq'}\NormalTok{]}
+  
+\NormalTok{  predicted =}\StringTok{ }\KeywordTok{get_predicted}\NormalTok{( model, lambda)}
+\NormalTok{  actual_revenue =}\StringTok{ }\NormalTok{tmdb_movies_test}\OperatorTok{$}\NormalTok{revenue}
+
+  \KeywordTok{rmse}\NormalTok{(actual_revenue, predicted)}\OperatorTok{/}\DecValTok{10}\OperatorTok{^}\DecValTok{6}
+\NormalTok{\}}
+
+
+\NormalTok{get_model_results =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model, }\DataTypeTok{alpha =} \FloatTok{0.01}\NormalTok{, }\DataTypeTok{lambda =} \OtherTok{NA}\NormalTok{) \{}
+\NormalTok{  model_str =}\StringTok{ }\KeywordTok{as.character}\NormalTok{(}\KeywordTok{as.formula}\NormalTok{(model))[}\DecValTok{3}\NormalTok{]}
+\NormalTok{  loocv_rmse =}\StringTok{ }\KeywordTok{get_loocv_rmse}\NormalTok{(model)}
+\NormalTok{  adj_r2 =}\StringTok{ }\KeywordTok{get_adj_r2}\NormalTok{(model)}
+\NormalTok{  bp_decision =}\StringTok{ }\KeywordTok{get_bp_decision}\NormalTok{(model, alpha)}
+\NormalTok{  bp_value =}\StringTok{ }\KeywordTok{bptest}\NormalTok{(model)}\OperatorTok{$}\NormalTok{p.value}
+\NormalTok{  sw_decision =}\StringTok{ }\KeywordTok{get_sw_decision}\NormalTok{(model, alpha)}
+\NormalTok{  sw_value =}\StringTok{ }\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model))}\OperatorTok{$}\NormalTok{p.value}
+\NormalTok{  num_params =}\StringTok{ }\KeywordTok{get_num_params}\NormalTok{(model)}
+\NormalTok{  model_rse =}\StringTok{  }\KeywordTok{get_rse}\NormalTok{(model)}
+\NormalTok{  model_test_rmse =}\StringTok{ }\KeywordTok{get_rmse}\NormalTok{(model, lambda)}
+
+  \KeywordTok{list}\NormalTok{(}
+       \DataTypeTok{model =}\NormalTok{ model_str,}
+       \DataTypeTok{loocv_rmse =}\NormalTok{ loocv_rmse,}
+       \DataTypeTok{adj_r2 =}\NormalTok{ adj_r2,}
+       \DataTypeTok{bp_decision =}\NormalTok{ bp_decision,}
+       \DataTypeTok{bp_value =}\NormalTok{ bp_value,}
+       \DataTypeTok{sw_decision =}\NormalTok{ sw_decision,}
+       \DataTypeTok{sw_value =}\NormalTok{ sw_value,}
+       \DataTypeTok{num_params =}\NormalTok{ num_params,}
+       \DataTypeTok{model_rse =}\NormalTok{ model_rse,}
+       \DataTypeTok{model_test_rmse=}\NormalTok{model_test_rmse)}
+\NormalTok{\}}
+
+\NormalTok{pasteFormula =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(outcome, variables) \{}
+\NormalTok{  pastef =}\StringTok{ ""}
+  \ControlFlowTok{if}\NormalTok{ (}\OperatorTok{!}\KeywordTok{is.null}\NormalTok{(outcome)) \{}
+\NormalTok{    pastef =}\StringTok{ }\KeywordTok{paste}\NormalTok{(outcome, }\KeywordTok{paste}\NormalTok{(variables, }\DataTypeTok{collapse =} \StringTok{" + "}\NormalTok{), }\DataTypeTok{sep =} \StringTok{" ~ "}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+\NormalTok{    pastef =}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{" ~ "}\NormalTok{, }\KeywordTok{paste}\NormalTok{(variables, }\DataTypeTok{collapse =} \StringTok{" + "}\NormalTok{))}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{ (pastef)}
+\NormalTok{\}}
+
+\NormalTok{removeInfluencers =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(data) \{}
+\NormalTok{  model =}\StringTok{ }\KeywordTok{lm}\NormalTok{(revenue }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data=}\NormalTok{data)}
+\NormalTok{  cd_mod_a =}\StringTok{ }\KeywordTok{cooks.distance}\NormalTok{(model)}
+\NormalTok{  influential_ind =}\StringTok{ }\NormalTok{cd_mod_a }\OperatorTok{>}\StringTok{ }\DecValTok{4} \OperatorTok{/}\StringTok{ }\KeywordTok{length}\NormalTok{(cd_mod_a)}
+\NormalTok{  data_modified =}\StringTok{ }\NormalTok{data[influential_ind }\OperatorTok{==}\StringTok{ }\OtherTok{FALSE}\NormalTok{, ]}
+  \KeywordTok{return}\NormalTok{ (data_modified)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{team}{%
+\subsection{Team}\label{team}}
+
+The names of the students who contributed to this group project:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{amana4} (Aman Arora)
+\item
+  \textbf{dani4} (Savvy Dani)
+\item
+  \textbf{gaurav4} (Gaurav Shrivastava)
+\end{itemize}
+
+\end{document}

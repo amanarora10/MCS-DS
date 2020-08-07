@@ -1,0 +1,450 @@
+---
+title: "Week 10 - Homework"
+author: "Aman Arora (amana4@illinois.edu)"
+date: '7/27/2020'
+output:
+  html_document: 
+    theme: readable
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80, fig.align = "center")
+```
+
+## Exercise 1 (Simulating Wald and Likelihood Ratio Tests)
+
+In this exercise we will investigate the distributions of hypothesis tests for logistic regression. For this exercise, we will use the following predictors.
+
+```{r}
+sample_size = 150
+set.seed(120)
+x1 = rnorm(n = sample_size)
+x2 = rnorm(n = sample_size)
+x3 = rnorm(n = sample_size)
+```
+
+Recall that
+
+$$
+p({\bf x}) = P[Y = 1 \mid {\bf X} = {\bf x}]
+$$
+
+Consider the true model
+
+$$
+\log\left(\frac{p({\bf x})}{1 - p({\bf x})}\right) = \beta_0 + \beta_1 x_1
+$$
+
+where
+
+- $\beta_0 = 0.4$
+- $\beta_1 = -0.35$
+
+**(a)** To investigate the distributions, simulate from this model 2500 times. To do so, calculate 
+
+$$
+P[Y = 1 \mid {\bf X} = {\bf x}]
+$$ 
+
+for an observation, and then make a random draw from a Bernoulli distribution with that success probability. (Note that a Bernoulli distribution is a Binomial distribution with parameter $n = 1$. There is no direction function in `R` for a Bernoulli distribution.)
+
+Each time, fit the model:
+
+$$
+\log\left(\frac{p({\bf x})}{1 - p({\bf x})}\right) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3
+$$
+
+Store the test statistics for two tests:
+
+- The Wald test for $H_0: \beta_2 = 0$, which we say follows a standard normal distribution for "large" samples
+- The likelihood ratio test for $H_0: \beta_2 = \beta_3 = 0$, which we say follows a $\chi^2$ distribution (with some degrees of freedom) for "large" samples
+
+```{r}
+sim_lr <- function(df, beta_0, beta_1)
+{
+  eta = beta_0 + beta_1*df$x1
+  p = exp(eta)/(1+exp(eta))
+  rbinom(nrow(df) ,1,p)
+ }
+beta_0 = 0.4
+beta_1 = -0.35
+
+
+```
+
+
+```{r}
+
+num_sim = 2500
+wald_beta2 = rep(0,num_sim)
+llr  = rep(0,num_sim)
+
+for(i in 1:num_sim)
+{
+  x1 = rnorm(n = sample_size)
+  x2 = rnorm(n = sample_size)
+  x3 = rnorm(n = sample_size)
+  
+  df = data.frame(y = rep(0,sample_size),x1 = x1,x2 = x2,x3 =x3 )
+  df$y = sim_lr(df, beta_0, beta_1 )
+  
+  model_full = glm(y~., data = df , family = binomial)
+  wald_beta2[i] = summary(model_full)$coefficients["x2","z value"]
+  
+  model_null = glm(y~x1, data = df , family = binomial)
+  llr[i] = anova(model_null,model_full,test = "LRT")$Deviance[2]
+}
+```
+
+
+
+**(b)** Plot a histogram of the empirical values for the Wald test statistic. Overlay the density of the true distribution assuming a large sample.
+
+
+```{r}
+hist(wald_beta2, freq = FALSE, xlab = "Beta2 Estimate", ylim = c(0,.5), main ="Simulated vs theory (Wald test statistic)",breaks =50, col = "lightblue")
+x<-seq(-4,+4,by=0.02)
+curve(dnorm(x), add=TRUE,col = "red",lwd = 2)
+
+legend("topright", c("Simulated", "Theoratical"), col= c("lightblue","red"), lty = 1)
+```
+
+**(c)** Use the empirical results for the Wald test statistic to estimate the probability of observing a test statistic larger than 1. Also report this probability using the true distribution of the test statistic assuming a large sample.
+
+
+```{r}
+mean(wald_beta2>1)
+pnorm(1, lower.tail = FALSE)
+```
+  
+  *The proabability from theory and empirical results are close
+
+**(d)** Plot a histogram of the empirical values for the likelihood ratio test statistic. Overlay the density of the true distribution assuming a large sample.
+
+```{r}
+hist(llr, freq = FALSE, xlab = "LLR Estimate", ylim = c(0,.5), main ="Simulated vs theory (LLR)", breaks = 100,col = "lightblue")
+x<-seq(0,15,by=0.02)
+curve(dchisq(x,df = 2), add=TRUE,col = "red", lwd = 2)
+
+legend("topright", c("Simulated", "Theoratical"), col= c("lightblue","red"), lty = 1)
+```
+
+
+**(e)** Use the empirical results for the likelihood ratio test statistic to estimate the probability of observing a test statistic larger than 5. Also report this probability using the true distribution of the test statistic assuming a large sample.
+
+```{r}
+
+mean(llr > 5)
+pchisq(5,df = 2,lower.tail = FALSE)
+
+```
+
+  *The probability from theory and empirical results are close
+
+
+**(f)** Repeat **(a)**-**(e)** but with simulation using a smaller sample size of 10. Based on these results, is this sample size large enough to use the standard normal and $\chi^2$ distributions in this situation? Explain.
+
+```{r}
+sample_size = 10
+set.seed(120)
+x1 = rnorm(n = sample_size)
+x2 = rnorm(n = sample_size)
+x3 = rnorm(n = sample_size)
+```
+
+
+```{r,  warning=FALSE}
+num_sim = 2500
+sample_size = 10
+wald_beta2 = rep(0,num_sim)
+llr  = rep(0,num_sim)
+
+for(i in 1:num_sim)
+{
+  x1 = rnorm(n = sample_size)
+  x2 = rnorm(n = sample_size)
+  x3 = rnorm(n = sample_size)
+  
+  df = data.frame(y = rep(0,sample_size),x1 = x1,x2 = x2,x3 =x3 )
+  df$y = sim_lr(df, beta_0, beta_1 )
+  
+  model_full = suppressWarnings(glm(y~., data = df , family = binomial))
+  wald_beta2[i] = summary(model_full)$coefficients["x2","z value"]
+  
+  model_null = suppressWarnings(glm(y~x1, data = df , family = binomial))
+  llr[i] = anova(model_null,model_full,test = "LRT")$Deviance[2]
+}
+```
+
+```{r}
+hist(wald_beta2, freq = FALSE, xlab = "Beta2 Estimate", ylim = c(0,.5), main ="Simulated vs theory (Wald test statistic)", col = "lightblue")
+x<-seq(-4,+4,by=0.02)
+curve(dnorm(x), add=TRUE,col = "red",lwd = 2)
+
+legend("topright", c("Simulated", "Theoratical"), col= c("lightblue","red"), lty = 1)
+```
+
+
+
+
+```{r}
+hist(llr, freq = FALSE, xlab = "LLR Estimate", ylim = c(0,.5), main ="Simulated vs theory (LLR)", breaks = 20,col = "lightblue")
+x<-seq(0,15,by=0.02)
+curve(dchisq(x,df = 2), add=TRUE,col = "red", lwd = 2)
+
+legend("topright", c("Simulated", "Theoratical"), col= c("lightblue","red"), lty = 1)
+
+```
+  
+  
+* Based on the wald statistic plot  the sample size of 10 does not seem like sufficient to simulate beta properly , also the LLR plot fit looks marginal. Overall the no. of samples does not seem sufficient. 
+
+***
+
+## Exercise 2 (Surviving the Titanic)
+
+For this exercise use the `ptitanic` data from the `rpart.plot` package. (The `rpart.plot` package depends on the `rpart` package.) Use `?rpart.plot::ptitanic` to learn about this dataset. We will use logistic regression to help predict which passengers aboard the [Titanic](https://en.wikipedia.org/wiki/RMS_Titanic) will survive based on various attributes.
+
+```{r, message = FALSE, warning = FALSE}
+#install.packages("rpart")
+#install.packages("rpart.plot")
+library(rpart)
+library(rpart.plot)
+data("ptitanic")
+```
+
+For simplicity, we will remove any observations with missing data. Additionally, we will create a test and train dataset.
+
+```{r}
+ptitanic = na.omit(ptitanic)
+set.seed(420)
+trn_idx = sample(nrow(ptitanic), 300)
+ptitanic_trn = ptitanic[trn_idx, ]
+ptitanic_tst = ptitanic[-trn_idx, ]
+```
+
+**(a)** Consider the model
+
+$$
+\log\left(\frac{p({\bf x})}{1 - p({\bf x})}\right) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 + \beta_5 x_3x_4
+$$
+
+where
+
+$$
+p({\bf x}) = P[Y = 1 \mid {\bf X} = {\bf x}]
+$$
+
+is the probability that a certain passenger survives given their attributes and
+
+- $x_1$ is a dummy variable that takes the value $1$ if a passenger was 2nd class.
+- $x_2$ is a dummy variable that takes the value $1$ if a passenger was 3rd class.
+- $x_3$ is a dummy variable that takes the value $1$ if a passenger was male.
+- $x_4$ is the age in years of a passenger.
+
+Fit this model to the training data and report its deviance.
+
+```{r}
+model_fit = glm(survived ~ pclass + sex*age, data = ptitanic_trn, family = binomial )
+summary(model_fit)$deviance
+```
+
+
+**(b)** Use the model fit in **(a)** and an appropriate statistical test to determine if class played a significant role in surviving on the Titanic. Use $\alpha = 0.01$. Report:
+
+- The null hypothesis of the test
+- The test statistic of the test
+- The p-value of the test
+- A statistical decision
+- A practical conclusion
+
+```{r}
+summary(model_fit)
+```
+
+```{r}
+model_null = glm(survived ~ sex*age, data = ptitanic_trn, family = binomial )
+(result = anova(model_null, model_fit, test = "LRT"))
+
+```
+
+  We will use likelihood test to evaluate if passenger class was a factor in survival:
+    
+  * The NULL hypothesis is $\beta1$ = $\beta2$ = 0
+  * We will use the likelihood test with chi- squared test statistic distribution. The value of test statistic  is    `r result$Deviance[2]`
+  * The p value of test is `r result[2,5]`
+  * We can reject the NULL hypothesis with $\alpha = 0.1$
+  * This indicates the passenger class played a significant role in determining their survival
+  
+  
+
+**(c)** Use the model fit in **(a)** and an appropriate statistical test to determine if an interaction between age and sex played a significant role in surviving on the Titanic. Use $\alpha = 0.01$. Report:
+
+- The null hypothesis of the test
+- The test statistic of the test
+- The p-value of the test
+- A statistical decision
+- A practical conclusion
+
+```{r}
+model_null = glm(survived ~ pclass+ sex+age, data = ptitanic_trn, family = binomial )
+(result = anova(model_null, model_fit, test = "LRT"))
+```
+
+
+  We will use likelihood test to evaluate if passenger class was a factor in survival:
+    
+  * The NULL hypothesis is $\beta_5$ = 0
+  * We will use the likelihood test with chi- squared test statistic distribution. The value of test statistic  is    `r result$Deviance[2]`
+  * The p value of test is `r result[2,5]`
+  * We can reject the NULL hypothesis with $\alpha = 0.1$
+  * This indicates the age-sex interaction of passengers  played a significant role in determining their survival
+
+**(d)** Use the model fit in **(a)** as a classifier that seeks to minimize the misclassification rate. Classify each of the passengers in the test dataset. Report the misclassification rate, the sensitivity, and the specificity of this classifier. (Use survived as the positive class.)
+
+
+```{r}
+mis_class= mean(ifelse(predict(model_fit, newdata = ptitanic_tst) > 0,"survived","dead") != ptitanic_tst$survived )
+```
+
+
+```{r}
+get_sens = function(conf_mat) {
+  conf_mat[2, 2] / sum(conf_mat[, 2])
+}
+
+make_conf_mat = function(predicted, actual) {
+  table(predicted = predicted, actual = actual)
+}
+
+get_spec =  function(conf_mat) {
+  conf_mat[1, 1] / sum(conf_mat[, 1])
+}
+
+predicted_state = ifelse(predict(model_fit, newdata = ptitanic_tst) > 0,"survived","dead")
+conf_mat_50 = make_conf_mat(predicted = predicted_state, actual = ptitanic_tst$survived  )
+
+sensitvity = get_sens(conf_mat_50)
+specificity = get_spec(conf_mat_50)
+
+```
+  
+  * The misclassifcation rate is `r mis_class`
+  * The Sensitivity  is `r sensitvity`
+  * The Specificity is `r specificity`
+
+
+***
+
+## Exercise 3 (Breast Cancer Detection)
+
+For this exercise we will use data found in [`wisc-train.csv`](wisc-train.csv) and [`wisc-test.csv`](wisc-test.csv), which contain train and test data, respectively. `wisc.csv` is provided but not used. This is a modification of the Breast Cancer Wisconsin (Diagnostic) dataset from the UCI Machine Learning Repository. Only the first 10 feature variables have been provided. (And these are all you should use.)
+
+- [UCI Page](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic))
+- [Data Detail](https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.names)
+
+You should consider coercing the response to be a factor variable if it is not stored as one after importing the data.
+
+**(a)** The response variable `class` has two levels: `M` if a tumor is malignant, and `B` if a tumor is benign. Fit three models to the training data.
+
+- An additive model that uses `radius`, `smoothness`, and `texture` as predictors
+- An additive model that uses all available predictors
+- A model chosen via backwards selection using AIC. Use a model that considers all available predictors as well as their two-way interactions for the start of the search.
+
+For each, obtain a 5-fold cross-validated misclassification rate using the model as a classifier that seeks to minimize the misclassification rate. Based on this, which model is best? Relative to the best, are the other two underfitting or over fitting? Report the test misclassification rate for the model you picked as the best.
+
+
+```{r}
+df_train = read.csv("wisc-train.csv")
+df_test = read.csv("wisc-test.csv")
+
+df_train$class = as.factor(df_train$class)
+df_test$class = as.factor(df_test$class)
+```
+
+```{r}
+model_add_partial = glm(class ~ radius + smoothness + texture, data = df_train, family = binomial)
+model_add_full = glm(class ~ ., data = df_train, family = binomial)  
+model_int_full = suppressWarnings(glm(class ~ .*. , data = df_train, family = binomial, maxit = 50 ))  
+model_int_best = suppressWarnings(step(model_int_full, trace = FALSE)) 
+  
+```
+
+```{r}
+library(boot)
+(result_add= suppressWarnings(cv.glm(df_train, model_add_partial, K = 5)$delta[1]))
+(result_add_full = suppressWarnings(cv.glm(df_train, model_add_full, K = 5)$delta[1]))
+(result_add_int= suppressWarnings(cv.glm(df_train, model_int_best, K = 5)$delta[1]))
+```
+  
+  * The additive model that uses `radius`, `smoothness`, and `texture` as predictors seems to have least misclassifcation rate of : `r result_add`. 
+
+**(b)** In this situation, simply minimizing misclassifications might be a bad goal since false positives and false negatives carry very different consequences. Consider the `M` class as the "positive" label. Consider each of the probabilities stored in `cutoffs` in the creation of a classifier using the **additive** model fit in **(a)**.
+
+That is, consider each of the values stored in `cutoffs` as $c$. Obtain the sensitivity and specificity in the test set for each of these classifiers. Using a single graphic, plot both sensitivity and specificity as a function of the cutoff used to create the classifier. Based on this plot, which cutoff would you use? (0 and 1 have not been considered for coding simplicity. If you like, you can instead consider these two values.)
+
+$$
+\hat{C}(\bf x) = 
+\begin{cases} 
+      1 & \hat{p}({\bf x}) > c \\
+      0 & \hat{p}({\bf x}) \leq c 
+\end{cases}
+$$
+```{r}
+get_sens = function(conf_mat) {
+  conf_mat[2, 2] / sum(conf_mat[, 2])
+}
+
+make_conf_mat = function(predicted, actual) {
+  table(predicted = predicted, actual = actual)
+}
+
+get_spec =  function(conf_mat) {
+  conf_mat[1, 1] / sum(conf_mat[, 1])
+}
+```
+
+```{r}
+cutoffs = seq(0.01, 0.99, by = 0.01)
+model_add_partial = glm(class ~ radius + smoothness + texture, data = df_train, family = binomial)
+sensitvity = rep(0, length(cutoffs))
+specificity = rep(0, length(cutoffs))
+
+i = 1
+for (cutoff in cutoffs)
+{
+  
+  predicted_val = ifelse(predict(model_add_partial, newdata = df_test , type = "response") > cutoff,"M","B")
+  
+  conf_mat = make_conf_mat(predicted_val, df_test$class)
+  
+  sensitvity[i] = get_sens(conf_mat)
+  
+  specificity[i] = get_spec(conf_mat)
+
+  i = i+1  
+}  
+
+```
+
+```{r}
+
+plot(x = cutoffs, y =sensitvity, col ="blue", ylab = "sensitivity/specificity",xlab = "cutoff (c)",lty = 1, type = "l")
+lines(x = cutoffs, y =specificity, col ="red",lty = 2)
+grid()
+abline(v = 0.667, lty = 3, col = "purple", lwd = 3)
+legend("bottom", c("Sensitivity", "Specificity", "c = 0.667"), col= c("blue","red","purple"), lty = c(1,2,3), lwd = c(1,1,2) )
+
+```
+  
+  * The preferred cut off is somewhat subjective but given a False negative has more serious  consequence (misdiagnosing a malignant tumor as benign) we will not choose 0.5 as the cutoff to prioritize minimizing false negatives. We can choose a cutoff where specificity and sensitivity intersect - approximately at 0.667 which  maximizes both sensitivity and specificity. 
+
+
+
+
+

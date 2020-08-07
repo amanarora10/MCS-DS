@@ -1,0 +1,20 @@
+unnamed-chunk-1	betas1	birthday	df1	f_stat_1	i	j	m	model_fitted_sum	n	p	p_val_1	r_squared_1	sigmas	sim_mlr	.Random.seed
+unnamed-chunk-2	betas	df1	f_stat_2	i	j	m	model_fitted_sum	n	p	p_val_2	r_squared_2	sigmas
+unnamed-chunk-3	model1.table	model2.table
+unnamed-chunk-4	
+unnamed-chunk-5	i
+unnamed-chunk-6	i	title
+unnamed-chunk-7	i	title
+unnamed-chunk-8	df1	m
+unnamed-chunk-9	sim_mlr
+unnamed-chunk-10	evaluate_model
+unnamed-chunk-11	simulate_run
+unnamed-chunk-12	betas1	result_sigma1	result_sigma2	result_sigma4	sigmas
+unnamed-chunk-13	
+unnamed-chunk-14	
+unnamed-chunk-15	sim_slr
+unnamed-chunk-16	alpha	beta1_idx	beta1_list	df1	i	model_sum	n_idx	null_rej_count	num_sim	p_val	results	sample_list	sigma_idx	sigmas	x_values
+unnamed-chunk-17	sigma_idx	title
+unnamed-chunk-18	power_sd
+unnamed-chunk-19	power	snr	xlab1
+unnamed-chunk-20	

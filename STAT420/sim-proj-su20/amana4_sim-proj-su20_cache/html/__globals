@@ -1,0 +1,20 @@
+unnamed-chunk-1	$	[<-	~	as.matrix	c	cbind	for	length	lm	matrix	nrow	pf	read.csv	rep	return	rnorm	set.seed	summary
+unnamed-chunk-2	$	[<-	~	c	for	length	lm	matrix	nrow	pf	read.csv	sim_mlr	summary
+unnamed-chunk-3	c	colMeans	colnames<-	f_stat_1	f_stat_2	library	p_val_1	p_val_2	r_squared_1	r_squared_2	rbind	rownames<-
+unnamed-chunk-4	axis	c	colMeans	grid	p_val_1	p_val_2	par	plot	sigmas
+unnamed-chunk-5	c	for	hist	par	r_squared_1	r_squared_2
+unnamed-chunk-6	c	for	hist	p_val_1	p_val_2	par	paste	sigmas
+unnamed-chunk-7	c	f_stat_1	f_stat_2	for	hist	legend	lines	n	p	par	paste	pf	sigmas
+unnamed-chunk-8	library	read.csv	set.seed
+unnamed-chunk-9	[<-	as.matrix	cbind	nrow	rep	return	rnorm
+unnamed-chunk-10	$	^	as.vector	c	mean	names	predict	sqrt
+unnamed-chunk-11	[<-	^	==	as.formula	c	evaluate_model	for	if	list	lm	matrix	min	names<-	nrow	paste	rep	return	rowMeans	sample	setdiff	sim_mlr
+unnamed-chunk-12	c	df1	simulate_run
+unnamed-chunk-13	$	axis	grid	plot	result_sigma1	result_sigma2	result_sigma4
+unnamed-chunk-14	$	axis	c	grid	legend	plot	points	result_sigma1	result_sigma2	result_sigma4
+unnamed-chunk-15	data.frame	length	rnorm
+unnamed-chunk-16	$	[<-	~	<	array	c	for	if	length	lm	rep	seq	set.seed	sim_slr	summary
+unnamed-chunk-17	beta1_list	c	for	grid	legend	length	lines	paste	plot	results	sigmas
+unnamed-chunk-18	c	grid	legend	lines	mean	plot	results	sigmas
+unnamed-chunk-19	abs	beta1_list	c	expression	grid	legend	plot	points	results
+unnamed-chunk-20	hist	p_val
