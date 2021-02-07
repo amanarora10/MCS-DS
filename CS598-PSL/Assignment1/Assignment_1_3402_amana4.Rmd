@@ -1,0 +1,204 @@
+---
+title: "Assignment1"
+author: "Aman Arora (amana4@illinois.edu)"
+date: "1/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(class)
+library(ggplot2)
+set.seed(3402)
+
+```
+
+
+```{r}
+# nc  : number of cluster centers
+# sdc : standard deviation for generating the cluster centers
+# p: dimension 
+generateCenters = function(nc, sdc,p) {
+
+#Centers normally distributed with mean  (1,0)
+m1 = matrix(rnorm(csize*p), csize, p)*sigma + cbind( rep(1,csize), rep(0,csize));
+
+#Centers normally distributed with mean  (0,1)
+m0 = matrix(rnorm(csize*p), csize, p)*sigma + cbind( rep(0,csize), rep(1,csize));
+
+  return(list("center0" = m0,
+              "center1" = m1))
+} 
+```
+
+```{r}
+#Function to generate data
+generateData = function(centers, ntr, nte, s, csize) {
+
+# Randomly allocate the n samples for class 1 to the 10 clusters
+id1 = sample(1:csize, ntr, replace = TRUE);
+
+# Randomly allocate the n samples for class 1 to the 10 clusters
+id0 = sample(1:csize, ntr, replace = TRUE);  
+
+m0 = centers$center0
+m1 = centers$center1
+
+#Generate training set
+X_train = matrix(rnorm(2*ntr*p), 2*ntr, p)*s + rbind(m1[id1,], m0[id0,])
+Y_train = (c(rep(1,ntr), rep(0,ntr)))
+
+
+train_set = data.frame(X1 = X_train[,1], X2 = X_train[,2], Y = Y_train)
+
+#Generate test set
+id1 = sample(1:csize, nte, replace=TRUE);
+id0 = sample(1:csize, nte, replace=TRUE); 
+X_test = matrix(rnorm(2*nte*p), 2*nte, p)*s +   rbind(m1[id1,], m0[id0,])
+Ytest = (c(rep(1,nte), rep(0,nte)))
+
+test_set = data.frame(X1 = X_test[,1], X2 = X_test[,2], Y = Ytest)
+
+
+return(list("train" = train_set,
+              "test" = test_set))
+}
+```
+
+```{r}
+eval_performance  = function(model, data) {
+
+  #Calculate train error
+  train_pred = as.integer(model$fitted.values > 0.5)
+  train_error = mean(train_pred != data$train$Y )
+  
+  #Calculate test error
+  test_pred = predict(model, newdata = data.frame(data$test[-3])) >0.5
+  test_error = mean(test_pred != data$test$Y )
+  
+  return(list("train_error" = train_error,
+              "test_error" = test_error))
+}
+  
+```
+
+
+```{r}
+find_best_k = function(data, max_K, foldNum)
+{
+  dataSet = data$train[, c("X1", "X2", "Y")]  ## 200-by-3 training data
+  dataSet$Y = as.factor(dataSet$Y)
+  foldSize = floor(nrow(dataSet)/foldNum)  
+  for(K in 1:max_K)
+  {
+   error = 0
+   min_error = 1
+   min_k = 0
+   for(runId in 1:foldNum){
+     testSetIndex = ((runId-1)*foldSize + 1):(ifelse(runId == foldNum, nrow(dataSet), runId*foldSize))
+     trainX = dataSet[-testSetIndex, c('X1', 'X2')]
+     trainY = as.factor(dataSet[-testSetIndex, ]$Y)
+     testX = dataSet[testSetIndex, c('X1' , 'X2')]
+     testY = as.factor(dataSet[testSetIndex, ]$Y)
+     predictY = knn(trainX, testX, trainY, K)
+     error = error + sum(predictY != testY) 
+   }
+   error = error / nrow(dataSet)
+   
+   #Check and store the minimum error and corresponding K
+   if(error< min_error)
+   {
+     min_error = error
+     min_k = K
+   }
+  }
+  
+  return(list("min_error" = min_error,
+               "best_k" = min_k))
+  
+}
+```
+
+#Main function
+```{r}
+#Generate centers
+p = 2;          #dimension    
+sigma = 1;      # sd for generating the centers 
+csize = 10;       # number of centers
+centers = generateCenters(csize,sigma,p)
+
+#Generate data
+ntr = 100 #no of training data
+nte = 5000 #no of test data
+s = sqrt(sigma/5);  # sd for generating x. 
+num_sim = 1 #No. of simulations
+
+
+#Repeat simulation num_sim times
+for (i in 1:num_sim)  
+{  
+  data = generateData(centers,ntr,nte,s,csize)
+  
+  #----------------------------------------------------------------------------------- 
+  #Run linear regression 
+  model_linear = lm(formula = Y ~ X1 + X2, data = data$train)
+  error_linear = eval_performance(model_linear,data)
+
+  #----------------------------------------------------------------------------------- 
+  #Run quadratic regression 
+  model_quadratic = lm(formula = Y ~ X1 + X2 + I(X1 * X2) + I(X1^2) + I(X2^2), data = data$train)
+  error_quadratic = eval_performance(model_quadratic,data)
+ 
+  #----------------------------------------------------------------------------------- 
+  #KNN classification: find best k
+  max_K = 10
+  foldNum = 10
+  result= find_best_k(data,max_K,foldNum)
+  
+  #KNN Training error
+  trainX = data$train[,c('X1','X2')]
+  trainY = as.factor(data$train[,'Y'])
+  predictY = knn(trainX, trainX, trainY, result$best_k)
+  knn_train_error = mean(predictY != trainY )
+  
+  #KNN Test error
+  trainX = data$train[,c('X1','X2')]
+  testX = data$test[,c('X1','X2')]
+  trainY = as.factor(data$train[,'Y'])
+  testY = as.factor(data$test[,'Y'])
+
+  predictY = knn(trainX, testX, trainY, result$best_k)
+  knn_test_error = mean(predictY != testY)
+  
+  #----------------------------------------------------------------------------------- 
+  #Bayes rule
+  
+  
+  
+}
+
+```
+
+```{r}
+n= ntr
+traindata = data$train
+m0 = centers$center0
+m1 = centers$center1
+
+plot(traindata[, 1], traindata[, 2], type = "n", xlab = "", ylab = "")
+abline(model_linear)
+points(traindata[1:n, 1], traindata[1:n, 2], col = "blue");
+points(traindata[(n+1):(2*n), 1], traindata[(n+1):(2*n), 2], col="red"); 
+
+points(m1[1:csize, 1], m1[1:csize, 2], pch="+", cex=1.5, col="blue");    
+points(m0[1:csize, 1], m0[1:csize, 2], pch="+", cex=1.5, col="red");   
+
+legend("bottomleft", pch = c(1,1), col = c("red", "blue"), 
+       legend = c("class 1", "class 0"))
+```
+
+
+
