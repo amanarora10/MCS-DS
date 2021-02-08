@@ -86,17 +86,19 @@ eval_performance  = function(model, data) {
 ```
 
 
+
 ```{r}
-find_best_k = function(data, max_K, foldNum)
+find_best_k = function(data, foldNum)
 {
   dataSet = data$train[, c("X1", "X2", "Y")]  ## 200-by-3 training data
   dataSet$Y = as.factor(dataSet$Y)
   foldSize = floor(nrow(dataSet)/foldNum)  
-  for(K in 1:max_K)
+  KVector = seq(1, (nrow(dataSet) - foldSize), 2)
+  min_error = 1
+  min_k = 0
+  for(K in KVector)
   {
    error = 0
-   min_error = 1
-   min_k = 0
    for(runId in 1:foldNum){
      testSetIndex = ((runId-1)*foldSize + 1):(ifelse(runId == foldNum, nrow(dataSet), runId*foldSize))
      trainX = dataSet[-testSetIndex, c('X1', 'X2')]
@@ -107,20 +109,34 @@ find_best_k = function(data, max_K, foldNum)
      error = error + sum(predictY != testY) 
    }
    error = error / nrow(dataSet)
-   
-   #Check and store the minimum error and corresponding K
-   if(error< min_error)
+   #Check and store the minimum error and corresponding K 
+   #the condition '<='  will ensure in case of equal errors higher K will be chosen 
+   #since we are going thru K in increasing order. 
+   #print(paste("error",error, "min_error",min_error))
+   if(error <= min_error)
    {
      min_error = error
      min_k = K
    }
+
   }
-  
   return(list("min_error" = min_error,
-               "best_k" = min_k))
+              "best_k" = min_k))
   
 }
 ```
+
+```{r}
+mixnorm = function(x, centers0, centers1, s){
+  ## return the density ratio for a point x, where each 
+  ## density is a mixture of normal with multiple components
+  d1 = sum(exp(-apply((t(centers1) - x)^2, 2, sum) / (2 * s^2)))
+  d0 = sum(exp(-apply((t(centers0) - x)^2, 2, sum) / (2 * s^2)))
+  
+  return (d1 / d0)
+}
+```
+
 
 #Main function
 ```{r}
@@ -134,8 +150,22 @@ centers = generateCenters(csize,sigma,p)
 ntr = 100 #no of training data
 nte = 5000 #no of test data
 s = sqrt(sigma/5);  # sd for generating x. 
-num_sim = 1 #No. of simulations
+num_sim = 20 #No. of simulations
 
+
+#Allocate storage for results
+linear_train = rep(0,num_sim)
+linear_test = rep(0,num_sim)
+
+quad_train = rep(0,num_sim)
+quad_test = rep(0,num_sim)
+
+knn_train = rep(0,num_sim)
+knn_test = rep(0,num_sim)
+knn_best_k = rep(0,num_sim)
+
+bayes_train = rep(0,num_sim)
+bayes_test = rep(0,num_sim)
 
 #Repeat simulation num_sim times
 for (i in 1:num_sim)  
@@ -146,24 +176,30 @@ for (i in 1:num_sim)
   #Run linear regression 
   model_linear = lm(formula = Y ~ X1 + X2, data = data$train)
   error_linear = eval_performance(model_linear,data)
-
+  linear_train[i] = error_linear$train_error
+  linear_test[i] = error_linear$test_error
+  
   #----------------------------------------------------------------------------------- 
   #Run quadratic regression 
   model_quadratic = lm(formula = Y ~ X1 + X2 + I(X1 * X2) + I(X1^2) + I(X2^2), data = data$train)
   error_quadratic = eval_performance(model_quadratic,data)
+  
+  quad_train[i] = error_quadratic$train_error
+  quad_test[i] = error_quadratic$test_error
  
   #----------------------------------------------------------------------------------- 
   #KNN classification: find best k
-  max_K = 10
   foldNum = 10
-  result= find_best_k(data,max_K,foldNum)
+  result= find_best_k(data,foldNum)
+  knn_best_k[i] = result$best_k
   
   #KNN Training error
   trainX = data$train[,c('X1','X2')]
   trainY = as.factor(data$train[,'Y'])
   predictY = knn(trainX, trainX, trainY, result$best_k)
   knn_train_error = mean(predictY != trainY )
-  
+  knn_train[i] =  knn_train_error
+
   #KNN Test error
   trainX = data$train[,c('X1','X2')]
   testX = data$test[,c('X1','X2')]
@@ -172,12 +208,25 @@ for (i in 1:num_sim)
 
   predictY = knn(trainX, testX, trainY, result$best_k)
   knn_test_error = mean(predictY != testY)
+  knn_test[i] = knn_test_error 
   
   #----------------------------------------------------------------------------------- 
   #Bayes rule
   
+  #Bayes error on training data
+  Ytrain_pred_Bayes = apply(trainX, 1, mixnorm, centers$center0,centers$center1,s )
+  Ytrain_pred_Bayes = as.numeric(Ytrain_pred_Bayes > 1);
+  table(trainY, Ytrain_pred_Bayes); 
+  train.err.Bayes = sum(trainY !=  Ytrain_pred_Bayes) / (2*ntr)
+  bayes_train[i] = train.err.Bayes
   
-  
+  #Bayes error on test data
+  Ytest_pred_Bayes = apply(testX, 1, mixnorm, centers$center0,centers$center1,s )
+  Ytest_pred_Bayes = as.numeric(Ytest_pred_Bayes > 1);
+  table(testY, Ytest_pred_Bayes); 
+  test.err.Bayes = sum(testY !=  Ytest_pred_Bayes) / (2*nte)
+  bayes_test[i] = test.err.Bayes
+
 }
 
 ```
