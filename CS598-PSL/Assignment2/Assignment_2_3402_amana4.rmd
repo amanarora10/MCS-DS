@@ -1,0 +1,13 @@
+---
+title: "Assignment_2_3402_amana4.Rmd"
+author: "Aman Arora"
+date: "2/22/2021"
+output:
+  html_document: 
+    theme: readable
+    toc: yes  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
