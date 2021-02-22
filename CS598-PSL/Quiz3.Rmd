@@ -1,0 +1,171 @@
+---
+title: "Quiz2"
+author: "Aman arora"
+date: "2/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+### Q1
+```{r}
+model_fit = lm(mpg~displacement, data = Auto)
+```
+```{r}
+round(model_fit$coefficients["displacement"],2)
+```
+### Q2
+```{r}
+sum_mpg = summary(model_fit)
+round(sum_mpg$r.squared,2)
+```
+###Q3
+```{r}
+model_fit = lm(mpg~.-name, data = Auto)
+round(model_fit$coefficients["displacement"],2)
+```
+
+###Q4
+```{r}
+X = c(1,4,100,1,400,4)
+b = c(50,20,.07,35,.01,-10)
+
+Y = X%*%b
+Y
+```
+
+## Q5
+- For a fixed value of IQ and GPA, males earn more on average than females provided that the GPA is less than 3.5.
+
+- 
+For a fixed value of IQ and GPA, females earn more on average than males provided that the GPA is higher than 3.5.
+
+
+
+## Q6
+
+The new estimates for b_2b and b_4b are 7 and 1, respectively; all other coefficients stay the same.
+
+
+
+## Q7-Q10
+
+```{r}
+a0 = 50
+a1 = 20
+a2 = .07
+a3 = 35
+a4 = .01
+a5 = -10
+
+```
+
+
+```{r}
+w0 = a0+a3
+
+w1= a1+a5
+
+w2 = a2
+
+w3 = a4
+
+```
+```{r}
+c(w0,w1,w2,w3)
+```
+
+
+## Q11-Q14
+
+```{r}
+m0 = a0
+m1 = a1
+m2 = a2
+m3 = a4
+
+```
+
+```{r}
+c(m0,m1,m2,m3)
+```
+
+## Q15-Q20
+
+```{r}
+b0 = 50
+b1 = 20
+b2 = .07
+b3 = 35
+b4 = .01
+b5 = -10
+
+```
+
+```{r}
+c0 = b0+b3
+c1 = b1+b5
+c2 = b2
+c3 = b0-c0
+c4 = b4
+c5 = b1-c1
+```
+```{r}
+c(c0,c1,c2,c3,c4,c5)
+
+```
+
+
+#21
+
+RSS will decrease
+Rsquare will increase
+
+#22
+
+LS coef. and R-square
+```{r}
+test = Auto[1:100,]
+model_fit = lm(mpg~.-name, data = test)
+test[101:200,] = test 
+model_fit_dbl = lm(mpg~.-name, data = test)
+
+```
+```{r}
+sum1 = summary(model_fit)
+sum(sum1$residuals^2)
+```
+
+```{r}
+sum2 = summary(model_fit_dbl)
+sum(sum2$residuals^2)
+
+```
+
+#23
+
+1st (wrong)
+
+
+The LS coefficients are not unique if columns of the nn-by-pp design matrix \mathbf{X}X are linear dependent. (Confirmed)
+
+The LS coefficients are not unique if pp is bigger than nn. (confirmed)
+
+The LS coefficients are unique only if the predictors are uncorrelated with each other.
+
+2nd (correct)
+
+The LS coefficients are not unique if p is bigger than n. (confirmed)
+
+
+The LS coefficients are not unique if columns of the nn-by-pp design matrix \mathbf{X}X are linear dependent (confirmed)
+
+
+The LS coefficients are not unique if a non-intercept predictor takes a constant value
+
+
+
