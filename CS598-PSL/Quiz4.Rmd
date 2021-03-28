@@ -1,0 +1,20 @@
+---
+title: "Quiz4"
+author: "Aman Arora"
+date: "2/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(rpart)
+library(rpart.plot)
+library(tree) 
+load("BostonHousing1.Rdata")  # data: Housing1
+
+```
+

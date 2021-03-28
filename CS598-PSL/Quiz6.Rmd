@@ -1,0 +1,216 @@
+---
+title: "Quiz6"
+author: "Aman Arora"
+date: "3/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Q1:
+
+
+Given a database of information about your users, automatically group them into different market segments.
+
+
+From the user's usage patterns on a website, identify different user groups.
+
+
+Q2:
+
+
+When clustering, we want to put two dissimilar data objects into the same cluster.
+
+We must know the number of clusters a priori for all clustering algorithms.
+
+
+Q3
+
+The centroids in the K-means algorithm may not be any observed data points.
+
+To avoid K-means getting stuck at a bad local optima, we should try using multiple randon initialization.
+
+
+The K-means algorithm can converge to different final clustering results, depending on initial choice of representatives.
+
+Q4:
+
+Assign each point to its nearest cluster
+
+Update the cluster centroids based the current assignment
+
+
+Q5
+
+Evaluate the objective function at the 10 clustering results and pick the one that gives rise to the smallest value of the objective function
+
+
+Q6:
+
+a dendrogram showing how close things are to each other
+
+Q7
+```{r}
+library(factoextra) 
+```
+
+
+```{r}
+
+df = data.frame( x = c(1,1,0,5,6,4), y = c(4,3,4,1,2,0) )
+centers1 = matrix( c(1,1,4,3), nrow =2, ncol=2)
+
+df[1,]
+centers1
+
+```
+
+
+
+```{r}
+
+
+distance <- function(c1,c2)
+{
+  c1_dist = rep(0,6)
+  c2_dist = rep(0,6)
+   for(i in 1:nrow(df))
+    {
+      c1_dist[i] = sqrt((df[i,]$x - c1[1])^2 +  (df[i,]$y - c1[2])^2)   
+      c2_dist[i] = sqrt((df[i,]$x - c2[1])^2 +  (df[i,]$y - c2[2])^2)
+    }
+      
+  data.frame(c1_dist, c2_dist)
+  
+}
+  
+
+```
+
+
+```{r}
+dist = distance(centers1[1,],centers1[2,])
+
+```
+```{r}
+centers2 = matrix( c(0.5,4,4,1.5), nrow =2, ncol=2)
+dist2 = distance(centers2[1,],centers2[2,])
+dist2$c1_dist < dist2$c2_dist
+```
+
+
+```{r}
+(dist$c1_dist < dist$c2_dist)
+```
+
+```{r}
+centers1
+```
+
+```{r}
+kmeans(df, centers=centers1)
+
+```
+
+
+Q7: 2
+Q8: 4
+Q9: 0.5
+Q10: 4
+Q11 5
+Q12 3
+
+Q13:
+(1,2,3) and (4)
+
+Q14
+
+(1,2) and (3,4)
+
+Q15:
+9
+
+Q16:
+50
+
+Q17:
+2
+
+Q18
+15
+
+Q19
+2
+
+Q20
+15
+
+Q21/Q22: 19/54
+
+Q23/24: 19/54
+
+Q25/26: 1/6
+
+Q27-28: 
+
+
+```{r}
+den1 = .2+.2+.8+.9+.9
+mu1 = (0.2*5+0.2*15+25*0.8+30*0.9 + 40*0.9)/den1
+
+w1 = den1/5
+c(w1, 1-w1)
+```
+Q29/30
+
+```{r}
+den2 = 5 - den1
+mu2= (0.8*5+0.8*15+25*0.2+0.1*30+0.1*40)/den2
+
+c(mu1,mu2)
+```
+
+
+
+(only 1 correct)
+Q31: 
+
+1st :
+The estimates returned by the EM algorithm could be a local optimum. 
+
+Let K denote the number of components in a Gaussian mixture model. Increasing K will always lead to a strictly larger log-likelihood on the training data. (wrong)
+
+2nd:
+
+The estimates returned by the EM algorithm could be a local optimum. (confirmed right)
+
+We can use BIC to select the number of components K. (new)
+
+     
+
+(only 1 correct)     
+q32:
+
+1st
+
+Words in the same document can be generated from different multinomail distributions depending on the topic label for each word.
+
+
+We can represent the ii-th document by a K-dim vector: (a_{i1}, ..., a_{iK}), (a 
+being the probability of the ii-th document belonging to kk-th topic.
+
+2nd
+
+Words in the same document can be generated from different multinomail distributions depending on the topic label for each word.
+
+
+We can represent the ii-th document by a KK-dim vector: (a_{i1}, ..., a_{iK})(a 
+which indicates that the words in the ii-th document can be modeled as a mixture of K topics with a_{ik}a ik  's being the mixing weights.
+
+
+
+

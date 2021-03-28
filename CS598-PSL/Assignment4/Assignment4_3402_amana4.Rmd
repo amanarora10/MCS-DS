@@ -1,0 +1,184 @@
+---
+title: "Assignment4"
+author: "Aman Arora"
+date: "3/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+CalAnk <- function(x,G, para) {
+  p= para$prob
+  mu = para$mean
+  sigma = para$Sigma
+  ank = rep(0,G)
+  for(i in 1:G)
+  {
+  
+  ank[i] = log(p[i]/p[1]) +
+           0.5*t(x-mu[,1]) %*% solve(sigma)%*% (x-mu[,1]) - 
+           0.5*t(x-mu[,i]) %*% solve(sigma)%*% (x-mu[,i])    
+  }
+  return (ank)
+}
+```
+
+
+```{r}
+CalBnk = function (a)
+{
+    new.a = a -max(a)
+    return (exp(new.a)/sum(exp(new.a)))
+}
+
+```
+
+```{r}
+Estep <- function(data, G, para){
+  # Your Code
+  # Return the n-by-G probability matrix
+  ank = t(apply(data,1,CalAnk,G,para))
+  bnk = t(apply(ank,1,CalBnk))
+  return(bnk)
+  }
+```
+
+
+```{r}
+Mstep <- function(data, G, para, post.prob){ 
+
+  newG = list()
+  prob = colMeans(post.prob)
+  
+  newMean = t(data) %*% post.prob %*% diag(1/colSums(post.prob))
+  
+  N = NROW(data)
+  p = NCOL(data)
+  k = NCOL(post.prob)
+  
+  S = matrix(0,ncol = p, nrow = p)
+  #for(i in 1:N){
+  #  for(j in 1:k){
+      
+  #    S = S + post.prob[i,j]* as.matrix( t(data[i,] - newMean[,j])) %*%
+  #      as.matrix((data[i,]- newMean[,j]))
+        
+  #  }
+    
+  #}
+  
+  S = lapply(1:k, function(j) (t(data)-newMean[,j]) 
+            %*% diag(post.prob[,j]) %*% t(t(data)-newMean[,j]))
+  S = Reduce('+', S)
+ 
+  
+  
+   S = S/N
+    
+   newG$prob = prob
+   newG$mean = newMean
+   newG$Sigma = S
+      
+  return(newG)
+    
+}
+```
+
+
+```{r}
+myEM <- function(data, itmax, G, para){
+  # itmax: num of iterations
+  # G:     num of components
+  # para:  list of parameters (prob, mean, Sigma)
+  for(t in 1:itmax){
+    post.prob <- Estep(data, G, para)
+    para <- Mstep(data, G, para, post.prob)
+  }
+  return(para)
+}
+```
+
+
+```{r}
+options(digits=8)
+options()$digits
+```
+
+```{r}
+library(mclust)
+dim(faithful)
+head(faithful)
+n <- nrow(faithful)
+
+
+```
+
+
+# Two cluster case
+
+```{r}
+K <- 2
+set.seed(124)  
+gID <- sample(1:K, n, replace = TRUE)
+Z <- matrix(0, n, K)
+for(k in 1:K)
+  Z[gID == k, k] <- 1 
+ini0 <- mstep(modelName="EEE", faithful , Z)$parameters
+```
+
+```{r}
+para0 <- list(prob = ini0$pro, 
+              mean = ini0$mean, 
+              Sigma = ini0$variance$Sigma)
+para0
+```
+
+```{r}
+myEM(data=faithful, itmax=20, G=K, para=para0)
+
+```
+
+```{r}
+Rout <- em(modelName = "EEE", data = faithful,
+           control = emControl(eps=0, tol=0, itmax = 20), 
+           parameters = ini0)$parameters
+list(Rout$pro, Rout$mean, Rout$variance$Sigma)
+
+```
+
+# Three Cluster case
+
+```{r}
+K <- 3
+set.seed(3402)  
+gID <- sample(1:K, n, replace = TRUE)
+Z <- matrix(0, n, K)
+for(k in 1:K)
+  Z[gID == k, k] <- 1 
+ini0 <- mstep(modelName="EEE", faithful , Z)$parameters
+para0 <- list(prob = ini0$pro, 
+              mean = ini0$mean, 
+              Sigma = ini0$variance$Sigma)
+para0
+
+```
+
+# 
+```{r}
+myEM(data=faithful, itmax=20, G=K, para=para0)
+
+```
+
+
+```{r}
+Rout <- em(modelName = "EEE", data = faithful,
+           control = emControl(eps=0, tol=0, itmax = 20), 
+           parameters = ini0)$parameters
+list(Rout$pro, Rout$mean, Rout$variance$Sigma)
+
+```
+
+

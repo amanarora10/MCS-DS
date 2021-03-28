@@ -1,0 +1,40 @@
+---
+title: "Assignment4"
+author: "Aman Arora"
+date: "3/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+Estep <- function(data, G, para){
+  # Your Code
+  # Return the n-by-G probability matrix
+  }
+```
+
+
+```{r}
+Mstep <- function(data, G, para, post.prob){ 
+  # Your Code
+  # Return the updated parameters
+}
+```
+
+
+```{r}
+myEM <- function(data, itmax, G, para){
+  # itmax: num of iterations
+  # G:     num of components
+  # para:  list of parameters (prob, mean, Sigma)
+  for(t in 1:itmax){
+    post.prob <- Estep(data, G, para)
+    para <- Mstep(data, G, para, post.prob)
+  }
+  return(para)
+}
+```
+
