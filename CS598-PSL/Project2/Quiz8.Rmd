@@ -1,0 +1,175 @@
+---
+title: "Untitled"
+author: "Aman Arora"
+date: "4/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Question 1:
+```{r}
+eta = -6+.5*3+1*3.5
+
+round(exp(eta)/(1+exp(eta)),2)
+
+
+```
+Question 2:
+
+```{r}
+eta = -6+.5*5+1*3.5
+
+round(exp(eta)/(1+exp(eta)),2)
+```
+Question 3
+x2<6 (for 1)
+
+Question 4:
+
+- The cost function J(\beta)J(β) for logistic regression is convex, so any local minimum is a global minimum.
+
+- The cost function J(\beta)J(β) for logistic regression is always non-negative.
+
+
+-The MLE of \betaβ, i.e., the minimizer of J(\beta)J(β), may not exist. 
+
+
+Question 5:
+```{r}
+library(ISLR)
+test = Caravan[1:1000,]
+train = Caravan[1001:nrow(Caravan),]
+```
+
+
+```{r}
+make_conf_mat = function(predicted, actual) {
+  table(predicted = predicted, actual = actual)
+}
+```
+
+
+```{r}
+
+model_fitted = glm(Purchase  ~ ., data = train, family = binomial)
+
+```
+
+```{r}
+predicted_p = predict(model_fitted, newdata = test,type = "response" ) 
+predicted = predicted_p > 0.25
+
+actual = test$Purchase == "Yes"
+
+```
+
+```{r}
+make_conf_mat(predicted,actual)
+```
+
+```{r}
+library(pROC)
+round(auc(test$Purchase, predicted_p),3)
+```
+
+#forward using AIC
+
+```{r}
+library(MASS)
+fit1 = glm(Purchase~., data=train, family=binomial)
+fit2 = glm(Purchase~ 1, data=train, family=binomial)
+step.model = stepAIC(fit2, direction = "forward", scope=list(upper=fit1,lower=fit2), trace=0)
+
+
+
+```
+
+```{r}
+predicted_p = predict(step.model, newdata = test,type = "response" ) 
+predicted = predicted_p > 0.25
+
+actual = test$Purchase == "Yes"
+make_conf_mat(predicted,actual)
+
+
+```
+
+```{r}
+round(auc(test$Purchase, predicted_p),3)
+```
+#BIC 
+```{r}
+n = nrow(train)
+```
+
+
+```{r}
+
+fit1 = glm(Purchase~., data=train, family=binomial)
+fit2 = glm(Purchase~ 1, data=train, family=binomial)
+step.model_bic = step(fit2, direction = "forward", scope=list(upper=fit1,lower=fit2), trace=0, k = log(n))
+
+```
+
+```{r}
+predicted_p = predict(step.model_bic, newdata = test,type = "response" ) 
+predicted = predicted_p > 0.25
+
+actual = test$Purchase == "Yes"
+make_conf_mat(predicted,actual)
+
+```
+
+```{r}
+round(auc(test$Purchase, predicted_p),3)
+
+```
+```{r}
+step.model_bic$coefficients
+```
+#L1 penalty
+
+```{r}
+trainY = train$Purchase
+trainX = train[,1:ncol(train)-1]
+testY = test$Purchase
+testX = test[,1:ncol(test)-1]
+
+```
+
+
+
+
+```{r}
+library(glmnet)
+myLasso1  = glmnet(trainX,trainY,alpha=1,lambda=0.004,family = 'binomial') 
+result = coef(myLasso1)
+
+x_test <- as.matrix(testX)
+predicted_p = predict(myLasso1, newx =x_test, type = "response",lambda=0.004 ) 
+
+predicted = predicted_p > 0.25
+
+actual = test$Purchase == "Yes"
+make_conf_mat(predicted,actual)
+
+```
+
+```{r}
+round(auc(test$Purchase, predicted_p),3)
+
+```
+
+
+```{r}
+myLasso2 <- glmnet(trainX,trainY,alpha=1,family = 'binomial') 
+coef(myLasso2,s=0.004)
+```
+
+

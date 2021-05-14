@@ -1,0 +1,120 @@
+---
+title: "Project1"
+author: "Aman Arora and Gaurav Dubey "
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(glmnet)
+library(randomForest)
+library("xgboost")
+```
+
+
+```{r}
+
+# Needs to skipped for submission 
+data <- read.csv("Ames_data.csv")
+testIDs <- read.table("project1_testIDs.dat")
+```
+
+
+```{r}
+
+# Needs to skipped for submission 
+j <- 1
+train <- data[-testIDs[,j], ]
+test <- data[testIDs[,j], ]
+test.y <- test[, c(1, 83)]
+test <- test[, -83]
+write.csv(train,"train.csv",row.names=FALSE)
+write.csv(test, "test.csv",row.names=FALSE)
+write.csv(test.y,"test_y.csv",row.names=FALSE)
+#test.y=read.csv("test_y.csv")
+```
+
+```{r}
+trainData <- read.csv("train.csv")
+testdata <- read.csv("test.csv")
+```
+
+
+```{r}
+## Processing Train Data 
+remove.var <- c('Street', 'Utilities',  'Condition_2', 'Roof_Matl', 'Heating', 'Pool_QC', 'Misc_Feature', 'Low_Qual_Fin_SF', 'Pool_Area', 'Longitude','Latitude')
+
+trainData = trainData[,setdiff(colnames(trainData),remove.var)]
+
+
+## numerical variable taken using summary function on Amesdata
+
+winsor.vars <- c("Lot_Frontage","Lot_Area","Year_Built", "Year_Remod_Add","Mas_Vnr_Area",       "BsmtFin_SF_1"     
+                 ,"BsmtFin_SF_2"       ,"Bsmt_Unf_SF"       , "Total_Bsmt_SF" ,"First_Flr_SF" 
+                 ,"Second_Flr_SF"      ,"Gr_Liv_Area"       ,"Bsmt_Full_Bath"     ,"Bsmt_Half_Bath"    
+                 ,"Full_Bath"          ,"Half_Bath"          ,"Bedroom_AbvGr"      ,"Kitchen_AbvGr"      ,"TotRms_AbvGrd"     
+                 ,"Fireplaces"         ,"Garage_Yr_Blt"      ,"Garage_Cars"        ,"Garage_Area"        ,"Wood_Deck_SF"      
+                 ,"Open_Porch_SF"      ,"Enclosed_Porch"     ,"Three_season_porch" ,"Screen_Porch"       ,"Misc_Val"          
+                 ,"Mo_Sold"            ,"Year_Sold"    )  
+
+## trainData winsorization 
+trainData_win=trainData ## To be used later for test data
+quan.value <- 0.95
+for(var in winsor.vars){
+  tmp1 <- trainData[, var]
+  myquan1 <- quantile(tmp1, probs = quan.value, na.rm = TRUE)
+  tmp1[tmp1 > myquan1] <- myquan1
+  trainData[, var] <- tmp1
+}
+
+## calculating Mean from Amesdata and replacig with NULLS
+trainData$Garage_Yr_Blt[is.na(trainData$Garage_Yr_Blt)] = 1978
+```
+
+
+```{r}
+## categoricalImputation  on Train data 
+categoricalImputation = function(inputDataframe){
+  
+  categorical.vars <- colnames(inputDataframe)[
+    which(sapply(inputDataframe,
+                 function(x) mode(x)=="character"))]
+  train.matrix <- inputDataframe[, !colnames(inputDataframe) %in% categorical.vars, 
+                                 drop=FALSE]
+  n.train <- nrow(train.matrix)
+  for(var in categorical.vars){
+    mylevels <- sort(unique(inputDataframe[, var]))
+    m <- length(mylevels)
+    m <- ifelse(m>2, m, 1)
+    tmp.train <- matrix(0, n.train, m)
+    col.names <- NULL
+    for(j in 1:m){
+      tmp.train[inputDataframe[, var]==mylevels[j], j] <- 1
+      col.names <- c(col.names, paste(var, '_', mylevels[j], sep=''))
+    }
+    colnames(tmp.train) <- col.names
+    train.matrix <- cbind(train.matrix, tmp.train)
+  }
+  return(train.matrix)
+}
+trainData = categoricalImputation(trainData)
+trainData_cat=trainData
+trainData=trainData[,sort(colnames(trainData))]
+```
+
+
+```{r}
+## Fit both the models 
+print('Results of model 1: Ridge Regression model')
+trainData<-trainData[sample(nrow(trainData)),]
+x = as.matrix(subset(trainData, select=-c(PID,Sale_Price)))
+y_train = trainData$Sale_Price
+lambdas <- 10^seq(2, -3, by = -.1)
+set.seed(0122)
+ridge_reg = glmnet(x, log(y_train), nlambda = 20, alpha = 0.7, family = 'gaussian',
+                   lambda = lambdas,type.measure='mae')
+cv_ridge <- cv.glmnet(x, log(y_train), alpha = 0, lambda = lambdas,nfolds=10)
